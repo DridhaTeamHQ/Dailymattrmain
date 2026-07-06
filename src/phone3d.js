@@ -57,19 +57,30 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
   sizeCamera();
 
   let screenAspect = 0.47; // refined from the mesh's bounding box on load
+  let uvBox = { uMin: 0, uMax: 1, vMin: 0, vMax: 1 }; // actual UV window of the screen mesh
   const texLoader = new THREE.TextureLoader();
   /* cover-crop each screenshot so it fills the screen mesh without
-   * stretching (the glTF screen UVs map the full texture) */
+   * stretching. The mesh's UVs may only span part of the 0..1 texture
+   * space, so the crop is mapped into the measured UV window. */
   const coverCrop = (t) => {
     if (!t.image || !screenAspect) return;
     const imgA = t.image.width / t.image.height;
+    // cover-crop factors in normalized screen space
+    let cropRx = 1, cropOx = 0, cropRy = 1, cropOy = 0;
     if (imgA > screenAspect) {
-      t.repeat.set(screenAspect / imgA, 1);
-      t.offset.set((1 - t.repeat.x) / 2, 0);
+      cropRx = screenAspect / imgA;
+      cropOx = (1 - cropRx) / 2;
     } else {
-      t.repeat.set(1, imgA / screenAspect);
-      t.offset.set(0, 0); // v=0 is the top of the image in glTF space
+      cropRy = imgA / screenAspect;
+      cropOy = (1 - cropRy) / 2;
     }
+    // remap so uv=uMin samples the crop start and uv=uMax the crop end
+    const uSpan = uvBox.uMax - uvBox.uMin || 1;
+    const vSpan = uvBox.vMax - uvBox.vMin || 1;
+    const rx = cropRx / uSpan;
+    const ry = cropRy / vSpan;
+    t.repeat.set(rx, ry);
+    t.offset.set(cropOx - uvBox.uMin * rx, cropOy - uvBox.vMin * ry);
     t.needsUpdate = true;
   };
   const allTex = [];
@@ -124,7 +135,26 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
         const sbw = sb.max.x - sb.min.x;
         const sbh = sb.max.y - sb.min.y;
         if (sbw > 0 && sbh > 0) screenAspect = sbw / sbh;
+        // measure the actual UV window the screen mesh samples
+        const uvAttr = screenMesh.geometry.attributes.uv;
+        if (uvAttr) {
+          let uMin = Infinity, uMax = -Infinity, vMin = Infinity, vMax = -Infinity;
+          for (let i = 0; i < uvAttr.count; i++) {
+            const u = uvAttr.getX(i), v = uvAttr.getY(i);
+            if (u < uMin) uMin = u;
+            if (u > uMax) uMax = u;
+            if (v < vMin) vMin = v;
+            if (v > vMax) vMax = v;
+          }
+          uvBox = { uMin, uMax, vMin, vMax };
+        }
         allTex.forEach(coverCrop);
+        // debug handle for tuning texture mapping from the console
+        window.__dm3d = {
+          screenAspect,
+          uvBox,
+          tex: () => allTex.map((t) => ({ r: [t.repeat.x, t.repeat.y], o: [t.offset.x, t.offset.y], img: t.image && [t.image.width, t.image.height] })),
+        };
         screenMesh.material = new THREE.MeshBasicMaterial({
           map: texHome,
           toneMapped: false,

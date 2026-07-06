@@ -1,8 +1,25 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "lenis";
 import { createPhone3D } from "./phone3d.js";
 
 gsap.registerPlugin(ScrollTrigger);
+
+/* ---------------------------------------------------------------
+ * Lenis smooth scrolling — the page itself scrolls on an eased
+ * curve, so the pinned sections, the DOM, and the 3D phone all read
+ * ONE smoothed scroll value. Scrubs can then map 1:1 (scrub: true)
+ * with no extra lag, which removes the "phone slides against the
+ * content" glitch and the stepped mouse-wheel motion.
+ * --------------------------------------------------------------- */
+const lenis = new Lenis({
+  lerp: 0.09,
+  smoothWheel: true,
+  syncTouch: false, // native touch scrolling on mobile
+});
+lenis.on("scroll", ScrollTrigger.update);
+gsap.ticker.add((t) => lenis.raf(t * 1000));
+gsap.ticker.lagSmoothing(0);
 
 const PHONE_W = 400;
 const PHONE_H = 822; // matches both the mockup PNG and the GLB aspect
@@ -18,10 +35,10 @@ const phone3d = createPhone3D({
   phoneW: PHONE_W,
   phoneH: PHONE_H,
   screens: {
-    home: "/assets/screen-home.jpg",
-    article: "/assets/screen-article.jpg",
-    qix: "/assets/screen-qix.jpg",
-    trax: "/assets/screen-trax.jpg",
+    home: "/assets/screen-home.jpg?v=2",
+    article: "/assets/screen-article.jpg?v=3",
+    qix: "/assets/screen-qix.jpg?v=2",
+    trax: "/assets/screen-trax.jpg?v=2",
   },
 });
 
@@ -149,7 +166,7 @@ function build() {
         trigger: document.body,
         start: 0,
         end: () => s4,
-        scrub: 1,
+        scrub: true, // Lenis provides the smoothing — map 1:1, zero lag
       },
     });
 
@@ -227,8 +244,7 @@ function build() {
         start: "top top",
         end: "+=340%",
         pin: true,
-        scrub: 0.8,
-        anticipatePin: 1,
+        scrub: true,
         onUpdate(self) {
           const idx = Math.min(2, Math.floor(self.progress * 2.999));
           dots.forEach((d, i) => d.classList.toggle("on", i === idx));
@@ -336,6 +352,16 @@ window.addEventListener("resize", () => {
   }, 220);
 });
 
+/* ---------- in-page anchors ride the smooth scroll ---------- */
+document.querySelectorAll('a[href^="#"]').forEach((a) => {
+  a.addEventListener("click", (e) => {
+    const target = document.querySelector(a.getAttribute("href"));
+    if (!target) return;
+    e.preventDefault();
+    lenis.scrollTo(target, { offset: -70, duration: 1.4 });
+  });
+});
+
 /* ---------- FAQ tabs (visual only) ---------- */
 document.querySelectorAll(".faq-tabs .tab").forEach((tab) => {
   tab.addEventListener("click", () => {
@@ -363,10 +389,10 @@ function playIntro() {
     gsap.set(introOff, { y: 0, a: 1 });
     return;
   }
-  document.documentElement.style.overflow = "hidden";
+  lenis.stop();
   const tl = gsap.timeline({
     onComplete: () => {
-      document.documentElement.style.overflow = "";
+      lenis.start();
       intro.remove();
     },
   });
