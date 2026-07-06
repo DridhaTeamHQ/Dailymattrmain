@@ -47,6 +47,7 @@ export function createPhone3D({ phoneW, phoneH, screens, quality }) {
   let dirty = true;
   let pose = null;
   let back = null; // { cx, cy (doc coords), w, rotZ, rotY }
+  let canvasHidden = false;
 
   /* full device resolution (capped at 2) so the model stays sharp — the
    * smoothness comes from the cheaper shaders/materials below, not from
@@ -278,6 +279,7 @@ export function createPhone3D({ phoneW, phoneH, screens, quality }) {
         renderer = new THREE.WebGLRenderer({
           alpha: true,
           antialias: !MOBILE, // AA is ~30-40% fragment overhead — off on mobile
+          stencil: false, // unused — saves memory bandwidth on mobile GPUs
           powerPreference: "high-performance",
         });
       } catch (e) {
@@ -370,6 +372,16 @@ export function createPhone3D({ phoneW, phoneH, screens, quality }) {
     lastKey = key;
 
     phone.visible = p.alpha > 0.01;
+
+    /* when nothing is drawn (FAQ/footer), remove the canvas layer from
+     * compositing entirely — a full-viewport transparent canvas otherwise
+     * costs a full-screen blend every browser frame */
+    const anyVisible = phone.visible || (back && backPhone && backPhone.visible);
+    const wantHidden = !anyVisible;
+    if (wantHidden !== canvasHidden) {
+      canvasHidden = wantHidden;
+      state.canvas.style.visibility = wantHidden ? "hidden" : "visible";
+    }
     if (phone.visible) {
       phone.position.set(p.x + (phoneW / 2) * 1, -(p.y + phoneH / 2), 0);
       phone.scale.setScalar(p.scale);

@@ -19,10 +19,11 @@ const lenis = new Lenis({
   smoothWheel: true,
   syncTouch: false,
 });
-const IS_TOUCH = window.matchMedia("(pointer: coarse)").matches;
-/* native scroll is authoritative on touch; a light scrub only smooths
- * how the pinned ANIMATION follows the scroll, not the scroll itself */
-const SCRUB = IS_TOUCH ? 0.3 : true;
+/* scrub maps 1:1 everywhere. Touch scroll positions already update at
+ * frame rate, so any scrub lag just makes the phone rubber-band against
+ * the natively-scrolling page (the hero jitter). Desktop is smoothed by
+ * Lenis before ScrollTrigger ever sees it. */
+const SCRUB = true;
 lenis.on("scroll", ScrollTrigger.update);
 gsap.ticker.add((t) => lenis.raf(t * 1000));
 gsap.ticker.lagSmoothing(0);
@@ -96,6 +97,7 @@ const NO_INTRO = window.innerWidth < 900;
 const introOff = NO_INTRO ? { y: 0, a: 1 } : { y: 140, a: 0 };
 
 let use3d = false;
+const SCRATCH = { ...P }; // reused every tick — no per-frame allocation
 gsap.ticker.add(() => {
   const can3d = phone3d.ready && !phone3d.demoted;
   if (can3d && !use3d) {
@@ -108,7 +110,10 @@ gsap.ticker.add(() => {
   const y = P.y + introOff.y;
   const alpha = P.alpha * introOff.a;
   if (use3d) {
-    phone3d.apply({ ...P, y, alpha }, window.scrollY);
+    Object.assign(SCRATCH, P);
+    SCRATCH.y = y;
+    SCRATCH.alpha = alpha;
+    phone3d.apply(SCRATCH, window.scrollY);
   } else {
     gsap.set(flyPhone, {
       x: P.x,
