@@ -192,6 +192,26 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
         }
       });
 
+      /* flatten the Dynamic Island (camera, lens, sensor housing) to a
+       * clean matte-black pill — the detailed hardware fights the flat
+       * screenshot underneath. Any smallish mesh sitting top-center on
+       * the front face is part of the island. */
+      const mBox = new THREE.Box3().setFromObject(model);
+      const mSize = mBox.getSize(new THREE.Vector3());
+      const mCx = (mBox.min.x + mBox.max.x) / 2;
+      const islandBlack = new THREE.MeshBasicMaterial({ color: 0x050507, toneMapped: false });
+      model.traverse((o) => {
+        if (!o.isMesh || o.userData.isScreen) return;
+        if (o.material && /glass|screen/i.test(o.material.name || "")) return;
+        const b = new THREE.Box3().setFromObject(o);
+        const bw = b.max.x - b.min.x;
+        const isTop = b.min.y > mBox.max.y - mSize.y * 0.1;
+        const isCentered = Math.abs((b.min.x + b.max.x) / 2 - mCx) < mSize.x * 0.25;
+        const isSmall = bw < mSize.x * 0.55;
+        const isFront = b.max.z > mBox.max.z - mSize.z * 0.55;
+        if (isTop && isCentered && isSmall && isFront) o.material = islandBlack;
+      });
+
       // static second phone for the showcase (article screen, tilted)
       backPhone = phone.clone(true);
       backPhone.traverse((o) => {
