@@ -38,14 +38,17 @@ a { text-decoration: none; color: inherit; }
   position: fixed; inset: 0; z-index: 100;
   background: var(--coal);
   display: flex; align-items: center; justify-content: center;
+  will-change: transform; /* pre-promote: the curtain lift must not
+                             wait for layer rasterization */
 }
-.intro-mark { overflow: hidden; text-align: center; }
+.intro-mark { overflow: hidden; text-align: center; will-change: transform, opacity; }
 .intro-logo {
   display: block;
   font-family: var(--font-serif);
   font-size: clamp(44px, 6vw, 84px);
   color: #fff; letter-spacing: -2px;
   transform: translateY(110%);
+  will-change: transform;
 }
 .intro-logo b { font-weight: 900; }
 .intro-tag {

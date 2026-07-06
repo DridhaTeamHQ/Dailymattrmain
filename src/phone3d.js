@@ -30,39 +30,23 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
     return state;
   }
 
-  let renderer, scene, camera, phone, backPhone, screenB, backScreenMat;
+  /* the renderer, environment map, and shader compile are the expensive
+   * steps (each can stall the main thread 100-300ms). They are DEFERRED
+   * and staggered across animation frames inside the GLB load callback,
+   * so the intro logo animation never shares a frame with a big stall.
+   * Construction here stays feather-light: only network fetches begin. */
+  let renderer = null;
+  let scene, camera, phone, backPhone, screenB, backScreenMat;
   let dirty = true;
   let pose = null;
   let back = null; // { cx, cy (doc coords), w, rotZ, rotY }
 
-  try {
-    renderer = new THREE.WebGLRenderer({
-      alpha: true,
-      antialias: true,
-      powerPreference: "high-performance",
-    });
-  } catch (e) {
-    state.failed = true;
-    return state;
-  }
-
   /* smaller canvases on small screens: mobile GPUs choke on a
    * full-viewport DPR-2 canvas; 1.6 is visually near-identical here */
   const dprCap = () => (window.innerWidth < 900 ? 1.6 : 2);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, dprCap()));
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
-
-  state.canvas = renderer.domElement;
-  state.canvas.className = "gl-stage";
 
   scene = new THREE.Scene();
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-
   camera = new THREE.PerspectiveCamera(30, 1, 10, 6000);
-  sizeCamera();
 
   let screenAspect = 0.47; // refined from the mesh's bounding box on load
   let uvBox = { uMin: 0, uMax: 1, vMin: 0, vMax: 1 }; // actual UV window of the screen mesh
@@ -95,12 +79,11 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
   const loadTex = (url) => {
     const t = texLoader.load(url, () => {
       coverCrop(t);
-      renderer.initTexture(t); // upload to the GPU now, not on first visible frame
+      if (renderer) renderer.initTexture(t); // upload off the visible path
       dirty = true;
     });
     t.colorSpace = THREE.SRGBColorSpace;
     t.flipY = false; // glTF UV convention
-    t.anisotropy = renderer.capabilities.getMaxAnisotropy();
     allTex.push(t);
     return t;
   };
@@ -114,7 +97,18 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
   gltfLoader.setMeshoptDecoder(MeshoptDecoder);
   gltfLoader.load(
     "/assets/iphone.glb",
-    (gltf) => {
+    async (gltf) => {
+      /* yield to the next paint so the intro animation gets frames
+       * between the heavy steps — with a timeout fallback so throttled
+       * or background tabs still finish initializing */
+      const nextFrame = () =>
+        new Promise((r) => {
+          const t = setTimeout(r, 90);
+          requestAnimationFrame(() => {
+            clearTimeout(t);
+            r();
+          });
+        });
       const model = gltf.scene;
 
       // normalize: center the model and scale it so its height equals
@@ -235,16 +229,51 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
       backPhone.visible = false;
       scene.add(backPhone);
 
-      /* pre-warm: compile shaders and upload buffers while the intro
-       * curtain still covers the page, so the first visible frame is
-       * free of GPU hitches */
+      /* ---- staggered GPU warm-up: one heavy step per frame so the
+       * intro logo animation keeps getting frames in between ---- */
+      await nextFrame();
+      try {
+        renderer = new THREE.WebGLRenderer({
+          alpha: true,
+          antialias: true,
+          powerPreference: "high-performance",
+        });
+      } catch (e) {
+        state.failed = true;
+        return;
+      }
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, dprCap()));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.1;
+      state.canvas = renderer.domElement;
+      state.canvas.className = "gl-stage";
+      sizeCamera();
+
+      await nextFrame();
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+      pmrem.dispose();
+
+      await nextFrame();
+      const maxAniso = renderer.capabilities.getMaxAnisotropy();
+      allTex.forEach((t) => {
+        t.anisotropy = maxAniso;
+        t.needsUpdate = true;
+        if (t.image) renderer.initTexture(t);
+      });
+      renderer.compile(scene, camera);
+
+      await nextFrame();
+      /* one hidden warm render uploads every remaining buffer while the
+       * curtain still covers the page */
       phone.visible = true;
       backPhone.visible = true;
-      renderer.compile(scene, camera);
       renderer.render(scene, camera);
       backPhone.visible = false;
 
       state.ready = true;
+      lastKey = "";
       dirty = true;
       document.body.appendChild(state.canvas);
     },
@@ -256,6 +285,7 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
   );
 
   function sizeCamera() {
+    if (!renderer) return;
     const vw = window.innerWidth || 1;
     const vh = window.innerHeight || 1;
     renderer.setSize(vw, vh);
@@ -268,6 +298,7 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
   }
 
   function resize() {
+    if (!renderer) return;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, dprCap()));
     sizeCamera();
     lastKey = ""; // force a fresh render at the new size
@@ -344,8 +375,8 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
 
   function dispose() {
     cancelAnimationFrame(raf);
-    renderer.dispose();
-    state.canvas.remove();
+    if (renderer) renderer.dispose();
+    if (state.canvas) state.canvas.remove();
   }
 
   return state;
