@@ -286,23 +286,44 @@ function build() {
     const sceneWords = rows.map((r) => r.querySelector(".scene-word"));
     const copies = gsap.utils.toArray(".feature-copy");
 
+    /* MOBILE: no JS pin. GSAP pinning repositions the element from the
+     * main thread against native compositor scrolling — it lags and
+     * snaps whenever the main thread is busy. Instead the section is
+     * made tall and .features-pin is CSS `position: sticky` (pure
+     * compositor work), with the scene timeline scrubbing over the
+     * section's scroll span. Desktop keeps the GSAP pin. */
+    const featuresSection = document.getElementById("features");
+    if (isMobile) {
+      featuresSection.style.height = Math.round(vh * 2.5) + "px"; // 100vh sticky + 150vh of story
+    } else {
+      featuresSection.style.height = "";
+    }
     const scenes = gsap.timeline({
       defaults: { ease: "power2.inOut" },
-      scrollTrigger: {
-        trigger: featuresPin,
-        start: "top top",
-        end: isMobile ? "+=150%" : "+=340%", // much shorter pin on phones — fewer swipes to pass
-        pin: true,
-        scrub: SCRUB,
-        onUpdate(self) {
-          const idx = Math.min(2, Math.floor(self.progress * 2.999));
-          if (idx !== lastDotIdx) {
-            lastDotIdx = idx;
-            dots.forEach((d, i) => d.classList.toggle("on", i === idx));
+      scrollTrigger: isMobile
+        ? {
+            trigger: featuresSection,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: SCRUB,
+            onUpdate: sceneDots,
           }
-        },
-      },
+        : {
+            trigger: featuresPin,
+            start: "top top",
+            end: "+=340%",
+            pin: true,
+            scrub: SCRUB,
+            onUpdate: sceneDots,
+          },
     });
+    function sceneDots(self) {
+      const idx = Math.min(2, Math.floor(self.progress * 2.999));
+      if (idx !== lastDotIdx) {
+        lastDotIdx = idx;
+        dots.forEach((d, i) => d.classList.toggle("on", i === idx));
+      }
+    }
 
     /* (the phone's position is owned entirely by the flight timeline;
      * this pinned timeline only choreographs the scenery + screens)
@@ -344,27 +365,32 @@ function build() {
     }
     rot.to(".word-track", { y: 0, duration: 0 }); // 5th word is a clone of the 1st
 
-    /* ---------- hero panel goes full-bleed as the dark world takes over ---------- */
-    gsap.to(".hero", {
-      backgroundColor: "#0a0a0b",
-      scrollTrigger: {
-        trigger: "#showcase",
-        start: "top bottom",
-        end: "top 62%",
-        scrub: true,
-      },
-      ease: "none",
-    });
-    gsap.to(".hero-inner", {
-      borderRadius: 0,
-      scrollTrigger: {
-        trigger: "#showcase",
-        start: "top bottom",
-        end: "top 62%",
-        scrub: true,
-      },
-      ease: "none",
-    });
+    /* ---------- hero panel goes full-bleed as the dark world takes over.
+     * Desktop only: animating background-color/border-radius REPAINTS the
+     * whole hero every scrolled frame — a real jank source on phones.
+     * Mobile keeps the static rounded-panel look. ---------- */
+    if (!isMobile) {
+      gsap.to(".hero", {
+        backgroundColor: "#0a0a0b",
+        scrollTrigger: {
+          trigger: "#showcase",
+          start: "top bottom",
+          end: "top 62%",
+          scrub: true,
+        },
+        ease: "none",
+      });
+      gsap.to(".hero-inner", {
+        borderRadius: 0,
+        scrollTrigger: {
+          trigger: "#showcase",
+          start: "top bottom",
+          end: "top 62%",
+          scrub: true,
+        },
+        ease: "none",
+      });
+    }
     // hero copy drifts up a touch faster than the scroll — gentle depth
     // (desktop only; a scrubbed per-frame parallax isn't worth the cost on phones)
     if (!isMobile) {

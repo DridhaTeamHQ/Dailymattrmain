@@ -49,10 +49,10 @@ export function createPhone3D({ phoneW, phoneH, screens, quality }) {
   let back = null; // { cx, cy (doc coords), w, rotZ, rotY }
   let canvasHidden = false;
 
-  /* full device resolution (capped at 2) so the model stays sharp — the
-   * smoothness comes from the cheaper shaders/materials below, not from
-   * under-sampling the canvas (which just looked blurry) */
-  const dprCap = () => 2;
+  /* sharp but not wasteful: 1.7 on phones is visually indistinguishable
+   * from 2 at this size (1.1 was the blurry mistake) yet shades ~28%
+   * fewer pixels every frame; desktop keeps 2 */
+  const dprCap = () => (MOBILE ? 1.7 : 2);
 
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(30, 1, 10, 6000);
