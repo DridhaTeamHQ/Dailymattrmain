@@ -34,18 +34,37 @@ const featuresPin = document.getElementById("features-pin");
 const dots = [...document.querySelectorAll(".scene-progress .dot")];
 let lastDotIdx = -1;
 
-/* Real 3D phone (three.js). If WebGL or the GLB fails, `phone3d.failed`
- * flips and the PNG mockup phone keeps doing the job. */
-const phone3d = createPhone3D({
-  phoneW: PHONE_W,
-  phoneH: PHONE_H,
-  screens: {
-    home: "/assets/screen-home.jpg?v=4",
-    article: "/assets/screen-article.jpg?v=4",
-    qix: "/assets/screen-qix.jpg?v=4",
-    trax: "/assets/screen-trax.jpg?v=4",
-  },
-});
+/* ---- adaptive device tiering ----
+ * high = desktop → full real-time 3D
+ * mid  = capable phone/tablet → optimized 3D (no reflections, low DPR)
+ * low  = cheap/old phone → skip WebGL entirely, use the PNG phone */
+function perfTier() {
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  if (!coarse && window.innerWidth >= 900) return "high";
+  const mem = navigator.deviceMemory || 4;
+  const cores = navigator.hardwareConcurrency || 4;
+  if (mem <= 4 || cores <= 4) return "low";
+  return "mid";
+}
+const TIER = perfTier();
+
+/* Real 3D phone (three.js). On "low" it is never created — the PNG
+ * mockup phone (`#fly-phone`) drives the whole journey instead. A
+ * runtime FPS guard can also demote mid→PNG on devices we misjudged. */
+const phone3d =
+  TIER === "low"
+    ? { ready: false, failed: true, demoted: true, apply() {}, resize() {}, setBackPhone() {}, demote() {} }
+    : createPhone3D({
+        phoneW: PHONE_W,
+        phoneH: PHONE_H,
+        quality: TIER === "mid" ? "mobile" : "desktop",
+        screens: {
+          home: "/assets/screen-home.jpg?v=4",
+          article: "/assets/screen-article.jpg?v=4",
+          qix: "/assets/screen-qix.jpg?v=4",
+          trax: "/assets/screen-trax.jpg?v=4",
+        },
+      });
 
 /* ---- single pose proxy: every scroll tween writes here, and the
  * ticker mirrors it onto whichever phone representation is live.
@@ -68,11 +87,38 @@ const flyS = {
  * phone in without fighting the per-tick applier */
 const introOff = { y: 140, a: 0 };
 
+/* runtime FPS guard: once the 3D canvas is live, sample frame times for
+ * ~90 rendered frames; if the median is worse than ~40fps, demote to the
+ * PNG phone. Catches low-end devices the static heuristic misjudged. */
+if (TIER === "mid") {
+  const samples = [];
+  let last = 0;
+  const sampler = (now) => {
+    if (!phone3d.ready || phone3d.demoted) {
+      if (!phone3d.demoted) requestAnimationFrame(sampler);
+      return;
+    }
+    if (last) samples.push(now - last);
+    last = now;
+    if (samples.length >= 90) {
+      const sorted = samples.slice().sort((a, b) => a - b);
+      const median = sorted[sorted.length >> 1];
+      if (median > 25) phone3d.demote(); // ~< 40fps sustained
+      return;
+    }
+    requestAnimationFrame(sampler);
+  };
+  requestAnimationFrame(sampler);
+}
+
 let use3d = false;
 gsap.ticker.add(() => {
-  if (!use3d && phone3d.ready) {
+  const can3d = phone3d.ready && !phone3d.demoted;
+  if (can3d && !use3d) {
     use3d = true;
     gsap.set(flyPhone, { autoAlpha: 0 });
+  } else if (!can3d && use3d) {
+    use3d = false; // demoted mid-session → hand back to the PNG phone
   }
   const y = P.y + introOff.y;
   const alpha = P.alpha * introOff.a;
@@ -330,17 +376,20 @@ function build() {
       ease: "none",
     });
     // hero copy drifts up a touch faster than the scroll — gentle depth
-    gsap.to([".hero-title", ".hero-sub", ".store-buttons"], {
-      y: (i) => -(34 + i * 10),
-      autoAlpha: 0.25,
-      scrollTrigger: {
-        trigger: "#hero",
-        start: "top top",
-        end: "bottom 45%",
-        scrub: true,
-      },
-      ease: "none",
-    });
+    // (desktop only; a scrubbed per-frame parallax isn't worth the cost on phones)
+    if (!isMobile) {
+      gsap.to([".hero-title", ".hero-sub", ".store-buttons"], {
+        y: (i) => -(34 + i * 10),
+        autoAlpha: 0.25,
+        scrollTrigger: {
+          trigger: "#hero",
+          start: "top top",
+          end: "bottom 45%",
+          scrub: true,
+        },
+        ease: "none",
+      });
+    }
 
     /* ---------- nav melts into the dark world, back to light at the FAQ ---------- */
     ScrollTrigger.create({
@@ -360,16 +409,18 @@ function build() {
       duration: 0.9,
       ease: "power3.out",
     });
-    gsap.from(".giant-words", {
-      scrollTrigger: {
-        trigger: "#showcase",
-        start: "top 80%",
-        end: "bottom top",
-        scrub: 1,
-      },
-      xPercent: 6,
-      ease: "none",
-    });
+    if (!isMobile) {
+      gsap.from(".giant-words", {
+        scrollTrigger: {
+          trigger: "#showcase",
+          start: "top 80%",
+          end: "bottom top",
+          scrub: 1,
+        },
+        xPercent: 6,
+        ease: "none",
+      });
+    }
 
     /* ---------- FAQ + footer reveals ---------- */
     gsap.from(".faq-left > *", {

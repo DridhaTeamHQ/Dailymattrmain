@@ -14,14 +14,21 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
 const PERSPECTIVE = 1400; // matches the CSS `perspective: 1500px` feel
 
-export function createPhone3D({ phoneW, phoneH, screens }) {
+export function createPhone3D({ phoneW, phoneH, screens, quality }) {
+  /* "mobile" quality: no environment reflections, cheap Standard
+   * materials lit by two lights, low DPR, no antialias, single phone
+   * instance. Roughly a quarter of the per-frame GPU cost. */
+  const MOBILE = quality === "mobile";
+
   const state = {
     ready: false,
     failed: false,
+    demoted: false, // flipped by the FPS guard → main.js falls back to PNG
     canvas: null,
     resize,
     apply,
     setBackPhone,
+    demote,
     dispose,
   };
 
@@ -41,9 +48,9 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
   let pose = null;
   let back = null; // { cx, cy (doc coords), w, rotZ, rotY }
 
-  /* smaller canvases on small screens: mobile GPUs choke on a
-   * full-viewport DPR-2 canvas; 1.6 is visually near-identical here */
-  const dprCap = () => (window.innerWidth < 900 ? 1.6 : 2);
+  /* mobile GPUs choke on a full-viewport high-DPR canvas; fragment cost
+   * scales with pixel count, so this is the single biggest GPU lever */
+  const dprCap = () => (MOBILE ? 1.1 : 2);
 
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(30, 1, 10, 6000);
@@ -186,13 +193,18 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
         matQix = overlay(texQix, 3);
         matTrax = overlay(texTrax, 4);
       }
-      // soften the cover glass so it doesn't milk out the screen
+      // cover glass: hidden entirely on mobile (one fewer overdraw layer),
+      // softened to a faint sheen on desktop
       model.traverse((o) => {
         if (o.isMesh && o.material && /glass/i.test(o.material.name || "")) {
-          o.material.transparent = true;
-          o.material.opacity = 0.06;
-          o.material.transmission = 0;
-          o.material.depthWrite = false;
+          if (MOBILE) {
+            o.visible = false;
+          } else {
+            o.material.transparent = true;
+            o.material.opacity = 0.06;
+            o.material.transmission = 0;
+            o.material.depthWrite = false;
+          }
         }
       });
 
@@ -216,18 +228,47 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
         if (isTop && isCentered && isSmall && isFront) o.material = islandBlack;
       });
 
-      // static second phone for the showcase (article screen, tilted)
-      backPhone = phone.clone(true);
-      backPhone.traverse((o) => {
-        if (o.isMesh && o.userData.isScreen) {
-          backScreenMat = new THREE.MeshBasicMaterial({ map: texArticle, toneMapped: false });
-          o.material = backScreenMat;
-        }
-        if (o.isMesh && o.material && o.material.transparent && o.material.opacity === 0)
-          o.visible = false; // drop the crossfade clone in the copy
-      });
-      backPhone.visible = false;
-      scene.add(backPhone);
+      /* mobile: swap the model's expensive PBR (clearcoat/transmission/
+       * envmap) for cheap Standard materials lit by two lights — no
+       * per-pixel environment sampling, no physical shader branches */
+      if (MOBILE) {
+        model.traverse((o) => {
+          if (!o.isMesh || !o.visible || o.userData.isScreen) return;
+          const m = o.material;
+          if (!m || m.isMeshBasicMaterial) return; // screen + island already basic
+          if (m.isMeshStandardMaterial || m.isMeshPhysicalMaterial) {
+            o.material = new THREE.MeshStandardMaterial({
+              color: m.color ? m.color.clone() : new THREE.Color(0xffffff),
+              map: m.map || null,
+              metalness: m.metalness != null ? m.metalness : 0.55,
+              roughness: m.roughness != null ? m.roughness : 0.45,
+              normalMap: m.normalMap || null,
+              envMapIntensity: 0,
+            });
+            m.dispose && m.dispose();
+          }
+        });
+        const hemi = new THREE.HemisphereLight(0xffffff, 0x2a2a33, 1.15);
+        const dir = new THREE.DirectionalLight(0xffffff, 1.1);
+        dir.position.set(0.4, 1, 1.3);
+        scene.add(hemi, dir);
+      }
+
+      // static second phone for the showcase — desktop only (skips a
+      // full extra model draw on mobile)
+      if (!MOBILE) {
+        backPhone = phone.clone(true);
+        backPhone.traverse((o) => {
+          if (o.isMesh && o.userData.isScreen) {
+            backScreenMat = new THREE.MeshBasicMaterial({ map: texArticle, toneMapped: false });
+            o.material = backScreenMat;
+          }
+          if (o.isMesh && o.material && o.material.transparent && o.material.opacity === 0)
+            o.visible = false; // drop the crossfade clone in the copy
+        });
+        backPhone.visible = false;
+        scene.add(backPhone);
+      }
 
       /* ---- staggered GPU warm-up: one heavy step per frame so the
        * intro logo animation keeps getting frames in between ---- */
@@ -235,7 +276,7 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
       try {
         renderer = new THREE.WebGLRenderer({
           alpha: true,
-          antialias: true,
+          antialias: !MOBILE, // AA is ~30-40% fragment overhead — off on mobile
           powerPreference: "high-performance",
         });
       } catch (e) {
@@ -251,12 +292,16 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
       sizeCamera();
 
       await nextFrame();
-      const pmrem = new THREE.PMREMGenerator(renderer);
-      scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-      pmrem.dispose();
+      if (!MOBILE) {
+        // image-based lighting — desktop only; mobile uses the cheap lights
+        const pmrem = new THREE.PMREMGenerator(renderer);
+        scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+        pmrem.dispose();
+      }
 
       await nextFrame();
-      const maxAniso = renderer.capabilities.getMaxAnisotropy();
+      // anisotropic filtering is costly on mobile GPUs; keep it desktop-only
+      const maxAniso = MOBILE ? 1 : renderer.capabilities.getMaxAnisotropy();
       allTex.forEach((t) => {
         t.anisotropy = maxAniso;
         t.needsUpdate = true;
@@ -268,9 +313,9 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
       /* one hidden warm render uploads every remaining buffer while the
        * curtain still covers the page */
       phone.visible = true;
-      backPhone.visible = true;
+      if (backPhone) backPhone.visible = true;
       renderer.render(scene, camera);
-      backPhone.visible = false;
+      if (backPhone) backPhone.visible = false;
 
       state.ready = true;
       lastKey = "";
@@ -365,13 +410,23 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
   }
 
   function render() {
-    if (dirty && state.ready) {
+    if (dirty && state.ready && !state.demoted) {
       renderer.render(scene, camera);
       dirty = false;
     }
     raf = requestAnimationFrame(render);
   }
   let raf = requestAnimationFrame(render);
+
+  /* the FPS guard calls this when a device can't sustain the 3D render;
+   * the canvas is torn down and main.js falls back to the PNG phone */
+  function demote() {
+    if (state.demoted) return;
+    state.demoted = true;
+    cancelAnimationFrame(raf);
+    if (state.canvas) state.canvas.remove();
+    if (renderer) renderer.dispose();
+  }
 
   function dispose() {
     cancelAnimationFrame(raf);

@@ -596,6 +596,19 @@ a { text-decoration: none; color: inherit; }
   .footer-cols { gap: clamp(32px, 10vw, 90px); flex-wrap: wrap; }
   .footer-legal { text-align: left; }
   .footer-wordmark { letter-spacing: -2px; }
+
+  /* ---- perf: drop the expensive paint effects on phones ---- */
+  /* blur(80px) on a ~940px circle is one of the heaviest per-frame
+     costs; the radial gradient alone already reads as a soft glow */
+  .scene-glow { filter: none; width: min(86vw, 620px); }
+  /* alpha-traced drop-shadow on the large PNG frame → cheaper, smaller */
+  .ph-frame { filter: drop-shadow(0 18px 26px rgba(0,0,0,.5)); }
+  /* huge soft shadows under the side phones → tighter, cheaper */
+  .sp { box-shadow: 0 16px 34px rgba(0,0,0,.5); }
+  /* the side phones aren't animated on mobile — no layer promotion */
+  .side { will-change: auto; }
+  /* the big blurred hero glow → smaller blur */
+  .hero-inner::before { filter: blur(14px); width: 360px; height: 360px; }
 }
 
 /* ---- wide-but-narrow (Fold unfolded ~815px, small tablets) ---- */
