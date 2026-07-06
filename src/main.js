@@ -17,6 +17,10 @@ const lenis = new Lenis({
   smoothWheel: true,
   syncTouch: false, // native touch scrolling on mobile
 });
+/* touch scroll is raw (Lenis only smooths wheels), so scrubs get a small
+ * smoothing pass on touch devices to absorb the stepped scroll events */
+const IS_TOUCH = window.matchMedia("(pointer: coarse)").matches;
+const SCRUB = IS_TOUCH ? 0.35 : true;
 lenis.on("scroll", ScrollTrigger.update);
 gsap.ticker.add((t) => lenis.raf(t * 1000));
 gsap.ticker.lagSmoothing(0);
@@ -28,6 +32,7 @@ const flyPhone = document.getElementById("fly-phone");
 const fly3d = flyPhone.querySelector(".phone-3d");
 const featuresPin = document.getElementById("features-pin");
 const dots = [...document.querySelectorAll(".scene-progress .dot")];
+let lastDotIdx = -1;
 
 /* Real 3D phone (three.js). If WebGL or the GLB fails, `phone3d.failed`
  * flips and the PNG mockup phone keeps doing the job. */
@@ -174,7 +179,7 @@ function build() {
         trigger: document.body,
         start: 0,
         end: () => s4,
-        scrub: true, // Lenis provides the smoothing — map 1:1, zero lag
+        scrub: SCRUB, // Lenis smooths wheels; touch gets a light scrub pass
       },
     });
 
@@ -252,10 +257,13 @@ function build() {
         start: "top top",
         end: isMobile ? "+=210%" : "+=340%", // phones get a much shorter ride
         pin: true,
-        scrub: true,
+        scrub: SCRUB,
         onUpdate(self) {
           const idx = Math.min(2, Math.floor(self.progress * 2.999));
-          dots.forEach((d, i) => d.classList.toggle("on", i === idx));
+          if (idx !== lastDotIdx) {
+            lastDotIdx = idx;
+            dots.forEach((d, i) => d.classList.toggle("on", i === idx));
+          }
         },
       },
     });

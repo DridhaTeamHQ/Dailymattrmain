@@ -9,6 +9,7 @@
 
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
 const PERSPECTIVE = 1400; // matches the CSS `perspective: 1500px` feel
@@ -35,13 +36,20 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
   let back = null; // { cx, cy (doc coords), w, rotZ, rotY }
 
   try {
-    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: true,
+      powerPreference: "high-performance",
+    });
   } catch (e) {
     state.failed = true;
     return state;
   }
 
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  /* smaller canvases on small screens: mobile GPUs choke on a
+   * full-viewport DPR-2 canvas; 1.6 is visually near-identical here */
+  const dprCap = () => (window.innerWidth < 900 ? 1.6 : 2);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, dprCap()));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;
@@ -102,7 +110,9 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
   const texTrax = loadTex(screens.trax);
   let matArticle, matQix, matTrax;
 
-  new GLTFLoader().load(
+  const gltfLoader = new GLTFLoader();
+  gltfLoader.setMeshoptDecoder(MeshoptDecoder);
+  gltfLoader.load(
     "/assets/iphone.glb",
     (gltf) => {
       const model = gltf.scene;
@@ -258,16 +268,29 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
   }
 
   function resize() {
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, dprCap()));
     sizeCamera();
+    lastKey = ""; // force a fresh render at the new size
   }
 
   const D2R = Math.PI / 180;
 
   /* pose: { x, y, scale, rotZ, rotY, rotX, alpha, mix } in CSS pixels/degrees
    * (x,y = top-left of the phone box, like the CSS version) */
+  let lastKey = "";
   function apply(p, scrollY) {
     pose = p;
     if (!state.ready) return;
+
+    /* only re-render when something actually changed — idle frames cost
+     * nothing instead of redrawing the full canvas at 60fps */
+    const key =
+      (p.x | 0) + "," + (p.y | 0) + "," + p.scale.toFixed(4) + "," +
+      p.rotZ.toFixed(2) + "," + p.rotY.toFixed(2) + "," + p.rotX.toFixed(2) + "," +
+      p.alpha.toFixed(3) + "," + p.mix.toFixed(3) + "," +
+      p.sQ.toFixed(3) + "," + p.sT.toFixed(3) + "," + (scrollY | 0);
+    if (key === lastKey) return;
+    lastKey = key;
 
     phone.visible = p.alpha > 0.01;
     if (phone.visible) {
