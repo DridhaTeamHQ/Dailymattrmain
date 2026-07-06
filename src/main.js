@@ -15,15 +15,23 @@ gsap.registerPlugin(ScrollTrigger);
 const lenis = new Lenis({
   lerp: 0.09,
   smoothWheel: true,
-  syncTouch: false, // native touch scrolling on mobile
+  /* Lenis drives TOUCH too. With native touch scrolling the pinned
+   * features section desynced from the browser's momentum scroll —
+   * hard flings blew past the pin and scrolling up lagged. Routing
+   * touch through Lenis gives ScrollTrigger one consistent, smoothed
+   * scroll value so pins stay glued. */
+  syncTouch: true,
+  syncTouchLerp: 0.08,
+  touchInertiaMultiplier: 16, // tame fling distance so it doesn't overshoot
 });
-/* touch scroll is raw (Lenis only smooths wheels), so scrubs get a small
- * smoothing pass on touch devices to absorb the stepped scroll events */
-const IS_TOUCH = window.matchMedia("(pointer: coarse)").matches;
-const SCRUB = IS_TOUCH ? 0.35 : true;
+const SCRUB = true; // Lenis smooths wheel AND touch — map scrubs 1:1
 lenis.on("scroll", ScrollTrigger.update);
 gsap.ticker.add((t) => lenis.raf(t * 1000));
 gsap.ticker.lagSmoothing(0);
+/* the mobile URL bar showing/hiding fires a resize that made
+ * ScrollTrigger recompute the pin every time — the scroll-up lag.
+ * Ignore that resize class entirely. */
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 const PHONE_W = 400;
 const PHONE_H = 822; // matches both the mockup PNG and the GLB aspect
