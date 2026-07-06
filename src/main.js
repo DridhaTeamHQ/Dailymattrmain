@@ -295,6 +295,49 @@ function build() {
     }
     rot.to(".word-track", { y: 0, duration: 0 }); // 5th word is a clone of the 1st
 
+    /* ---------- hero panel goes full-bleed as the dark world takes over ---------- */
+    gsap.to(".hero", {
+      backgroundColor: "#0a0a0b",
+      scrollTrigger: {
+        trigger: "#showcase",
+        start: "top bottom",
+        end: "top 62%",
+        scrub: true,
+      },
+      ease: "none",
+    });
+    gsap.to(".hero-inner", {
+      borderRadius: 0,
+      scrollTrigger: {
+        trigger: "#showcase",
+        start: "top bottom",
+        end: "top 62%",
+        scrub: true,
+      },
+      ease: "none",
+    });
+    // hero copy drifts up a touch faster than the scroll — gentle depth
+    gsap.to([".hero-title", ".hero-sub", ".store-buttons"], {
+      y: (i) => -(34 + i * 10),
+      autoAlpha: 0.25,
+      scrollTrigger: {
+        trigger: "#hero",
+        start: "top top",
+        end: "bottom 45%",
+        scrub: true,
+      },
+      ease: "none",
+    });
+
+    /* ---------- nav melts into the dark world, back to light at the FAQ ---------- */
+    ScrollTrigger.create({
+      trigger: "#hero",
+      start: "top+=90 top",
+      endTrigger: "#faq",
+      end: "top 64px",
+      toggleClass: { targets: ".nav", className: "nav-dark" },
+    });
+
     /* ---------- showcase reveals ---------- */
     gsap.from(".showcase-title, .showcase .eyebrow", {
       scrollTrigger: { trigger: "#showcase", start: "top 70%" },
@@ -353,6 +396,19 @@ window.addEventListener("resize", () => {
     build();
     ScrollTrigger.refresh();
   }, 220);
+});
+
+/* ---------- nav hides on scroll-down, returns on scroll-up ---------- */
+let navHidden = false;
+lenis.on("scroll", (e) => {
+  const down = e.direction === 1;
+  if (down && e.scroll > 320 && !navHidden) {
+    navHidden = true;
+    gsap.to(".nav", { yPercent: -110, duration: 0.45, ease: "power3.out", overwrite: "auto" });
+  } else if ((!down || e.scroll <= 320) && navHidden) {
+    navHidden = false;
+    gsap.to(".nav", { yPercent: 0, duration: 0.45, ease: "power3.out", overwrite: "auto" });
+  }
 });
 
 /* ---------- in-page anchors ride the smooth scroll ---------- */

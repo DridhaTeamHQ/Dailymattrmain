@@ -94,25 +94,40 @@ a { text-decoration: none; color: inherit; }
   padding: 0 56px;
   background: rgba(255,255,255,.85);
   backdrop-filter: blur(14px);
+  transition: background .45s ease;
+  will-change: transform;
 }
-.brand { font-family: var(--font-serif); font-size: 24px; letter-spacing: -.5px; }
+.brand { font-family: var(--font-serif); font-size: 24px; letter-spacing: -.5px; transition: color .45s ease; }
 .brand b { font-weight: 900; }
 .nav-links { display: flex; gap: 6px; }
 .nav-links a {
   font-size: 13px; font-weight: 500; color: var(--ink-soft);
   padding: 8px 12px; border-radius: 999px;
   display: inline-flex; align-items: center; gap: 4px;
-  transition: color .2s ease, background .2s ease;
+  transition: color .3s ease, background .3s ease;
 }
 .nav-links a:hover, .nav-links a.active { color: var(--ink); background: #f1f1f3; }
 .nav-cta { display: flex; align-items: center; gap: 8px; }
 
+/* dark-world nav: once the black panel fills the screen the bar melts
+   into it as dark glass */
+.nav.nav-dark { background: rgba(12,12,14,.68); }
+.nav.nav-dark .brand { color: #fff; }
+.nav.nav-dark .nav-links a { color: rgba(255,255,255,.6); }
+.nav.nav-dark .nav-links a:hover,
+.nav.nav-dark .nav-links a.active { color: #fff; background: rgba(255,255,255,.1); }
+.nav.nav-dark .btn-dark { background: #fff; color: var(--ink); }
+.nav.nav-dark .btn-avatar { background: rgba(255,255,255,.12); color: #fff; }
+
 /* ============ Hero ============ */
-.hero { padding: calc(var(--nav-h) + 11px) 16px 14px; background: var(--paper); }
+.hero {
+  padding: calc(var(--nav-h) + 11px) 16px 14px;
+  background: var(--paper); /* scroll-tweened to coal so the panel goes full-bleed */
+}
 .hero-inner {
   position: relative;
   background: radial-gradient(120% 90% at 50% 0%, #1c1c1f 0%, var(--coal) 55%);
-  border-radius: var(--radius-panel);
+  border-radius: var(--radius-panel); /* scroll-tweened to 0 */
   overflow: hidden;
   text-align: center;
   padding: 88px 24px 0;
@@ -376,7 +391,13 @@ a { text-decoration: none; color: inherit; }
 .scene-progress .dot.on i { width: 34px; }
 
 /* ============ FAQ ============ */
-.faq { background: var(--paper); padding: 130px 8vw; }
+/* rises over the dark features section as a rounded white sheet */
+.faq {
+  background: var(--paper); padding: 130px 8vw;
+  position: relative; z-index: 5;
+  border-radius: 32px 32px 0 0;
+  margin-top: -32px;
+}
 .faq-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 80px; max-width: 1280px; margin: 0 auto; }
 .faq-left h2 {
   font-size: clamp(38px, 4vw, 56px); font-weight: 700;
@@ -443,6 +464,26 @@ a { text-decoration: none; color: inherit; }
   color: var(--ink);
 }
 .footer-wordmark b { font-weight: 900; }
+
+/* ============ Film grain (premium texture, both platforms) ============ */
+.grain {
+  position: fixed; inset: -50%; z-index: 90;
+  width: 200%; height: 200%;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: .045;
+  mix-blend-mode: soft-light;
+  animation: grain-shift 1.1s steps(3) infinite;
+}
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  33% { transform: translate(-2.5%, 1.6%); }
+  66% { transform: translate(1.8%, -2.2%); }
+  100% { transform: translate(0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .grain { animation: none; }
+}
 
 /* ============ Mobile ============ */
 @media (max-width: 900px) {
