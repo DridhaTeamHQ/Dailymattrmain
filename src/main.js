@@ -21,8 +21,8 @@ const lenis = new Lenis({
    * touch through Lenis gives ScrollTrigger one consistent, smoothed
    * scroll value so pins stay glued. */
   syncTouch: true,
-  syncTouchLerp: 0.08,
-  touchInertiaMultiplier: 16, // tame fling distance so it doesn't overshoot
+  syncTouchLerp: 0.11, // snappier — less "catching up" feel
+  touchInertiaMultiplier: 30, // a normal swipe covers a normal distance
 });
 const SCRUB = true; // Lenis smooths wheel AND touch — map scrubs 1:1
 lenis.on("scroll", ScrollTrigger.update);
@@ -288,7 +288,7 @@ function build() {
       scrollTrigger: {
         trigger: featuresPin,
         start: "top top",
-        end: isMobile ? "+=210%" : "+=340%", // phones get a much shorter ride
+        end: isMobile ? "+=150%" : "+=340%", // much shorter pin on phones — fewer swipes to pass
         pin: true,
         scrub: SCRUB,
         onUpdate(self) {
