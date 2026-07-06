@@ -131,12 +131,13 @@ function build() {
      * height — so it fits narrow phones (Fold cover) AND short/wide ones
      * (Fold unfolded) without ever overflowing or looking oversized. */
     const isMobile = vw < 900;
-    const hBudget = vh * (isMobile ? 0.46 : 0.7);
-    const wBudget = vw * (isMobile ? 0.66 : 0.72);
+    const hBudget = vh * (isMobile ? 0.44 : 0.7);
+    const wBudget = vw * (isMobile ? 0.64 : 0.72);
     const floatScale = Math.min(hBudget / PHONE_H, wBudget / PHONE_W);
     const floatPose = {
       x: vw / 2 - PHONE_W / 2,
-      y: vh * (isMobile ? 0.34 : 0.54) - PHONE_H / 2,
+      // a touch lower on mobile so the phone top clears the scene markers
+      y: vh * (isMobile ? 0.4 : 0.54) - PHONE_H / 2,
       scale: floatScale,
       rotZ: 0,
     };

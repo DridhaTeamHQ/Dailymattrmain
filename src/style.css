@@ -342,7 +342,16 @@ a { text-decoration: none; color: inherit; }
   position: absolute; inset: 0;
   background:
     linear-gradient(180deg, var(--coal-2) 0%, transparent 14%, transparent 82%, var(--coal-2) 100%),
+    radial-gradient(46% 40% at 50% 44%, rgba(122,122,146,.16) 0%, transparent 68%),
     radial-gradient(120% 100% at 50% 52%, transparent 0%, transparent 58%, rgba(13,13,15,.72) 100%);
+}
+@media (max-width: 900px) {
+  .stage-veil {
+    background:
+      linear-gradient(180deg, var(--coal-2) 0%, transparent 12%, transparent 84%, var(--coal-2) 100%),
+      radial-gradient(56% 36% at 50% 38%, rgba(122,122,146,.18) 0%, transparent 70%),
+      radial-gradient(130% 100% at 50% 46%, transparent 0%, transparent 56%, rgba(13,13,15,.72) 100%);
+  }
 }
 .feature-copy {
   position: absolute; top: 50%; transform: translateY(-50%);
