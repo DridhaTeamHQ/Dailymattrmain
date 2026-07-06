@@ -35,10 +35,10 @@ const phone3d = createPhone3D({
   phoneW: PHONE_W,
   phoneH: PHONE_H,
   screens: {
-    home: "/assets/screen-home.jpg?v=2",
-    article: "/assets/screen-article.jpg?v=3",
-    qix: "/assets/screen-qix.jpg?v=2",
-    trax: "/assets/screen-trax.jpg?v=2",
+    home: "/assets/screen-home.jpg?v=4",
+    article: "/assets/screen-article.jpg?v=4",
+    qix: "/assets/screen-qix.jpg?v=4",
+    trax: "/assets/screen-trax.jpg?v=4",
   },
 });
 
@@ -380,8 +380,27 @@ document.querySelectorAll(".accordion details").forEach((d) => {
   });
 });
 
-/* ---------- site entrance ---------- */
-function playIntro() {
+/* ---------- site entrance (doubles as the loading screen) ---------- */
+function assetsSettled(maxWait = 3500) {
+  const model = new Promise((res) => {
+    const t0 = performance.now();
+    const poll = setInterval(() => {
+      if (phone3d.ready || phone3d.failed || performance.now() - t0 > maxWait) {
+        clearInterval(poll);
+        res();
+      }
+    }, 100);
+  });
+  const imgs = Promise.all(
+    [...document.querySelectorAll(".fan-item img")].map((i) =>
+      i.decode ? i.decode().catch(() => {}) : Promise.resolve()
+    )
+  );
+  const cap = new Promise((res) => setTimeout(res, maxWait));
+  return Promise.race([Promise.all([model, imgs]), cap]);
+}
+
+async function playIntro() {
   const intro = document.getElementById("intro");
   if (!intro) return;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.scrollY > 40) {
@@ -390,29 +409,34 @@ function playIntro() {
     return;
   }
   lenis.stop();
+  // logo rises immediately while assets load behind the curtain
+  gsap.to(".intro-logo", { y: 0, duration: 0.7, ease: "power4.out", delay: 0.15 });
+  gsap.to(".intro-tag", { y: 0, duration: 0.6, ease: "power4.out", delay: 0.38 });
+
+  const minHold = new Promise((res) => setTimeout(res, 1500));
+  await Promise.all([assetsSettled(), minHold]);
+
+  // everything heavy is uploaded/decoded — lift the curtain
   const tl = gsap.timeline({
     onComplete: () => {
       lenis.start();
       intro.remove();
     },
   });
-  tl.to(".intro-logo", { y: 0, duration: 0.7, ease: "power4.out" }, 0.15)
-    .to(".intro-tag", { y: 0, duration: 0.6, ease: "power4.out" }, 0.38)
-    .to(".intro-mark", { autoAlpha: 0, y: -26, duration: 0.45, ease: "power2.in" }, 1.5)
-    .to("#intro", { yPercent: -100, duration: 0.85, ease: "power4.inOut" }, 1.75)
-    // hero builds in as the curtain lifts
-    .from(".nav", { yPercent: -110, duration: 0.7, ease: "power3.out" }, 1.95)
+  tl.to(".intro-mark", { autoAlpha: 0, y: -26, duration: 0.4, ease: "power2.in" }, 0)
+    .to("#intro", { yPercent: -100, duration: 0.85, ease: "power4.inOut" }, 0.22)
+    .from(".nav", { yPercent: -110, duration: 0.7, ease: "power3.out" }, 0.42)
     .from(
       [".hero-title", ".hero-sub", ".store-buttons"],
       { y: 46, autoAlpha: 0, stagger: 0.1, duration: 0.85, ease: "power3.out" },
-      2.05
+      0.52
     )
     .from(
       ".fan-item",
       { y: 110, autoAlpha: 0, stagger: 0.07, duration: 0.9, ease: "power3.out" },
-      2.2
+      0.67
     )
-    .to(introOff, { y: 0, a: 1, duration: 1.05, ease: "power3.out" }, 2.3);
+    .to(introOff, { y: 0, a: 1, duration: 1.05, ease: "power3.out" }, 0.77);
 }
 
 /* build after fonts are ready so measurements are stable */

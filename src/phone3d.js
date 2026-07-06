@@ -87,6 +87,7 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
   const loadTex = (url) => {
     const t = texLoader.load(url, () => {
       coverCrop(t);
+      renderer.initTexture(t); // upload to the GPU now, not on first visible frame
       dirty = true;
     });
     t.colorSpace = THREE.SRGBColorSpace;
@@ -203,6 +204,15 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
       });
       backPhone.visible = false;
       scene.add(backPhone);
+
+      /* pre-warm: compile shaders and upload buffers while the intro
+       * curtain still covers the page, so the first visible frame is
+       * free of GPU hitches */
+      phone.visible = true;
+      backPhone.visible = true;
+      renderer.compile(scene, camera);
+      renderer.render(scene, camera);
+      backPhone.visible = false;
 
       state.ready = true;
       dirty = true;

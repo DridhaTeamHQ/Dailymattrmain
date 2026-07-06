@@ -7,6 +7,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet" />
+  <!-- start the heavy assets early; the intro waits for them -->
+  <link rel="preload" as="fetch" href="/assets/iphone.glb" crossorigin />
+  <link rel="preload" as="image" href="/assets/screen-home.jpg?v=4" />
+  <link rel="preload" as="image" href="/assets/screen-article.jpg?v=4" />
+  <link rel="preload" as="image" href="/assets/screen-qix.jpg?v=4" />
+  <link rel="preload" as="image" href="/assets/screen-trax.jpg?v=4" />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
@@ -66,11 +72,11 @@
 
         <!-- phone fan -->
         <div class="fan">
-          <div class="fan-item fan-1"><img src="/assets/screen-trax.jpg" alt="Trax audio player" /></div>
-          <div class="fan-item fan-2"><img src="/assets/screen-article.jpg" alt="Article brief" /></div>
+          <div class="fan-item fan-1"><img src="/assets/screen-trax.jpg?v=4" decoding="async" alt="Trax audio player" /></div>
+          <div class="fan-item fan-2"><img src="/assets/screen-article.jpg?v=4" decoding="async" alt="Article brief" /></div>
           <div class="fan-anchor" id="anchor-hero"></div>
-          <div class="fan-item fan-3"><img src="/assets/screen-qix.jpg" alt="Qix visual stories" /></div>
-          <div class="fan-item fan-4"><img src="/assets/screen-polls.jpg" alt="Live polls" /></div>
+          <div class="fan-item fan-3"><img src="/assets/screen-qix.jpg?v=4" decoding="async" alt="Qix visual stories" /></div>
+          <div class="fan-item fan-4"><img src="/assets/screen-polls.jpg?v=4" decoding="async" alt="Live polls" /></div>
         </div>
       </div>
     </section>
@@ -101,24 +107,24 @@
             <span class="scene-glow"></span>
             <div class="scene-word" aria-hidden="true">Articles</div>
             <div class="side side-r">
-              <img class="sp sp-main" src="/assets/row-matchcenter.jpg" alt="" />
-              <img class="sp sp-back" src="/assets/row-live.jpg" alt="" />
+              <img loading="lazy" decoding="async" class="sp sp-main" src="/assets/row-matchcenter.jpg" alt="" />
+              <img loading="lazy" decoding="async" class="sp sp-back" src="/assets/row-live.jpg" alt="" />
             </div>
           </div>
           <div class="row-scene" data-scene="1">
             <span class="scene-glow"></span>
             <div class="scene-word" aria-hidden="true">Qix</div>
             <div class="side side-l">
-              <img class="sp sp-back" src="/assets/row-saved.jpg" alt="" />
-              <img class="sp sp-main" src="/assets/row-habits.jpg" alt="" />
+              <img loading="lazy" decoding="async" class="sp sp-back" src="/assets/row-saved.jpg" alt="" />
+              <img loading="lazy" decoding="async" class="sp sp-main" src="/assets/row-habits.jpg" alt="" />
             </div>
           </div>
           <div class="row-scene" data-scene="2">
             <span class="scene-glow"></span>
             <div class="scene-word" aria-hidden="true">Trax</div>
             <div class="side side-r">
-              <img class="sp sp-main" src="/assets/row-trax.jpg" alt="" />
-              <img class="sp sp-back" src="/assets/row-wraps.jpg" alt="" />
+              <img loading="lazy" decoding="async" class="sp sp-main" src="/assets/row-trax.jpg" alt="" />
+              <img loading="lazy" decoding="async" class="sp sp-back" src="/assets/row-wraps.jpg" alt="" />
             </div>
           </div>
         </div>
