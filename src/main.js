@@ -127,12 +127,16 @@ function build() {
     /* the phone floats free in the pinned features section — centered,
      * large, no hand (viewport coords, since the phone layer is fixed).
      * On mobile the phone sits in the UPPER half so the copy below it
-     * is never covered. */
+     * is never covered. Sized by whichever budget is tighter — width OR
+     * height — so it fits narrow phones (Fold cover) AND short/wide ones
+     * (Fold unfolded) without ever overflowing or looking oversized. */
     const isMobile = vw < 900;
-    const floatScale = (vh * (isMobile ? 0.5 : 0.7)) / PHONE_H;
+    const hBudget = vh * (isMobile ? 0.46 : 0.7);
+    const wBudget = vw * (isMobile ? 0.66 : 0.72);
+    const floatScale = Math.min(hBudget / PHONE_H, wBudget / PHONE_W);
     const floatPose = {
       x: vw / 2 - PHONE_W / 2,
-      y: vh * (isMobile ? 0.36 : 0.54) - PHONE_H / 2,
+      y: vh * (isMobile ? 0.34 : 0.54) - PHONE_H / 2,
       scale: floatScale,
       rotZ: 0,
     };

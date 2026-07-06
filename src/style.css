@@ -485,49 +485,112 @@ a { text-decoration: none; color: inherit; }
   .grain { animation: none; }
 }
 
-/* ============ Mobile ============ */
+/* ============ Mobile (fluid, scales itself across 320–900px) ============ */
 @media (max-width: 900px) {
-  .nav { padding: 0 20px; }
+  .nav { padding: 0 clamp(16px, 5vw, 28px); }
   .nav-links { display: none; }
-  .hero-inner { min-height: 0; padding-bottom: 80px; }
-  .fan { aspect-ratio: auto; height: 440px; }
+
+  /* ---- hero ---- */
+  .hero { padding: calc(var(--nav-h) + 11px) 12px 14px; }
+  .hero-inner { min-height: 0; padding: 56px clamp(16px, 5vw, 28px) clamp(64px, 11vh, 120px); }
+  .hero-title { gap: clamp(10px, 3vw, 22px); }
+  .hero-sub { font-size: clamp(14px, 3.6vw, 18px); }
+  .store-buttons { gap: 10px; flex-wrap: wrap; }
+  .fan { aspect-ratio: auto; height: clamp(320px, 50vh, 520px); }
   /* inner fan pair peeks from the edges beside the 3D phone */
   .fan-item { display: none; }
-  .fan-2, .fan-3 { display: block; width: 34vw; height: 74%; top: 15%; }
-  .fan-2 { left: -13vw; }
-  .fan-3 { left: auto; right: -13vw; }
-  .fan-anchor { left: 50%; transform: translateX(-50%); width: 205px; }
-  /* mobile showcase: phones cluster in the upper area, copy flows BELOW */
-  .showcase { min-height: 940px; padding: 110px 0 90px; }
-  .showcase-copy { margin-top: 660px; padding-left: 24px; padding-right: 24px; }
-  .eyebrow { padding-left: 24px; }
-  .showcase-title { padding-left: 24px; }
-  .showcase-anchor { left: 56%; transform: translateX(-50%); top: 300px; width: 180px; height: 370px; }
-  .showcase-anchor.showback { left: 5%; transform: none; top: 470px; width: 136px; height: 280px; }
-  .scene-word { font-size: 26vw; top: 9%; }
-  /* side phones peek from the edges beside the floating phone — the
-     BACK image is the one that differs from the center screen */
-  .side { top: 34%; gap: 0; }
+  .fan-2, .fan-3 {
+    display: block; width: clamp(108px, 33vw, 228px);
+    height: 72%; top: 14%; bottom: auto;
+  }
+  .fan-2 { left: -12vw; right: auto; }
+  .fan-3 { left: auto; right: -12vw; }
+  .fan-anchor {
+    left: 50%; transform: translateX(-50%); bottom: auto;
+    top: 12%; height: 80%; width: clamp(166px, 54vw, 280px);
+  }
+
+  /* ---- showcase: flex column stacks title → phones → copy so heights
+         never collide, whatever the title wraps to ---- */
+  .showcase {
+    display: flex; flex-direction: column; min-height: 0;
+    padding: clamp(92px, 14vh, 130px) 0 clamp(56px, 9vh, 90px);
+  }
+  .eyebrow { order: 1; }
+  .showcase-title { order: 2; font-size: clamp(27px, 6.4vw, 42px); line-height: 1.14; }
+  .eyebrow, .showcase-title { padding-left: clamp(20px, 6vw, 40px); padding-right: 24px; }
+  .giant-words { font-size: 30vw; } /* stays absolute, decorative */
+  .showcase-stage {
+    order: 3; position: relative; left: auto; right: auto; top: auto;
+    width: 100%; height: clamp(300px, 44vh, 500px);
+    margin: clamp(18px, 4vh, 40px) 0 0;
+  }
+  .showcase-anchor {
+    left: 55%; top: 3%; transform: translateX(-50%);
+    width: clamp(150px, 42vw, 232px); height: auto; aspect-ratio: 256 / 526;
+  }
+  .showcase-anchor.showback {
+    left: 5vw; top: 33%; transform: none;
+    width: clamp(114px, 32vw, 184px); height: auto; aspect-ratio: 240 / 493;
+  }
+  .showcase-copy {
+    order: 4; position: static; margin: clamp(14px, 3vh, 30px) 0 0;
+    padding: 0 clamp(20px, 6vw, 40px); font-size: 14.5px; max-width: none;
+  }
+
+  /* ---- features (pinned; container is 100vh so it self-fits) ---- */
+  .scene-word { font-size: 26vw; top: 8%; }
+  /* side phones peek from the edges — the BACK image differs from the
+     center screen (the main one is the same content) */
+  .side { top: 32%; gap: 0; }
   .side-l { left: -13vw; }
   .side-r { right: -13vw; }
-  .sp { width: 34vw; opacity: .8; }
+  .sp { width: clamp(120px, 34vw, 240px); opacity: .8; }
   .sp-main { display: none; }
   .side .sp-back { display: block; transform: rotateY(-24deg); scale: 1; opacity: .8; filter: none; }
   .side-l .sp-back { transform: rotateY(24deg); }
-  /* markers move to the top so they never sit on the copy/chips */
+  /* markers move below the nav so they never sit on the copy/chips */
   .scene-progress {
-    top: 86px; right: 16px; bottom: auto;
-    gap: 14px;
+    top: calc(var(--nav-h) + 16px); right: clamp(14px, 4vw, 22px);
+    bottom: auto; gap: clamp(10px, 3vw, 16px);
   }
   .scene-progress .dot { font-size: 11px; }
-  /* copy sits under the phone (phone occupies the upper ~62vh) */
-  .copy-left, .copy-right { left: 24px; right: 24px; top: auto; bottom: 28px; transform: none; max-width: none; }
+  /* copy sits under the phone (phone occupies the upper band) */
+  .copy-left, .copy-right {
+    left: clamp(20px, 6vw, 40px); right: clamp(20px, 6vw, 40px);
+    top: auto; bottom: clamp(22px, 4vh, 40px); transform: none; max-width: none;
+  }
+  .feature-copy { max-width: none; }
+  .feature-copy h3 { font-size: clamp(26px, 7vw, 36px); }
+  .feature-copy p { font-size: 14px; max-width: none; }
+  .fc-icon { width: clamp(30px, 8vw, 38px); height: clamp(30px, 8vw, 38px); }
   .fc-index { margin-bottom: 10px; }
-  .feature-copy p { max-width: none; }
-  .feature-copy h3 { font-size: 30px; }
-  .feature-copy p { font-size: 14px; }
+  .fc-chips { margin-top: 16px; }
+
+  /* ---- faq / footer ---- */
   .faq-grid { grid-template-columns: 1fr; gap: 40px; }
-  .faq { padding: 80px 24px; }
-  .footer-cols { gap: 40px; }
+  .faq { padding: clamp(64px, 10vh, 90px) clamp(20px, 6vw, 34px); }
+  .footer { padding: clamp(60px, 9vh, 90px) clamp(20px, 6vw, 34px) 0; }
+  .footer-top { flex-direction: column; gap: 40px; }
+  .footer-cols { gap: clamp(32px, 10vw, 90px); flex-wrap: wrap; }
+  .footer-legal { text-align: left; }
   .footer-wordmark { letter-spacing: -2px; }
+}
+
+/* ---- wide-but-narrow (Fold unfolded ~815px, small tablets) ---- */
+@media (min-width: 620px) and (max-width: 900px) {
+  /* stop text and copy from stretching edge-to-edge; keep it centered */
+  .showcase-copy { max-width: 34rem; }
+  .feature-copy { left: 50%; right: auto; transform: translateX(-50%);
+    width: min(34rem, 84vw); text-align: center; }
+  .feature-copy h3 { justify-content: center; }
+  .fc-chips { justify-content: center; }
+  .scene-progress { flex-direction: row; }
+}
+
+/* ---- very narrow (Fold cover ~344px, iPhone SE/mini) ---- */
+@media (max-width: 380px) {
+  .hero-title { font-size: clamp(38px, 12vw, 50px); }
+  .btn-store { padding: 11px 18px; font-size: 14px; }
+  .store-buttons { gap: 8px; }
 }
