@@ -84,39 +84,18 @@ const flyS = {
 };
 
 /* entrance offset — folded into the pose so the intro can drop the
- * phone in without fighting the per-tick applier */
-const introOff = { y: 140, a: 0 };
-
-/* runtime FPS guard: once the 3D canvas is live, sample frame times for
- * ~90 rendered frames; if the median is worse than ~40fps, demote to the
- * PNG phone. Catches low-end devices the static heuristic misjudged. */
-if (TIER === "mid") {
-  const samples = [];
-  let last = 0;
-  const sampler = (now) => {
-    if (!phone3d.ready || phone3d.demoted) {
-      if (!phone3d.demoted) requestAnimationFrame(sampler);
-      return;
-    }
-    if (last) samples.push(now - last);
-    last = now;
-    if (samples.length >= 90) {
-      const sorted = samples.slice().sort((a, b) => a - b);
-      const median = sorted[sorted.length >> 1];
-      if (median > 25) phone3d.demote(); // ~< 40fps sustained
-      return;
-    }
-    requestAnimationFrame(sampler);
-  };
-  requestAnimationFrame(sampler);
-}
+ * phone in without fighting the per-tick applier. On mobile there is no
+ * intro, so the phone is visible from the first frame. */
+const NO_INTRO = window.innerWidth < 900;
+const introOff = NO_INTRO ? { y: 0, a: 1 } : { y: 140, a: 0 };
 
 let use3d = false;
 gsap.ticker.add(() => {
   const can3d = phone3d.ready && !phone3d.demoted;
   if (can3d && !use3d) {
     use3d = true;
-    gsap.set(flyPhone, { autoAlpha: 0 });
+    // soft handoff: fade the PNG phone out as the 3D canvas takes over
+    gsap.to(flyPhone, { autoAlpha: 0, duration: 0.35, ease: "power1.out" });
   } else if (!can3d && use3d) {
     use3d = false; // demoted mid-session → hand back to the PNG phone
   }
@@ -526,7 +505,13 @@ function assetsSettled(maxWait = 3500) {
 async function playIntro() {
   const intro = document.getElementById("intro");
   if (!intro) return;
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.scrollY > 40) {
+  /* mobile: no intro at all — the site is visible from the first frame.
+   * Also skipped for reduced-motion and when arriving mid-page. */
+  if (
+    NO_INTRO ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+    window.scrollY > 40
+  ) {
     intro.remove();
     gsap.set(introOff, { y: 0, a: 1 });
     return;

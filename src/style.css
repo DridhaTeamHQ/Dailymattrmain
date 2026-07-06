@@ -503,6 +503,8 @@ a { text-decoration: none; color: inherit; }
 
 /* ============ Mobile (fluid, scales itself across 320–900px) ============ */
 @media (max-width: 900px) {
+  /* no intro curtain on phones — avoid even a flash before JS runs */
+  .intro { display: none !important; }
   .nav {
     padding: 0 clamp(16px, 5vw, 28px);
     backdrop-filter: none; /* re-blurring every scroll frame janks mobile */

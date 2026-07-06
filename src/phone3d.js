@@ -48,9 +48,10 @@ export function createPhone3D({ phoneW, phoneH, screens, quality }) {
   let pose = null;
   let back = null; // { cx, cy (doc coords), w, rotZ, rotY }
 
-  /* mobile GPUs choke on a full-viewport high-DPR canvas; fragment cost
-   * scales with pixel count, so this is the single biggest GPU lever */
-  const dprCap = () => (MOBILE ? 1.1 : 2);
+  /* full device resolution (capped at 2) so the model stays sharp — the
+   * smoothness comes from the cheaper shaders/materials below, not from
+   * under-sampling the canvas (which just looked blurry) */
+  const dprCap = () => 2;
 
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(30, 1, 10, 6000);
@@ -300,8 +301,8 @@ export function createPhone3D({ phoneW, phoneH, screens, quality }) {
       }
 
       await nextFrame();
-      // anisotropic filtering is costly on mobile GPUs; keep it desktop-only
-      const maxAniso = MOBILE ? 1 : renderer.capabilities.getMaxAnisotropy();
+      // full anisotropic filtering keeps the screen texture crisp
+      const maxAniso = renderer.capabilities.getMaxAnisotropy();
       allTex.forEach((t) => {
         t.anisotropy = maxAniso;
         t.needsUpdate = true;
