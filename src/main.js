@@ -191,8 +191,8 @@ function build() {
       dA
     );
     flight
-      .to(P, { rotY: -30, rotX: 6, duration: dB * 0.55, ease: "power2.in" }, dA)
-      .to(P, { rotY: -16, rotX: 3, duration: dB * 0.45, ease: "power2.out" }, dA + dB * 0.55);
+      .to(P, { rotY: 28, rotX: 6, duration: dB * 0.55, ease: "power2.in" }, dA)
+      .to(P, { rotY: 16, rotX: 3, duration: dB * 0.45, ease: "power2.out" }, dA + dB * 0.55);
     flight
       .to(P, { scale: poseShow.scale * 1.07, duration: dB * 0.55, ease: "power1.in" }, dA)
       .to(P, { scale: poseShow.scale, duration: dB * 0.45, ease: "power1.out" }, dA + dB * 0.55);
