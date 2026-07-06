@@ -491,7 +491,11 @@ a { text-decoration: none; color: inherit; }
   .nav-links { display: none; }
   .hero-inner { min-height: 0; padding-bottom: 80px; }
   .fan { aspect-ratio: auto; height: 440px; }
+  /* inner fan pair peeks from the edges beside the 3D phone */
   .fan-item { display: none; }
+  .fan-2, .fan-3 { display: block; width: 34vw; height: 74%; top: 15%; }
+  .fan-2 { left: -13vw; }
+  .fan-3 { left: auto; right: -13vw; }
   .fan-anchor { left: 50%; transform: translateX(-50%); width: 205px; }
   /* mobile showcase: phones cluster in the upper area, copy flows BELOW */
   .showcase { min-height: 1060px; }
@@ -501,12 +505,15 @@ a { text-decoration: none; color: inherit; }
   .showcase-anchor { left: 56%; transform: translateX(-50%); top: 300px; width: 180px; height: 370px; }
   .showcase-anchor.showback { left: 5%; transform: none; top: 470px; width: 136px; height: 280px; }
   .scene-word { font-size: 26vw; top: 9%; }
-  /* side phones peek from the edges beside the floating phone */
+  /* side phones peek from the edges beside the floating phone — the
+     BACK image is the one that differs from the center screen */
   .side { top: 34%; gap: 0; }
   .side-l { left: -13vw; }
   .side-r { right: -13vw; }
   .sp { width: 34vw; opacity: .8; }
-  .sp-back { display: none; }
+  .sp-main { display: none; }
+  .side .sp-back { display: block; transform: rotateY(-24deg); scale: 1; opacity: .8; filter: none; }
+  .side-l .sp-back { transform: rotateY(24deg); }
   /* markers move to the top so they never sit on the copy/chips */
   .scene-progress {
     top: 86px; right: 16px; bottom: auto;
