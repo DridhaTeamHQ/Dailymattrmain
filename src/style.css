@@ -477,6 +477,45 @@ a { text-decoration: none; color: inherit; }
 }
 .footer-wordmark b { font-weight: 900; }
 
+/* ============ Features — mobile crossfade stage (desktop hidden) ============ */
+.features-mobile { display: none; height: 280vh; position: relative; }
+.fm-stage {
+  position: sticky; top: 0; height: 100vh; /* compositor-native hold */
+  overflow: hidden;
+}
+.fm-block {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: calc(var(--nav-h) + 10px) clamp(20px, 6vw, 40px) 34px;
+  color: #fff;
+  text-align: center;
+  opacity: 0;
+}
+/* compact phone so the text always fits on the same screen */
+.fm-phone {
+  width: min(178px, 44vw);
+  margin: 0 auto clamp(16px, 3vh, 26px);
+  border-radius: 24px;
+  border: 5px solid #ececf0;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 14px 30px rgba(0,0,0,.45);
+  flex: none;
+}
+.fm-phone img { width: 100%; display: block; }
+.fm-block .fc-index { color: rgba(255,255,255,.42); }
+.fm-block h3 {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-size: clamp(24px, 6.6vw, 32px); font-weight: 600; letter-spacing: -.5px;
+}
+.fm-block h3 .fc-icon { width: 30px; height: 30px; }
+.fm-block p {
+  margin: 12px auto 0; max-width: 30rem;
+  font-size: 14px; line-height: 1.7; color: rgba(255,255,255,.86);
+}
+.fm-block .fc-chips { justify-content: center; margin-top: 16px; }
+
 /* ============ Film grain (premium texture, both platforms) ============ */
 .grain {
   position: fixed; inset: -3%; z-index: 90;
@@ -505,9 +544,9 @@ a { text-decoration: none; color: inherit; }
 @media (max-width: 900px) {
   /* no intro curtain on phones — avoid even a flash before JS runs */
   .intro { display: none !important; }
-  /* compositor-native pinning: the section is tall (set from JS) and
-     the stage sticks — no JS pin fighting native touch scroll */
-  .features-pin { position: sticky; top: 0; }
+  /* the pinned story is desktop-only; phones scroll three normal blocks */
+  .features-pin { display: none; }
+  .features-mobile { display: block; }
   .nav {
     padding: 0 clamp(16px, 5vw, 28px);
     backdrop-filter: none; /* re-blurring every scroll frame janks mobile */

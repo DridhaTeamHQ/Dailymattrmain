@@ -247,6 +247,22 @@ function build() {
       .to(P, { scale: poseShow.scale, duration: dB * 0.45, ease: "power1.out" }, dA + dB * 0.55);
     // C: parked in the showcase beside the back phone, gliding with it
     flight.to(P, { y: poseShow.y - s2, duration: dC }, dA + dB);
+
+    if (isMobile) {
+      /* mobile has no pinned stage: the phone simply rides away with the
+       * showcase and fades before the feature blocks arrive */
+      flight.to(
+        P,
+        { y: poseShow.y - s4, ease: "none", duration: dD + dE },
+        dA + dB + dC
+      );
+      flight.to(
+        P,
+        { alpha: 0, ease: "power1.in", duration: (dD + dE) * 0.6 },
+        dA + dB + dC + (dD + dE) * 0.4
+      );
+      // the flight timeline ends here on mobile — skip the desktop legs
+    } else {
     // D: straighten and descend toward the features stage
     flight.to(
       P,
@@ -279,6 +295,7 @@ function build() {
       },
       dA + dB + dC + dD
     );
+    } // end desktop flight legs
 
     /* ---------- features: pinned scene machine (10 time units) ---------- */
     const rows = gsap.utils.toArray(".row-scene");
@@ -286,71 +303,82 @@ function build() {
     const sceneWords = rows.map((r) => r.querySelector(".scene-word"));
     const copies = gsap.utils.toArray(".feature-copy");
 
-    /* MOBILE: no JS pin. GSAP pinning repositions the element from the
-     * main thread against native compositor scrolling — it lags and
-     * snaps whenever the main thread is busy. Instead the section is
-     * made tall and .features-pin is CSS `position: sticky` (pure
-     * compositor work), with the scene timeline scrubbing over the
-     * section's scroll span. Desktop keeps the GSAP pin. */
-    const featuresSection = document.getElementById("features");
-    if (isMobile) {
-      featuresSection.style.height = Math.round(vh * 2.5) + "px"; // 100vh sticky + 150vh of story
-    } else {
-      featuresSection.style.height = "";
-    }
-    const scenes = gsap.timeline({
-      defaults: { ease: "power2.inOut" },
-      scrollTrigger: isMobile
-        ? {
-            trigger: featuresSection,
-            start: "top top",
-            end: "bottom bottom",
-            scrub: SCRUB,
-            onUpdate: sceneDots,
-          }
-        : {
+    /* the pinned story only exists on desktop; on phones the features
+     * section is three normal blocks that scroll natively */
+    const scenes = isMobile
+      ? null
+      : gsap.timeline({
+          defaults: { ease: "power2.inOut" },
+          scrollTrigger: {
             trigger: featuresPin,
             start: "top top",
             end: "+=340%",
             pin: true,
             scrub: SCRUB,
-            onUpdate: sceneDots,
+            onUpdate(self) {
+              const idx = Math.min(2, Math.floor(self.progress * 2.999));
+              if (idx !== lastDotIdx) {
+                lastDotIdx = idx;
+                dots.forEach((d, i) => d.classList.toggle("on", i === idx));
+              }
+            },
           },
-    });
-    function sceneDots(self) {
-      const idx = Math.min(2, Math.floor(self.progress * 2.999));
-      if (idx !== lastDotIdx) {
-        lastDotIdx = idx;
-        dots.forEach((d, i) => d.classList.toggle("on", i === idx));
-      }
+        });
+
+    if (scenes) {
+      /* (the phone's position is owned entirely by the flight timeline;
+       * this pinned timeline only choreographs the scenery + screens)
+       *
+       * Prototype behaviour: the phone stays dead-still in the middle
+       * while each scene's content SCROLLS UP past it. Scenes 1 and 2
+       * start parked below the viewport and ride up through it. */
+      gsap.set(rows, { autoAlpha: 1, y: (i) => (i === 0 ? 0 : vh) });
+      gsap.set(copies, { autoAlpha: 1, y: (i) => (i === 0 ? 0 : vh) });
+
+      const swapScene = (pos, from, to, screenProp) => {
+        const dur = 1.1;
+        // outgoing content scrolls up and away
+        scenes.to([rows[from], copies[from]], { y: -vh, ease: "none", duration: dur }, pos);
+        // incoming content rides up into place
+        scenes.to([rows[to], copies[to]], { y: 0, ease: "none", duration: dur }, pos);
+        // the phone's screen changes as the new scene passes its middle
+        scenes.to(P, { [screenProp]: 1, duration: 0.45, ease: "none" }, pos + dur * 0.35);
+      };
+
+      swapScene(3.0, 0, 1, "sQ");
+      swapScene(6.3, 1, 2, "sT");
+
+      /* exit: the phone glides up and fades before the pin releases, so
+       * nothing ever lingers over the FAQ */
+      scenes.to(P, { alpha: 0, y: floatPose.y - vh * 0.18, scale: floatPose.scale * 0.92, duration: 0.55, ease: "power2.in" }, 9.4);
+      scenes.to({}, { duration: 0.05 }, 9.95); // hold to the end
+    } else {
+      /* mobile: scroll crossfades the three blocks through the sticky
+       * stage — opacity/transform only (fully composited, no repaints) */
+      const blocks = gsap.utils.toArray(".fm-block");
+      gsap.set(blocks, { autoAlpha: (i) => (i === 0 ? 1 : 0), y: 0 });
+      const mScenes = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: {
+          trigger: ".features-mobile",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: SCRUB,
+        },
+      });
+      mScenes.to({}, { duration: 10 }, 0); // 10-unit ruler
+      const fadeTo = (pos, from, to) => {
+        mScenes.to(blocks[from], { autoAlpha: 0, y: -26, duration: 0.9 }, pos);
+        mScenes.fromTo(
+          blocks[to],
+          { autoAlpha: 0, y: 30 },
+          { autoAlpha: 1, y: 0, duration: 0.9, immediateRender: false },
+          pos + 0.35
+        );
+      };
+      fadeTo(3.1, 0, 1);
+      fadeTo(6.4, 1, 2);
     }
-
-    /* (the phone's position is owned entirely by the flight timeline;
-     * this pinned timeline only choreographs the scenery + screens)
-     *
-     * Prototype behaviour: the phone stays dead-still in the middle
-     * while each scene's content SCROLLS UP past it. Scenes 1 and 2
-     * start parked below the viewport and ride up through it. */
-    gsap.set(rows, { autoAlpha: 1, y: (i) => (i === 0 ? 0 : vh) });
-    gsap.set(copies, { autoAlpha: 1, y: (i) => (i === 0 ? 0 : vh) });
-
-    const swapScene = (pos, from, to, screenProp) => {
-      const dur = 1.1;
-      // outgoing content scrolls up and away
-      scenes.to([rows[from], copies[from]], { y: -vh, ease: "none", duration: dur }, pos);
-      // incoming content rides up into place
-      scenes.to([rows[to], copies[to]], { y: 0, ease: "none", duration: dur }, pos);
-      // the phone's screen changes as the new scene passes its middle
-      scenes.to(P, { [screenProp]: 1, duration: 0.45, ease: "none" }, pos + dur * 0.35);
-    };
-
-    swapScene(3.0, 0, 1, "sQ");
-    swapScene(6.3, 1, 2, "sT");
-
-    /* exit: the phone glides up and fades before the pin releases, so
-     * nothing ever lingers over the FAQ */
-    scenes.to(P, { alpha: 0, y: floatPose.y - vh * 0.18, scale: floatPose.scale * 0.92, duration: 0.55, ease: "power2.in" }, 9.4);
-    scenes.to({}, { duration: 0.05 }, 9.95); // hold to the end
 
     /* ---------- hero word rotator ---------- */
     const words = document.querySelectorAll(".word-track span").length;
