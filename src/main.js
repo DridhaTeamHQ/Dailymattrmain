@@ -125,11 +125,14 @@ function build() {
     phone3d.setBackPhone({ cx: showB.cx, cy: showB.cy, w: showB.w, rotZ: -30, rotY: 20 });
 
     /* the phone floats free in the pinned features section — centered,
-     * large, no hand (viewport coords, since the phone layer is fixed) */
-    const floatScale = (vh * 0.7) / PHONE_H;
+     * large, no hand (viewport coords, since the phone layer is fixed).
+     * On mobile the phone sits in the UPPER half so the copy below it
+     * is never covered. */
+    const isMobile = vw < 900;
+    const floatScale = (vh * (isMobile ? 0.5 : 0.7)) / PHONE_H;
     const floatPose = {
       x: vw / 2 - PHONE_W / 2,
-      y: vh * 0.54 - PHONE_H / 2,
+      y: vh * (isMobile ? 0.36 : 0.54) - PHONE_H / 2,
       scale: floatScale,
       rotZ: 0,
     };

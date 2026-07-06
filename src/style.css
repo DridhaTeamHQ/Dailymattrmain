@@ -448,19 +448,29 @@ a { text-decoration: none; color: inherit; }
 @media (max-width: 900px) {
   .nav { padding: 0 20px; }
   .nav-links { display: none; }
-  .hero-inner { min-height: 0; padding-bottom: 60px; }
-  .fan { aspect-ratio: auto; height: 470px; }
+  .hero-inner { min-height: 0; padding-bottom: 80px; }
+  .fan { aspect-ratio: auto; height: 440px; }
   .fan-item { display: none; }
-  .fan-anchor { left: 50%; transform: translateX(-50%); width: 230px; }
-  .showcase-copy { margin-top: 620px; padding-left: 24px; }
+  .fan-anchor { left: 50%; transform: translateX(-50%); width: 205px; }
+  /* mobile showcase: phones cluster in the upper area, copy flows BELOW */
+  .showcase { min-height: 1060px; }
+  .showcase-copy { margin-top: 760px; padding-left: 24px; padding-right: 24px; }
   .eyebrow { padding-left: 24px; }
   .showcase-title { padding-left: 24px; }
-  .showcase-anchor { left: 58%; transform: translateX(-50%); top: 360px; width: 205px; }
-  .showcase-anchor.showback { left: 2%; transform: none; top: 540px; width: 158px; }
-  .scene-word { font-size: 26vw; }
+  .showcase-anchor { left: 56%; transform: translateX(-50%); top: 300px; width: 180px; height: 370px; }
+  .showcase-anchor.showback { left: 5%; transform: none; top: 470px; width: 136px; height: 280px; }
+  .scene-word { font-size: 26vw; top: 9%; }
   .side { display: none; }
-  .scene-progress { right: 20px; }
-  .copy-left, .copy-right { left: 24px; right: 24px; top: auto; bottom: 44px; transform: none; max-width: none; }
+  /* markers move to the top so they never sit on the copy/chips */
+  .scene-progress {
+    top: 86px; right: 16px; bottom: auto;
+    gap: 14px;
+  }
+  .scene-progress .dot { font-size: 11px; }
+  /* copy sits under the phone (phone occupies the upper ~62vh) */
+  .copy-left, .copy-right { left: 24px; right: 24px; top: auto; bottom: 28px; transform: none; max-width: none; }
+  .fc-index { margin-bottom: 10px; }
+  .feature-copy p { max-width: none; }
   .feature-copy h3 { font-size: 30px; }
   .feature-copy p { font-size: 14px; }
   .faq-grid { grid-template-columns: 1fr; gap: 40px; }
