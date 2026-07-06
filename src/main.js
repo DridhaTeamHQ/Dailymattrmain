@@ -12,19 +12,17 @@ gsap.registerPlugin(ScrollTrigger);
  * with no extra lag, which removes the "phone slides against the
  * content" glitch and the stepped mouse-wheel motion.
  * --------------------------------------------------------------- */
+/* Native touch scrolling on phones (Lenis only smooths the mouse wheel)
+ * — smooth-scroll-controlled touch felt sticky and unnatural. */
 const lenis = new Lenis({
   lerp: 0.09,
   smoothWheel: true,
-  /* Lenis drives TOUCH too. With native touch scrolling the pinned
-   * features section desynced from the browser's momentum scroll —
-   * hard flings blew past the pin and scrolling up lagged. Routing
-   * touch through Lenis gives ScrollTrigger one consistent, smoothed
-   * scroll value so pins stay glued. */
-  syncTouch: true,
-  syncTouchLerp: 0.11, // snappier — less "catching up" feel
-  touchInertiaMultiplier: 30, // a normal swipe covers a normal distance
+  syncTouch: false,
 });
-const SCRUB = true; // Lenis smooths wheel AND touch — map scrubs 1:1
+const IS_TOUCH = window.matchMedia("(pointer: coarse)").matches;
+/* native scroll is authoritative on touch; a light scrub only smooths
+ * how the pinned ANIMATION follows the scroll, not the scroll itself */
+const SCRUB = IS_TOUCH ? 0.3 : true;
 lenis.on("scroll", ScrollTrigger.update);
 gsap.ticker.add((t) => lenis.raf(t * 1000));
 gsap.ticker.lagSmoothing(0);
