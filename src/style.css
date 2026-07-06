@@ -498,8 +498,8 @@ a { text-decoration: none; color: inherit; }
   .fan-3 { left: auto; right: -13vw; }
   .fan-anchor { left: 50%; transform: translateX(-50%); width: 205px; }
   /* mobile showcase: phones cluster in the upper area, copy flows BELOW */
-  .showcase { min-height: 1060px; }
-  .showcase-copy { margin-top: 760px; padding-left: 24px; padding-right: 24px; }
+  .showcase { min-height: 940px; padding: 110px 0 90px; }
+  .showcase-copy { margin-top: 660px; padding-left: 24px; padding-right: 24px; }
   .eyebrow { padding-left: 24px; }
   .showcase-title { padding-left: 24px; }
   .showcase-anchor { left: 56%; transform: translateX(-50%); top: 300px; width: 180px; height: 370px; }

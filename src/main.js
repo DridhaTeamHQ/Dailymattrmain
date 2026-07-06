@@ -245,7 +245,7 @@ function build() {
       scrollTrigger: {
         trigger: featuresPin,
         start: "top top",
-        end: "+=340%",
+        end: isMobile ? "+=210%" : "+=340%", // phones get a much shorter ride
         pin: true,
         scrub: true,
         onUpdate(self) {
