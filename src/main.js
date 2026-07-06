@@ -122,7 +122,7 @@ function build() {
     const featTop = docRect(document.getElementById("features")).y;
 
     // showcase back phone lives in the WebGL scene (doc coords)
-    phone3d.setBackPhone({ cx: showB.cx, cy: showB.cy, w: showB.w, rotZ: -24, rotY: 26 });
+    phone3d.setBackPhone({ cx: showB.cx, cy: showB.cy, w: showB.w, rotZ: -30, rotY: 20 });
 
     /* the phone floats free in the pinned features section — centered,
      * large, no hand (viewport coords, since the phone layer is fixed) */

@@ -207,16 +207,16 @@ a { text-decoration: none; color: inherit; }
   position: absolute; top: 0; right: 0; width: 60%; height: 100%;
   pointer-events: none;
 }
-/* the pair is clustered around the stage center (px offsets, so wide
-   screens don't stretch them apart) */
+/* diagonal pair like the Figma render: front phone high-right, back
+   phone lower-left at a steeper lean, corners overlapping slightly */
 .showcase-anchor {
-  position: absolute; left: calc(50% - 10px); top: 280px;
-  width: 272px; height: 559px;
+  position: absolute; left: calc(44% - 128px); top: 150px;
+  width: 256px; height: 526px;
   pointer-events: none;
 }
 .showcase-anchor.showback {
-  left: calc(50% - 330px); top: 420px;
-  width: 248px; height: 510px;
+  left: calc(22% - 120px); top: 320px;
+  width: 240px; height: 493px;
 }
 /* WebGL stage for the real 3D phone */
 .gl-stage {
@@ -455,8 +455,8 @@ a { text-decoration: none; color: inherit; }
   .showcase-copy { margin-top: 620px; padding-left: 24px; }
   .eyebrow { padding-left: 24px; }
   .showcase-title { padding-left: 24px; }
-  .showcase-anchor { left: 50%; transform: translateX(-50%); top: 380px; }
-  .showcase-anchor.showback { left: 8%; transform: none; top: 460px; width: 200px; }
+  .showcase-anchor { left: 58%; transform: translateX(-50%); top: 360px; width: 205px; }
+  .showcase-anchor.showback { left: 2%; transform: none; top: 540px; width: 158px; }
   .scene-word { font-size: 26vw; }
   .side { display: none; }
   .scene-progress { right: 20px; }
