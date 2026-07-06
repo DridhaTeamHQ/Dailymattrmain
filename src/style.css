@@ -501,7 +501,12 @@ a { text-decoration: none; color: inherit; }
   .showcase-anchor { left: 56%; transform: translateX(-50%); top: 300px; width: 180px; height: 370px; }
   .showcase-anchor.showback { left: 5%; transform: none; top: 470px; width: 136px; height: 280px; }
   .scene-word { font-size: 26vw; top: 9%; }
-  .side { display: none; }
+  /* side phones peek from the edges beside the floating phone */
+  .side { top: 34%; gap: 0; }
+  .side-l { left: -13vw; }
+  .side-r { right: -13vw; }
+  .sp { width: 34vw; opacity: .8; }
+  .sp-back { display: none; }
   /* markers move to the top so they never sit on the copy/chips */
   .scene-progress {
     top: 86px; right: 16px; bottom: auto;
