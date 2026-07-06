@@ -285,8 +285,19 @@ export function createPhone3D({ phoneW, phoneH, screens }) {
       const vy = back.cy - scrollY; // viewport y of the back phone center
       backPhone.visible = vy > -600 && vy < window.innerHeight + 600;
       if (backPhone.visible) {
-        backPhone.position.set(back.cx, -vy, -40);
-        backPhone.scale.setScalar(back.scale);
+        /* deep enough behind that the tilted phones can never
+         * interpenetrate; scale + position are perspective-compensated
+         * so the screen-space placement stays identical */
+        const BACK_Z = 150;
+        const k = (PERSPECTIVE + BACK_Z) / PERSPECTIVE;
+        const vw = window.innerWidth || 1;
+        const vh = window.innerHeight || 1;
+        backPhone.position.set(
+          vw / 2 + (back.cx - vw / 2) * k,
+          -vh / 2 + (vh / 2 - vy) * k,
+          -BACK_Z
+        );
+        backPhone.scale.setScalar(back.scale * k);
         backPhone.rotation.set(0, -back.rotY * D2R, -back.rotZ * D2R);
       }
     }
