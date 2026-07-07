@@ -1,7 +1,7 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
-import { createPhoneSeq } from "./phoneSeq.js";
+import { createPhoneSeq, createPhoneSeqDesktop } from "./phoneSeq.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -42,11 +42,14 @@ const dots = [...document.querySelectorAll(".scene-progress .dot")];
 let lastDotIdx = -1;
 
 /* ---- adaptive device tiering ----
- * Desktop → full real-time three.js (loaded dynamically — phones never
- * download it). Phones → the pre-rendered image sequence (the "Apple
- * technique"): the 3D flight was baked offline into frames, so playback
- * is pure compositor work and stays smooth on any device. If the
- * sequence fails to load, the PNG mockup phone takes over. */
+ * EVERYONE gets the pre-rendered image sequence (the "Apple technique"):
+ * the 3D journey was baked offline at full quality into sprite sheets +
+ * hi-res rest stills, so playback is pure compositor work — no three.js
+ * is ever downloaded at runtime. Desktop gets the full journey player
+ * (both swings + the pinned-features screen stills + the showcase back
+ * phone); phones get the shorter flight sheet. Live three.js only loads
+ * for the offline bake (?capture=1). If a sequence fails to load, the
+ * PNG mockup phone takes over. */
 const IS_DESKTOP =
   window.innerWidth >= 900 && !window.matchMedia("(pointer: coarse)").matches;
 const CAPTURE = new URLSearchParams(location.search).has("capture");
@@ -61,8 +64,8 @@ let phone3d = {
   demote() {},
 };
 
-if (IS_DESKTOP || CAPTURE) {
-  // three.js is a separate chunk; phones never fetch it
+if (CAPTURE) {
+  // offline bake rig only — three.js stays out of every visitor's bundle
   import("./phone3d.js").then(
     (m) => {
       const pending = phone3d._pendingBack;
@@ -78,10 +81,26 @@ if (IS_DESKTOP || CAPTURE) {
         },
       });
       if (pending) phone3d.setBackPhone(pending);
-      if (CAPTURE) window.__phone3d = phone3d; // capture rig handle
+      window.__phone3d = phone3d; // capture rig handle
     },
     () => { phone3d.failed = true; }
   );
+} else if (IS_DESKTOP) {
+  phone3d = createPhoneSeqDesktop({
+    phoneW: PHONE_W,
+    phoneH: PHONE_H,
+    meta: { frames: 32, cols: 8, rows: 4, fw: 704, fh: 1034, backBox: { w: 800, h: 980 } },
+    urls: {
+      seq1: "/assets/dphone-seq1.webp",
+      seq2: "/assets/dphone-seq2.webp",
+      a: "/assets/dphone-a.webp",
+      b: "/assets/dphone-b.webp",
+      c: "/assets/dphone-c.webp",
+      q: "/assets/dphone-q.webp",
+      t: "/assets/dphone-t.webp",
+      back: "/assets/dphone-back.webp",
+    },
+  });
 } else {
   phone3d = createPhoneSeq({
     phoneW: PHONE_W,
@@ -318,6 +337,8 @@ function build() {
       },
       dA + dB + dC + dD
     );
+    // linear frame clock for baked swing 2 (legs D+E share one sheet)
+    flight.to(P, { prog: 2, duration: dD + dE, ease: "none" }, dA + dB + dC);
     } // end desktop flight legs
 
     /* ---------- features: pinned scene machine (10 time units) ---------- */

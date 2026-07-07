@@ -522,5 +522,129 @@ export function createPhone3D({ phoneW, phoneH, screens, quality }) {
     };
   };
 
+  /* ---- desktop bake: the ENTIRE desktop phone journey ----
+   * sheet1 = flight leg B (hero fan → showcase tilt, home screen)
+   * sheet2 = flight legs D+E (showcase → upright float; the screen turns
+   *          to the article mid-air, mirroring the live tweens exactly)
+   * stills = hero / showcase / article / qix / trax rest poses at high
+   *          res, plus the static showcase back phone in its live pose.
+   * The pinned features section never rotates the phone, so its screen
+   * swaps need no frames at all — runtime stacks the article/qix/trax
+   * stills and crossfades their opacity. */
+  state.captureDesktop = async function captureDesktop({ frames = 32, cols = 8 } = {}) {
+    if (!state.ready) throw new Error("capture: model not ready");
+    const io = (x) => (x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
+    const out = (x) => 1 - (1 - x) * (1 - x);
+    const clamp01 = (x) => Math.min(1, Math.max(0, x));
+    // flight leg B — same curve the mobile bake uses
+    const curveB = (p) => {
+      const eIn = Math.min(p / 0.55, 1) ** 2;
+      const eOut = out(Math.max((p - 0.55) / 0.45, 0));
+      return {
+        rotY: p < 0.55 ? 28 * eIn : 28 - 12 * eOut,
+        rotX: p < 0.55 ? 6 * eIn : 6 - 3 * eOut,
+        rotZ: 15 * io(p),
+        mix: 0,
+      };
+    };
+    /* flight legs D+E on one clock. The D:E scroll split is
+     * vh-proportional (0.75vh : 0.28vh), so it's identical on every
+     * desktop viewport and safe to bake. */
+    const uD = 0.75 / 1.03;
+    const curveDE = (u) => {
+      if (u < uD) {
+        const t = u / uD;
+        const a = io(Math.min(t * 2, 1)); // first half: power2.inOut
+        const b = out(Math.max(t * 2 - 1, 0)); // second half: power2.out
+        return {
+          rotY: t < 0.5 ? 16 + 2 * a : 18 - 12 * b,
+          rotX: t < 0.5 ? 3 - 7 * a : -4 + 4 * b,
+          rotZ: 15 - 10 * io(t),
+          mix: clamp01((t - 0.35) / 0.35),
+        };
+      }
+      const t = (u - uD) / (1 - uD);
+      return { rotY: 6 - 6 * out(t), rotX: 0, rotZ: 5 - 5 * out(t), mix: 1 };
+    };
+
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const prevDpr = renderer.getPixelRatio();
+    const savedBack = back; // keep the showcase back phone out of every shot
+    back = null;
+    if (backPhone) backPhone.visible = false;
+    const setPR = (pr) => { renderer.setPixelRatio(pr); renderer.setSize(vw, vh); };
+    const show = (r, sc, screens = {}) => {
+      apply({
+        x: vw / 2 - phoneW / 2, y: vh / 2 - phoneH / 2, scale: sc,
+        rotZ: r.rotZ || 0, rotY: r.rotY || 0, rotX: r.rotX || 0,
+        alpha: 1, mix: screens.mix || 0, sQ: screens.sQ || 0, sT: screens.sT || 0,
+      }, 0);
+      renderer.render(scene, camera);
+    };
+    // crop the canvas around a phone-space box centered on the phone
+    const grab = (boxW, boxH, sc, pr) => {
+      const bw = boxW * sc, bh = boxH * sc; // CSS px
+      const c = document.createElement("canvas");
+      c.width = Math.round(bw * pr); c.height = Math.round(bh * pr);
+      c.getContext("2d").drawImage(
+        state.canvas,
+        (vw / 2 - bw / 2) * pr, (vh / 2 - bh / 2) * pr, bw * pr, bh * pr,
+        0, 0, c.width, c.height
+      );
+      return c;
+    };
+
+    // motion sheets — soft-during-motion is invisible; rest poses are stills
+    const scM = 0.55, prM = 2;
+    const fw = Math.round(640 * scM * prM), fh = Math.round(940 * scM * prM);
+    const rows = Math.ceil(frames / cols);
+    const bakeSheet = async (curve) => {
+      setPR(prM);
+      const sheet = document.createElement("canvas");
+      sheet.width = fw * cols; sheet.height = fh * rows;
+      const sctx = sheet.getContext("2d");
+      /* no per-frame yield: hidden tabs clamp timers to ≥1s, and the
+       * bake is an offline batch job anyway */
+      for (let i = 0; i < frames; i++) {
+        const r = curve(i / (frames - 1));
+        show(r, scM, { mix: r.mix });
+        sctx.drawImage(grab(640, 940, scM, prM), (i % cols) * fw, Math.floor(i / cols) * fh);
+      }
+      return sheet.toDataURL("image/webp", 0.82);
+    };
+    const sheet1 = await bakeSheet(curveB);
+    const sheet2 = await bakeSheet(curveDE);
+
+    // rest stills: phone ~1000 device px wide — sharp even on 5K displays
+    const scS = 0.5, prS = 5;
+    setPR(prS);
+    const still = (r, screens) => {
+      show(r, scS, screens);
+      return grab(640, 940, scS, prS).toDataURL("image/webp", 0.92);
+    };
+    const stillA = still(curveB(0), {});
+    const stillB = still(curveB(1), {});
+    const upright = { rotY: 0, rotX: 0, rotZ: 0 };
+    const stillC = still(upright, { mix: 1 });
+    const stillQ = still(upright, { mix: 1, sQ: 1 });
+    const stillT = still(upright, { mix: 1, sQ: 1, sT: 1 });
+
+    /* showcase back phone in its exact live pose (article screen, rotZ
+     * −30 → a wider box so the rotated body is never clipped) */
+    const backBox = { w: 800, h: 980 };
+    const scBk = 0.475, prBk = 4;
+    setPR(prBk);
+    show({ rotY: 20, rotX: 0, rotZ: -30 }, scBk, { mix: 1 });
+    const stillBack = grab(backBox.w, backBox.h, scBk, prBk).toDataURL("image/webp", 0.92);
+
+    setPR(prevDpr);
+    back = savedBack;
+    lastKey = "";
+    return {
+      meta: { frames, cols, rows, fw, fh, backBox },
+      sheet1, sheet2, stillA, stillB, stillC, stillQ, stillT, stillBack,
+    };
+  };
+
   return state;
 }

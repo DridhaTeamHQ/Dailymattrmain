@@ -14,10 +14,12 @@
   <link rel="preload" as="image" href="/assets/screen-article.jpg?v=4" />
   <link rel="preload" as="image" href="/assets/screen-qix.jpg?v=4" />
   <link rel="preload" as="image" href="/assets/screen-trax.jpg?v=4" />
-  <!-- phones: the baked phone sequence starts fetching before main.js runs
+  <!-- the baked phone sequences start fetching before main.js runs
        (loaded via fetch + createImageBitmap, hence as="fetch") -->
   <link rel="preload" as="fetch" crossorigin href="/assets/phone-pose-a.webp" media="(max-width: 899px)" />
   <link rel="preload" as="fetch" crossorigin href="/assets/phone-seq.webp" media="(max-width: 899px)" />
+  <link rel="preload" as="fetch" crossorigin href="/assets/dphone-a.webp" media="(min-width: 900px) and (pointer: fine)" />
+  <link rel="preload" as="fetch" crossorigin href="/assets/dphone-seq1.webp" media="(min-width: 900px) and (pointer: fine)" />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>

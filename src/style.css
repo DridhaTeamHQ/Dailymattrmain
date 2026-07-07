@@ -255,6 +255,12 @@ a { text-decoration: none; color: inherit; }
   width: 100%; height: 100%;
   opacity: 0;
 }
+/* baked showcase back phone (desktop) — document-positioned so it
+   scrolls natively with the section, under the front phone */
+.seq-back {
+  position: absolute; z-index: 39;
+  pointer-events: none;
+}
 
 /* ============ Phone — real mockup frame ============ */
 .phone {
