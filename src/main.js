@@ -1,7 +1,7 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
-import { createPhone3D } from "./phone3d.js";
+import { createPhoneSeq } from "./phoneSeq.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -42,29 +42,34 @@ const dots = [...document.querySelectorAll(".scene-progress .dot")];
 let lastDotIdx = -1;
 
 /* ---- adaptive device tiering ----
- * high = desktop → full real-time 3D
- * mid  = capable phone/tablet → optimized 3D (no reflections, low DPR)
- * low  = cheap/old phone → skip WebGL entirely, use the PNG phone */
-function perfTier() {
-  const coarse = window.matchMedia("(pointer: coarse)").matches;
-  if (!coarse && window.innerWidth >= 900) return "high";
-  const mem = navigator.deviceMemory || 4;
-  const cores = navigator.hardwareConcurrency || 4;
-  if (mem <= 4 || cores <= 4) return "low";
-  return "mid";
-}
-const TIER = perfTier();
+ * Desktop → full real-time three.js (loaded dynamically — phones never
+ * download it). Phones → the pre-rendered image sequence (the "Apple
+ * technique"): the 3D flight was baked offline into frames, so playback
+ * is pure compositor work and stays smooth on any device. If the
+ * sequence fails to load, the PNG mockup phone takes over. */
+const IS_DESKTOP =
+  window.innerWidth >= 900 && !window.matchMedia("(pointer: coarse)").matches;
+const CAPTURE = new URLSearchParams(location.search).has("capture");
 
-/* Real 3D phone (three.js). On "low" it is never created — the PNG
- * mockup phone (`#fly-phone`) drives the whole journey instead. A
- * runtime FPS guard can also demote mid→PNG on devices we misjudged. */
-const phone3d =
-  TIER === "low"
-    ? { ready: false, failed: true, demoted: true, apply() {}, resize() {}, setBackPhone() {}, demote() {} }
-    : createPhone3D({
+let phone3d = {
+  ready: false,
+  failed: false,
+  demoted: false,
+  apply() {},
+  resize() {},
+  setBackPhone(c) { phone3d._pendingBack = c; },
+  demote() {},
+};
+
+if (IS_DESKTOP || CAPTURE) {
+  // three.js is a separate chunk; phones never fetch it
+  import("./phone3d.js").then(
+    (m) => {
+      const pending = phone3d._pendingBack;
+      phone3d = m.createPhone3D({
         phoneW: PHONE_W,
         phoneH: PHONE_H,
-        quality: TIER === "mid" ? "mobile" : "desktop",
+        quality: "desktop",
         screens: {
           home: "/assets/screen-home.jpg?v=4",
           article: "/assets/screen-article.jpg?v=4",
@@ -72,6 +77,21 @@ const phone3d =
           trax: "/assets/screen-trax.jpg?v=4",
         },
       });
+      if (pending) phone3d.setBackPhone(pending);
+      if (CAPTURE) window.__phone3d = phone3d; // capture rig handle
+    },
+    () => { phone3d.failed = true; }
+  );
+} else {
+  phone3d = createPhoneSeq({
+    phoneW: PHONE_W,
+    phoneH: PHONE_H,
+    meta: { frames: 40, cols: 8, rows: 5, fw: 461, fh: 677 },
+    sheetUrl: "/assets/phone-seq.webp",
+    poseAUrl: "/assets/phone-pose-a.webp",
+    poseBUrl: "/assets/phone-pose-b.webp",
+  });
+}
 
 /* ---- single pose proxy: every scroll tween writes here, and the
  * ticker mirrors it onto whichever phone representation is live.
@@ -81,6 +101,7 @@ const P = {
   rotZ: 0, rotY: 0, rotX: 0,
   alpha: 1,
   mix: 0, sQ: 0, sT: 0,
+  prog: 0, // normalized flight progress — frame selector for the baked sequence
 };
 
 const flyS = {
@@ -202,7 +223,7 @@ function build() {
     /* viewport pose at a given scroll position */
     const at = (pose, scroll) => ({ ...pose, y: pose.y - scroll });
 
-    gsap.set(P, { ...at(poseHero, 0), rotY: 0, rotX: 0, alpha: 1, mix: 0, sQ: 0, sT: 0 });
+    gsap.set(P, { ...at(poseHero, 0), rotY: 0, rotX: 0, alpha: 1, mix: 0, sQ: 0, sT: 0, prog: 0 });
 
     /* ---------- master flight timeline (hero -> showcase -> hover) ---------- */
     /* ONE timeline owns the phone's position for the whole journey —
@@ -242,6 +263,8 @@ function build() {
     flight
       .to(P, { rotY: 28, rotX: 6, duration: dB * 0.55, ease: "power2.in" }, dA)
       .to(P, { rotY: 16, rotX: 3, duration: dB * 0.45, ease: "power2.out" }, dA + dB * 0.55);
+    // linear frame clock for the baked sequence (its easing is pre-rendered)
+    flight.to(P, { prog: 1, duration: dB, ease: "none" }, dA);
     flight
       .to(P, { scale: poseShow.scale * 1.07, duration: dB * 0.55, ease: "power1.in" }, dA)
       .to(P, { scale: poseShow.scale, duration: dB * 0.45, ease: "power1.out" }, dA + dB * 0.55);

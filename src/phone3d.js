@@ -447,5 +447,80 @@ export function createPhone3D({ phoneW, phoneH, screens, quality }) {
     if (state.canvas) state.canvas.remove();
   }
 
+  /* ---- offline capture: bake the mobile flight's rotation swing into
+   * a sprite sheet + two hi-res end poses. Dev-only (?capture=1); the
+   * output is saved to public/assets and shipped instead of three.js
+   * on phones. The rotation curves mirror the flight timeline's leg B. */
+  state.capture = async function capture({ frames = 40, cols = 8 } = {}) {
+    if (!state.ready) throw new Error("capture: model not ready");
+    const curve = (p) => {
+      // matches flight leg B: rotY 0→28 (power2.in) then 28→16 (power2.out)
+      const inP = Math.min(p / 0.55, 1);
+      const outP = Math.max((p - 0.55) / 0.45, 0);
+      const eIn = inP * inP;
+      const eOut = 1 - (1 - outP) * (1 - outP);
+      return {
+        rotY: p < 0.55 ? 28 * eIn : 28 + (16 - 28) * eOut,
+        rotX: p < 0.55 ? 6 * eIn : 6 + (3 - 6) * eOut,
+        rotZ: 15 * (p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2),
+      };
+    };
+    const vw = window.innerWidth, vh = window.innerHeight;
+    // force 2x regardless of the capturing display so assets are sharp
+    const prevDpr = renderer.getPixelRatio();
+    renderer.setPixelRatio(2);
+    renderer.setSize(vw, vh);
+    const dpr = 2;
+    const shot = (sc, targetW, targetH) => {
+      // phone centered in a box of (640·sc × 940·sc) CSS px
+      const boxW = 640 * sc, boxH = 940 * sc;
+      const sx = (vw / 2 - boxW / 2) * dpr, sy = (vh / 2 - boxH / 2) * dpr;
+      return { boxW, boxH, sx, sy, sw: boxW * dpr, sh: boxH * dpr, targetW, targetH };
+    };
+    const renderPose = (p, sc) => {
+      const r = curve(p);
+      apply({
+        x: vw / 2 - phoneW / 2, y: vh / 2 - phoneH / 2, scale: sc,
+        rotZ: r.rotZ, rotY: r.rotY, rotX: r.rotX,
+        alpha: 1, mix: 0, sQ: 0, sT: 0,
+      }, 0);
+      renderer.render(scene, camera);
+    };
+    // sheet: 40 motion frames at 460×676
+    const scM = 0.36, fw = Math.round(640 * scM * dpr), fh = Math.round(940 * scM * dpr);
+    const rows = Math.ceil(frames / cols);
+    const sheet = document.createElement("canvas");
+    sheet.width = fw * cols; sheet.height = fh * rows;
+    const sctx = sheet.getContext("2d");
+    const gM = shot(scM, fw, fh);
+    for (let i = 0; i < frames; i++) {
+      renderPose(i / (frames - 1), scM);
+      sctx.drawImage(state.canvas, gM.sx, gM.sy, gM.sw, gM.sh,
+        (i % cols) * fw, Math.floor(i / cols) * fh, fw, fh);
+      await new Promise((r) => setTimeout(r, 0));
+    }
+    // hi-res end poses at 2× for the resting states
+    const scE = 0.72;
+    const endShot = (p) => {
+      renderPose(p, scE);
+      const g = shot(scE);
+      const c = document.createElement("canvas");
+      c.width = g.sw; c.height = g.sh;
+      c.getContext("2d").drawImage(state.canvas, g.sx, g.sy, g.sw, g.sh, 0, 0, g.sw, g.sh);
+      return c.toDataURL("image/webp", 0.92);
+    };
+    const startImg = endShot(0);
+    const endImg = endShot(1);
+    renderer.setPixelRatio(prevDpr);
+    renderer.setSize(vw, vh);
+    lastKey = ""; // let the normal loop repaint whatever pose is current
+    return {
+      meta: { frames, cols, rows, fw, fh },
+      sheet: sheet.toDataURL("image/webp", 0.9),
+      startImg,
+      endImg,
+    };
+  };
+
   return state;
 }

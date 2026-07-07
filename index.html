@@ -7,12 +7,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet" />
-  <!-- start the heavy assets early; the intro waits for them -->
-  <link rel="preload" as="fetch" href="/assets/iphone.glb" crossorigin />
+  <!-- start the heavy assets early; the intro waits for them.
+       (the GLB is fetched by the desktop-only dynamic import — phones
+       load the tiny pre-rendered sequence instead) -->
   <link rel="preload" as="image" href="/assets/screen-home.jpg?v=4" />
   <link rel="preload" as="image" href="/assets/screen-article.jpg?v=4" />
   <link rel="preload" as="image" href="/assets/screen-qix.jpg?v=4" />
   <link rel="preload" as="image" href="/assets/screen-trax.jpg?v=4" />
+  <!-- phones: the baked phone sequence starts fetching before main.js runs
+       (loaded via fetch + createImageBitmap, hence as="fetch") -->
+  <link rel="preload" as="fetch" crossorigin href="/assets/phone-pose-a.webp" media="(max-width: 899px)" />
+  <link rel="preload" as="fetch" crossorigin href="/assets/phone-seq.webp" media="(max-width: 899px)" />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
