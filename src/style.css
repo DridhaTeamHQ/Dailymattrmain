@@ -474,10 +474,16 @@ a { text-decoration: none; color: inherit; }
 /* ============ Footer ============ */
 .footer {
   background: var(--mist);
-  padding: 90px 6.5vw 0;
+  padding: 90px 0 1vw;
   overflow: hidden;
 }
-.footer-top { display: flex; justify-content: space-between; gap: 60px; flex-wrap: wrap; }
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 60px;
+  flex-wrap: wrap;
+  padding: 0 6.5vw;
+}
 .footer-logoline { font-size: 24px; font-weight: 700; letter-spacing: -.5px; }
 .brand-mini { font-family: var(--font-serif); }
 .brand-mini b { font-weight: 900; }
@@ -486,16 +492,31 @@ a { text-decoration: none; color: inherit; }
 .footer-col h4 { font-size: 12px; letter-spacing: 1.5px; color: #97979e; font-weight: 600; margin-bottom: 18px; }
 .footer-col a { display: block; font-size: 14px; font-weight: 500; margin-bottom: 13px; color: var(--ink); }
 .footer-col a:hover { text-decoration: underline; }
-.footer-legal { text-align: right; color: var(--ink-soft); font-size: 14px; margin-top: 40px; }
+.footer-legal {
+  text-align: right;
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin-top: 40px;
+  padding: 0 6.5vw;
+}
 .footer-wordmark {
   font-family: var(--font-serif);
-  font-size: clamp(100px, 19vw, 280px);
-  font-weight: 700; letter-spacing: -6px; line-height: .78;
-  margin-top: 70px; margin-bottom: -0.06em;
-  text-align: center; white-space: nowrap;
+  font-size: 14.8vw;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: .8;
+  margin-top: 70px;
+  margin-bottom: -0.02em;
+  text-align: center;
+  white-space: nowrap;
   color: var(--ink);
+  width: 100%;
 }
-.footer-wordmark b { font-weight: 900; }
+.footer-wordmark b {
+  font-size: 19.2vw;
+  font-weight: inherit;
+}
+.footer-wordmark .wordmark-quote { color: #97979e; }
 
 /* ============ Features — mobile crossfade stage (desktop hidden) ============ */
 .features-mobile { display: none; height: 280vh; position: relative; }
@@ -655,11 +676,21 @@ a { text-decoration: none; color: inherit; }
   /* ---- faq / footer ---- */
   .faq-grid { grid-template-columns: 1fr; gap: 40px; }
   .faq { padding: clamp(64px, 10vh, 90px) clamp(20px, 6vw, 34px); }
-  .footer { padding: clamp(60px, 9vh, 90px) clamp(20px, 6vw, 34px) 0; }
-  .footer-top { flex-direction: column; gap: 40px; }
+  .footer { padding: clamp(60px, 9vh, 90px) 0 clamp(10px, 1vw, 20px); }
+  .footer-top {
+    flex-direction: column;
+    gap: 40px;
+    padding: 0 clamp(20px, 6vw, 34px);
+  }
   .footer-cols { gap: clamp(32px, 10vw, 90px); flex-wrap: wrap; }
-  .footer-legal { text-align: left; }
-  .footer-wordmark { letter-spacing: -2px; }
+  .footer-legal {
+    text-align: left;
+    padding: 0 clamp(20px, 6vw, 34px);
+  }
+  .footer-wordmark {
+    font-size: 14.8vw;
+    letter-spacing: -0.04em;
+  }
 
   /* ---- perf: drop the expensive paint effects on phones ---- */
   /* blur(80px) on a ~940px circle is one of the heaviest per-frame
