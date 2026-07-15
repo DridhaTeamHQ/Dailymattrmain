@@ -169,6 +169,97 @@ gsap.ticker.add(() => {
   }
 });
 
+/* ---- Apple-style "liquid glass" for the feature copy panels ----
+ * Chromium supports `backdrop-filter: url(<svg filter>)`, so each panel
+ * gets a real lens: a displacement map (rounded-rect SDF — refraction
+ * strongest across the rim bezel, neutral in the middle) chained with
+ * blur + saturation. Safari/Firefox silently keep the frosted-blur
+ * fallback declared in the CSS. */
+const LG_CHROMIUM = /Chrom(e|ium)/.test(navigator.userAgent);
+function liquidGlass(panels) {
+  if (!LG_CHROMIUM || !panels.length) return;
+  const NS = "http://www.w3.org/2000/svg";
+  let defs = document.getElementById("lg-defs");
+  if (!defs) {
+    defs = document.createElementNS(NS, "svg");
+    defs.id = "lg-defs";
+    defs.setAttribute("width", "0");
+    defs.setAttribute("height", "0");
+    defs.style.cssText = "position:absolute;width:0;height:0";
+    document.body.appendChild(defs);
+  }
+  defs.innerHTML = "";
+  panels.forEach((panel, i) => {
+    const w = Math.round(panel.offsetWidth);
+    const h = Math.round(panel.offsetHeight);
+    if (!w || !h) return;
+    const r = 22; // matches the panel's border-radius
+    const bezel = 34; // how deep the refraction ring reaches inward
+
+    /* displacement map: R/G channels hold the rim's outward normal,
+     * eased across the bezel (128,128 = no displacement) */
+    const c = document.createElement("canvas");
+    c.width = w;
+    c.height = h;
+    const g = c.getContext("2d");
+    const img = g.createImageData(w, h);
+    const sdf = (px, py) => {
+      // signed distance to the rounded-rect rim (negative inside)
+      const qx = Math.abs(px) - (w / 2 - r);
+      const qy = Math.abs(py) - (h / 2 - r);
+      const ax = Math.max(qx, 0);
+      const ay = Math.max(qy, 0);
+      return Math.hypot(ax, ay) + Math.min(Math.max(qx, qy), 0) - r;
+    };
+    let p = 0;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const px = x + 0.5 - w / 2;
+        const py = y + 0.5 - h / 2;
+        const t = Math.min(Math.max(1 + sdf(px, py) / bezel, 0), 1);
+        const s = t * t * t; // ease — glassy falloff into the middle
+        const nx = (sdf(px + 1, py) - sdf(px - 1, py)) / 2;
+        const ny = (sdf(px, py + 1) - sdf(px, py - 1)) / 2;
+        img.data[p++] = 128 + nx * s * 127;
+        img.data[p++] = 128 + ny * s * 127;
+        img.data[p++] = 128;
+        img.data[p++] = 255;
+      }
+    }
+    g.putImageData(img, 0, 0);
+
+    const f = document.createElementNS(NS, "filter");
+    f.id = "lg-copy-" + i;
+    f.setAttribute("filterUnits", "userSpaceOnUse");
+    f.setAttribute("x", "0");
+    f.setAttribute("y", "0");
+    f.setAttribute("width", w);
+    f.setAttribute("height", h);
+    f.setAttribute("color-interpolation-filters", "sRGB");
+    const feMap = document.createElementNS(NS, "feImage");
+    feMap.setAttribute("href", c.toDataURL());
+    feMap.setAttribute("x", "0");
+    feMap.setAttribute("y", "0");
+    feMap.setAttribute("width", w);
+    feMap.setAttribute("height", h);
+    feMap.setAttribute("result", "map");
+    const feDisp = document.createElementNS(NS, "feDisplacementMap");
+    feDisp.setAttribute("in", "SourceGraphic");
+    feDisp.setAttribute("in2", "map");
+    feDisp.setAttribute("scale", "64");
+    feDisp.setAttribute("xChannelSelector", "R");
+    feDisp.setAttribute("yChannelSelector", "G");
+    const feBlur = document.createElementNS(NS, "feGaussianBlur");
+    feBlur.setAttribute("stdDeviation", "9");
+    const feSat = document.createElementNS(NS, "feColorMatrix");
+    feSat.setAttribute("type", "saturate");
+    feSat.setAttribute("values", "1.2");
+    f.append(feMap, feDisp, feBlur, feSat);
+    defs.appendChild(f);
+    panel.style.backdropFilter = "url(#lg-copy-" + i + ")";
+  });
+}
+
 const docRect = (el) => {
   const r = el.getBoundingClientRect();
   return {
@@ -345,6 +436,7 @@ function build() {
     const rows = gsap.utils.toArray(".row-scene");
     const sceneWords = rows.map((r) => r.querySelector(".scene-word"));
     const copies = gsap.utils.toArray(".feature-copy");
+    if (!isMobile) liquidGlass(copies); // per-panel lens, re-fit on rebuilds
 
     /* ---------- masonry card wall (desktop scenes) ----------
      * ONE tall edge-to-edge wall of app cards behind the locked phone
