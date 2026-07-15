@@ -110,32 +110,24 @@
     <section class="features" id="features">
       <div class="features-pin" id="features-pin">
 
-        <!-- per-scene stages: giant word + color glow + 3D side phones,
-             always on the opposite side of the copy -->
+        <!-- per-scene stages: giant word + color glow + a masonry wall
+             of app cards behind the centered 3D phone (cards are built
+             and laid out in main.js) -->
         <div class="rows">
           <div class="row-scene" data-scene="0">
             <span class="scene-glow"></span>
             <div class="scene-word" aria-hidden="true">Articles</div>
-            <div class="side side-r">
-              <img decoding="async" class="sp sp-main" src="/assets/row-matchcenter.jpg?v=2" alt="" />
-              <img decoding="async" class="sp sp-back" src="/assets/row-live.jpg?v=2" alt="" />
-            </div>
+            <div class="scene-masonry" aria-hidden="true"></div>
           </div>
           <div class="row-scene" data-scene="1">
             <span class="scene-glow"></span>
             <div class="scene-word" aria-hidden="true">Qix</div>
-            <div class="side side-l">
-              <img decoding="async" class="sp sp-back" src="/assets/row-saved.jpg?v=2" alt="" />
-              <img decoding="async" class="sp sp-main" src="/assets/row-habits.jpg?v=2" alt="" />
-            </div>
+            <div class="scene-masonry" aria-hidden="true"></div>
           </div>
           <div class="row-scene" data-scene="2">
             <span class="scene-glow"></span>
             <div class="scene-word" aria-hidden="true">Trax</div>
-            <div class="side side-r">
-              <img decoding="async" class="sp sp-main" src="/assets/row-trax.jpg?v=2" alt="" />
-              <img decoding="async" class="sp sp-back" src="/assets/row-wraps.jpg?v=2" alt="" />
-            </div>
+            <div class="scene-masonry" aria-hidden="true"></div>
           </div>
         </div>
 

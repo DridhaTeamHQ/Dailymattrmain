@@ -337,30 +337,29 @@ a { text-decoration: none; color: inherit; }
   color: #1b1b1f;
   user-select: none; white-space: nowrap;
 }
-/* 3D-angled side phones, opposite the copy */
-.side {
-  position: absolute; top: 50%;
-  display: flex; gap: 46px; align-items: center;
-  transform: translateY(-50%);
-  transform-style: preserve-3d;
-  will-change: transform;
+/* masonry wall of app cards behind the centered phone — laid out by
+   main.js (shortest-column algorithm); left/top place the cards so
+   transforms stay free for the entrance/hover animations */
+.scene-masonry {
+  position: absolute;
+  left: 44px; right: 44px;
+  top: 96px; bottom: 110px;
+  overflow: hidden;
 }
-.side-l { left: 2.5%; }
-.side-r { right: 2.5%; }
-.sp {
-  width: clamp(190px, 15.5vw, 256px);
-  aspect-ratio: 310 / 655;
-  object-fit: cover;
-  border-radius: 34px;
-  border: 1px solid rgba(255,255,255,.09);
-  box-shadow: 0 50px 90px rgba(0,0,0,.55);
-  opacity: .9;
-  flex: none;
+.m-card {
+  position: absolute; top: 0; left: 0;
+  border-radius: 12px; overflow: hidden;
+  box-shadow: 0 10px 50px -10px rgba(0, 0, 0, .6);
+  will-change: transform, opacity;
 }
-.side-l .sp-main { transform: rotateY(28deg) rotateX(2deg); }
-.side-l .sp-back { transform: rotateY(34deg) scale(.9); opacity: .45; filter: brightness(.7); }
-.side-r .sp-main { transform: rotateY(-28deg) rotateX(2deg); }
-.side-r .sp-back { transform: rotateY(-34deg) scale(.9); opacity: .45; filter: brightness(.7); }
+.m-card img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: top;
+  /* dimmed so the phone + copy stay the heroes of the scene */
+  filter: brightness(.62) saturate(.85);
+  transition: filter .3s ease;
+}
+.m-card:hover img { filter: brightness(.85) saturate(1); }
 .stage-veil {
   position: absolute; inset: 0;
   background:
@@ -380,6 +379,13 @@ a { text-decoration: none; color: inherit; }
   position: absolute; top: 50%; transform: translateY(-50%);
   max-width: 340px; color: #fff; opacity: 0;
   z-index: 6;
+}
+/* soft scrim so the copy stays readable over the masonry card wall */
+.feature-copy::before {
+  content: ""; position: absolute; z-index: -1;
+  inset: -70px -90px;
+  background: radial-gradient(58% 58% at 50% 50%, rgba(10,10,11,.82) 0%, rgba(10,10,11,.5) 55%, transparent 78%);
+  pointer-events: none;
 }
 .feature-copy[data-scene="0"] { opacity: 1; }
 .copy-left { left: 7%; }
@@ -646,15 +652,6 @@ a { text-decoration: none; color: inherit; }
 
   /* ---- features (pinned; container is 100vh so it self-fits) ---- */
   .scene-word { font-size: 26vw; top: 8%; }
-  /* side phones peek from the edges — the BACK image differs from the
-     center screen (the main one is the same content) */
-  .side { top: 32%; gap: 0; }
-  .side-l { left: -13vw; }
-  .side-r { right: -13vw; }
-  .sp { width: clamp(120px, 34vw, 240px); opacity: .8; }
-  .sp-main { display: none; }
-  .side .sp-back { display: block; transform: rotateY(-24deg); scale: 1; opacity: .8; filter: none; }
-  .side-l .sp-back { transform: rotateY(24deg); }
   /* markers move below the nav so they never sit on the copy/chips */
   .scene-progress {
     top: calc(var(--nav-h) + 16px); right: clamp(14px, 4vw, 22px);
@@ -698,10 +695,6 @@ a { text-decoration: none; color: inherit; }
   .scene-glow { filter: none; width: min(86vw, 620px); }
   /* alpha-traced drop-shadow on the large PNG frame → cheaper, smaller */
   .ph-frame { filter: drop-shadow(0 18px 26px rgba(0,0,0,.5)); }
-  /* huge soft shadows under the side phones → tighter, cheaper */
-  .sp { box-shadow: 0 16px 34px rgba(0,0,0,.5); }
-  /* the side phones aren't animated on mobile — no layer promotion */
-  .side { will-change: auto; }
   /* the big blurred hero glow → smaller blur */
   .hero-inner::before { filter: blur(14px); width: 360px; height: 360px; }
 }
