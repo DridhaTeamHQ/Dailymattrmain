@@ -27,6 +27,22 @@ const SCRUB = true;
 lenis.on("scroll", ScrollTrigger.update);
 gsap.ticker.add((t) => lenis.raf(t * 1000));
 gsap.ticker.lagSmoothing(0);
+/* Lenis only virtualizes the WHEEL — dragging the scrollbar or keyboard
+ * jumps (PgUp/Home) scroll natively behind its back. Its internal
+ * position goes stale, ScrollTrigger stops updating (the phone freezes
+ * mid-pose), and the next wheel tick lerps the page back from the stale
+ * position — the "glitch when scrolling back up". Resync Lenis whenever
+ * the native scroll moves without it. */
+window.addEventListener(
+  "scroll",
+  () => {
+    if (!lenis.isScrolling && Math.abs(window.scrollY - lenis.animatedScroll) > 2) {
+      lenis.scrollTo(window.scrollY, { immediate: true, force: true });
+      ScrollTrigger.update();
+    }
+  },
+  { passive: true }
+);
 /* the mobile URL bar showing/hiding fires a resize that made
  * ScrollTrigger recompute the pin every time — the scroll-up lag.
  * Ignore that resize class entirely. */
