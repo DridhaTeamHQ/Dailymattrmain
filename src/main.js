@@ -346,59 +346,65 @@ function build() {
     const sceneWords = rows.map((r) => r.querySelector(".scene-word"));
     const copies = gsap.utils.toArray(".feature-copy");
 
-    /* ---------- masonry card walls (desktop scenes) ----------
-     * A wall of app cards behind the centered phone, one per scene —
-     * shortest-column layout, staggered blur-to-focus entrance, gentle
-     * scale on hover (vanilla port of the React Bits Masonry look).
-     * Cards are placed with left/top so transforms stay free for the
-     * animations. Rebuilt on every build() so resizes re-flow them. */
-    const MASONRY_SETS = [
-      // Articles — reading, briefs, live coverage
-      ["row-matchcenter.jpg?v=2", "sm-article.jpg", "row-live.jpg?v=2", "row-notif2.jpg?v=2", "sm-home.jpg", "row-polls.jpg?v=2", "row-saved.jpg?v=2", "row-wraps2.jpg?v=2", "row-habits.jpg?v=2", "sm-qix.jpg"],
-      // Qix — visual stories
-      ["row-qix.jpg?v=2", "sm-qix.jpg", "row-habits.jpg?v=2", "row-saved.jpg?v=2", "sm-home.jpg", "row-polls.jpg?v=2", "row-notif2.jpg?v=2", "sm-article.jpg", "row-wraps2.jpg?v=2", "row-live.jpg?v=2"],
-      // Trax — audio, wraps
-      ["row-trax.jpg?v=2", "sm-trax.jpg", "row-wraps.jpg?v=2", "row-habits.jpg?v=2", "sm-home.jpg", "row-live.jpg?v=2", "row-polls.jpg?v=2", "sm-article.jpg", "row-wraps2.jpg?v=2", "row-saved.jpg?v=2"],
+    /* ---------- masonry card wall (desktop scenes) ----------
+     * ONE tall edge-to-edge wall of app cards behind the locked phone
+     * (vanilla port of the React Bits Masonry look): shortest-column
+     * layout, staggered blur-to-focus entrance, gentle scale on hover.
+     * While the features pin scrolls, ONLY this wall moves — the pinned
+     * scene timeline scrubs its translateY. Cards are placed with
+     * left/top so transforms stay free for the animations. Rebuilt on
+     * every build() so resizes re-flow it. */
+    const M_IMGS = [
+      "row-matchcenter.jpg?v=2", "sm-article.jpg", "row-live.jpg?v=2",
+      "row-notif2.jpg?v=2", "sm-home.jpg", "row-polls.jpg?v=2",
+      "row-saved.jpg?v=2", "row-wraps2.jpg?v=2", "row-habits.jpg?v=2",
+      "sm-qix.jpg", "row-qix.jpg?v=2", "row-trax.jpg?v=2",
+      "sm-trax.jpg", "row-wraps.jpg?v=2",
     ];
     // varied card heights (in px at a 300px column) — the masonry rhythm
     const M_HEIGHTS = [320, 200, 400, 250, 180, 360, 230, 300, 210, 340];
-    if (!isMobile) {
-      rows.forEach((row, si) => {
-        const wall = row.querySelector(".scene-masonry");
-        if (!wall) return;
-        wall.innerHTML = "";
-        const W = wall.clientWidth;
-        if (!W) return;
-        const cols = W >= 1500 ? 5 : W >= 1050 ? 4 : 3;
-        const gap = 16;
-        const colW = (W - gap * (cols - 1)) / cols;
-        const colH = new Array(cols).fill(0);
-        MASONRY_SETS[si].forEach((src, i) => {
-          const col = colH.indexOf(Math.min(...colH));
-          const h = Math.round(M_HEIGHTS[i % M_HEIGHTS.length] * (colW / 300));
-          const card = document.createElement("div");
-          card.className = "m-card";
-          card.style.width = colW + "px";
-          card.style.height = h + "px";
-          card.style.left = col * (colW + gap) + "px";
-          card.style.top = colH[col] + "px";
-          const img = document.createElement("img");
-          img.src = "/assets/" + src;
-          img.decoding = "async";
-          if (si > 0) img.loading = "lazy"; // later scenes can trickle in
-          img.alt = "";
-          card.appendChild(img);
-          wall.appendChild(card);
-          colH[col] += h + gap;
-          // hover: the reference's gentle scale-down
-          card.addEventListener("mouseenter", () =>
-            gsap.to(card, { scale: 0.96, duration: 0.3, ease: "power2.out" })
-          );
-          card.addEventListener("mouseleave", () =>
-            gsap.to(card, { scale: 1, duration: 0.3, ease: "power2.out" })
-          );
-        });
-      });
+    const track = document.querySelector(".masonry-track");
+    let mTravel = 0; // how far the wall rides up across the whole pin
+    if (!isMobile && track) {
+      track.innerHTML = "";
+      const W = track.clientWidth || vw;
+      const cols = W >= 1500 ? 5 : W >= 1050 ? 4 : 3;
+      const gap = 14;
+      const colW = (W - gap * (cols - 1)) / cols;
+      const colH = new Array(cols).fill(0);
+      /* the wall is ~2.8 viewports tall: over the 340vh pin it glides
+       * by at a natural background-parallax rate with no bare patches */
+      const wallH = vh * 2.8;
+      let i = 0;
+      while (Math.min(...colH) < wallH && i < 60) {
+        const col = colH.indexOf(Math.min(...colH));
+        const h = Math.round(M_HEIGHTS[i % M_HEIGHTS.length] * (colW / 300));
+        const card = document.createElement("div");
+        card.className = "m-card";
+        card.style.width = colW + "px";
+        card.style.height = h + "px";
+        card.style.left = col * (colW + gap) + "px";
+        card.style.top = colH[col] + "px";
+        const img = document.createElement("img");
+        img.src = "/assets/" + M_IMGS[i % M_IMGS.length];
+        img.decoding = "async";
+        if (i >= cols * 3) img.loading = "lazy"; // below the first screen
+        img.alt = "";
+        card.appendChild(img);
+        track.appendChild(card);
+        colH[col] += h + gap;
+        i++;
+        // hover: the reference's gentle scale-down
+        card.addEventListener("mouseenter", () =>
+          gsap.to(card, { scale: 0.96, duration: 0.3, ease: "power2.out" })
+        );
+        card.addEventListener("mouseleave", () =>
+          gsap.to(card, { scale: 1, duration: 0.3, ease: "power2.out" })
+        );
+      }
+      const trackH = Math.max(...colH) - gap;
+      track.style.height = trackH + "px";
+      mTravel = Math.max(0, trackH - vh);
     }
 
     /* the pinned story only exists on desktop; on phones the features
@@ -433,20 +439,26 @@ function build() {
       gsap.set(rows, { autoAlpha: 1, y: (i) => (i === 0 ? 0 : vh) });
       gsap.set(copies, { autoAlpha: 1, y: (i) => (i === 0 ? 0 : vh) });
 
-      /* scene 0's masonry wall plays the reference entrance — staggered
-       * rise from below, blur resolving to focus — as the pin arrives */
-      const wall0 = rows[0].querySelectorAll(".m-card");
-      if (wall0.length) {
-        gsap.from(wall0, {
+      /* the wall plays the reference entrance — staggered rise from
+       * below, blur resolving to focus — as the pin arrives */
+      const mCards = track ? track.querySelectorAll(".m-card") : [];
+      if (mCards.length) {
+        gsap.from(mCards, {
           scrollTrigger: { trigger: featuresPin, start: "top 60%" },
           y: 120,
           autoAlpha: 0,
           filter: "blur(10px)",
-          stagger: 0.06,
-          duration: 0.8,
+          stagger: 0.035,
+          duration: 0.7,
           ease: "power3.out",
           clearProps: "filter",
         });
+      }
+
+      /* the phone stays locked in the middle — scroll ONLY moves the
+       * background wall, gliding up across the whole pin */
+      if (track && mTravel) {
+        scenes.to(track, { y: -mTravel, ease: "none", duration: 10 }, 0);
       }
 
       const swapScene = (pos, from, to, screenProp) => {
@@ -455,19 +467,6 @@ function build() {
         scenes.to([rows[from], copies[from]], { y: -vh, ease: "none", duration: dur }, pos);
         // incoming content rides up into place
         scenes.to([rows[to], copies[to]], { y: 0, ease: "none", duration: dur }, pos);
-        /* the incoming wall's cards stagger up into place while the row
-         * itself rides up — the masonry entrance, scrubbed by scroll */
-        const cards = rows[to].querySelectorAll(".m-card");
-        if (cards.length) {
-          /* starts exactly at `pos` (while the row is still fully below
-           * the viewport) so no card is ever seen popping to hidden */
-          scenes.fromTo(
-            cards,
-            { y: 140, autoAlpha: 0 },
-            { y: 0, autoAlpha: 1, stagger: 0.07, duration: 0.9, ease: "power2.out", immediateRender: false },
-            pos
-          );
-        }
         // the phone's screen changes as the new scene passes its middle
         scenes.to(P, { [screenProp]: 1, duration: 0.45, ease: "none" }, pos + dur * 0.35);
       };

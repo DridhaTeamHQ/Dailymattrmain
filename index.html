@@ -110,25 +110,26 @@
     <section class="features" id="features">
       <div class="features-pin" id="features-pin">
 
-        <!-- per-scene stages: giant word + color glow + a masonry wall
-             of app cards behind the centered 3D phone (cards are built
-             and laid out in main.js) -->
+        <!-- per-scene stages: giant word + color glow -->
         <div class="rows">
           <div class="row-scene" data-scene="0">
             <span class="scene-glow"></span>
             <div class="scene-word" aria-hidden="true">Articles</div>
-            <div class="scene-masonry" aria-hidden="true"></div>
           </div>
           <div class="row-scene" data-scene="1">
             <span class="scene-glow"></span>
             <div class="scene-word" aria-hidden="true">Qix</div>
-            <div class="scene-masonry" aria-hidden="true"></div>
           </div>
           <div class="row-scene" data-scene="2">
             <span class="scene-glow"></span>
             <div class="scene-word" aria-hidden="true">Trax</div>
-            <div class="scene-masonry" aria-hidden="true"></div>
           </div>
+        </div>
+
+        <!-- ONE tall edge-to-edge masonry wall of app cards behind the
+             locked phone; scroll only moves this wall (built in main.js) -->
+        <div class="masonry-bg" aria-hidden="true">
+          <div class="masonry-track"></div>
         </div>
 
         <div class="stage-veil" aria-hidden="true"></div>

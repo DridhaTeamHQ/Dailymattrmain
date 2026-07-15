@@ -337,14 +337,17 @@ a { text-decoration: none; color: inherit; }
   color: #1b1b1f;
   user-select: none; white-space: nowrap;
 }
-/* masonry wall of app cards behind the centered phone — laid out by
-   main.js (shortest-column algorithm); left/top place the cards so
-   transforms stay free for the entrance/hover animations */
-.scene-masonry {
-  position: absolute;
-  left: 44px; right: 44px;
-  top: 96px; bottom: 110px;
+/* masonry wall of app cards behind the centered phone — ONE tall
+   edge-to-edge wall laid out by main.js (shortest-column algorithm);
+   scroll translates the track while the phone stays locked. left/top
+   place the cards so transforms stay free for entrance/hover. */
+.masonry-bg {
+  position: absolute; inset: 0;
   overflow: hidden;
+}
+.masonry-track {
+  position: absolute; left: 0; right: 0; top: 0;
+  will-change: transform;
 }
 .m-card {
   position: absolute; top: 0; left: 0;
