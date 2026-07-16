@@ -7,6 +7,10 @@
   --coal-2: #0d0d0f;
   --mist: #e5e4e8;
   --pill: #1d1d21;
+  /* brand blue — the accent across the app screens, feature icons and
+     the footer wordmark (Figma: Dailymattr Landing page) */
+  --blue: #3979ff;
+  --blue-soft: #6b9aff;
   --radius-panel: 28px;
   --font-sans: "Be Vietnam Pro", system-ui, sans-serif;
   --font-serif: "Playfair Display", Georgia, serif;
@@ -44,13 +48,13 @@ a { text-decoration: none; color: inherit; }
 .intro-mark { overflow: hidden; text-align: center; will-change: transform, opacity; }
 .intro-logo {
   display: block;
-  font-family: var(--font-serif);
-  font-size: clamp(44px, 6vw, 84px);
-  color: #fff; letter-spacing: -2px;
   transform: translateY(110%);
   will-change: transform;
 }
-.intro-logo b { font-weight: 900; }
+.intro-logo img {
+  display: block;
+  width: clamp(260px, 34vw, 470px); height: auto;
+}
 .intro-tag {
   display: block; margin-top: 10px;
   font-family: var(--font-sans);
@@ -70,16 +74,18 @@ a { text-decoration: none; color: inherit; }
   transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
 }
 .btn:hover { transform: translateY(-1px); }
-.btn-dark { background: var(--ink); color: #fff; position: relative; overflow: hidden; }
+.btn-dark { background: var(--blue); color: #fff; position: relative; overflow: hidden; }
+.btn-dark:hover { background: #2f68e6; }
 .btn-ghost { background: transparent; color: var(--ink); padding: 9px 10px; }
 .btn-avatar {
-  background: #ededf0; color: var(--ink);
+  background: var(--blue); color: #fff;
   width: 38px; height: 38px; padding: 0;
   justify-content: center; border-radius: 999px;
 }
-.btn-avatar:hover { background: #e2e2e6; }
-.btn-store { background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.16); font-size: 16px; padding: 12px 24px; backdrop-filter: blur(6px); }
-.btn-store:hover { background: rgba(255,255,255,.14); }
+.btn-avatar:hover { background: #2f68e6; }
+/* store pills: solid white with dark type (Figma hero) */
+.btn-store { background: #fff; color: var(--ink); border: 1px solid #fff; font-size: 16px; padding: 12px 24px; }
+.btn-store:hover { background: #ececf0; }
 .btn-round { padding: 9px; }
 .shine::after {
   content: ""; position: absolute; inset: 0;
@@ -100,8 +106,8 @@ a { text-decoration: none; color: inherit; }
   transition: background .45s ease;
   will-change: transform;
 }
-.brand { font-family: var(--font-serif); font-size: 24px; letter-spacing: -.5px; transition: color .45s ease; }
-.brand b { font-weight: 900; }
+.brand { display: flex; align-items: center; }
+.brand img { height: 26px; width: auto; display: block; }
 .nav-links { display: flex; gap: 6px; }
 .nav-links a {
   font-size: 13px; font-weight: 500; color: var(--ink-soft);
@@ -109,18 +115,26 @@ a { text-decoration: none; color: inherit; }
   display: inline-flex; align-items: center; gap: 4px;
   transition: color .3s ease, background .3s ease;
 }
-.nav-links a:hover, .nav-links a.active { color: var(--ink); background: #f1f1f3; }
+.nav-links a:hover { color: var(--ink); background: #f1f1f3; }
+/* active link: blue-outlined pill (Figma nav) */
+.nav-links a.active {
+  color: var(--blue); background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--blue);
+}
 .nav-cta { display: flex; align-items: center; gap: 8px; }
 
 /* dark-world nav: once the black panel fills the screen the bar melts
    into it as dark glass */
 .nav.nav-dark { background: rgba(12,12,14,.68); }
-.nav.nav-dark .brand { color: #fff; }
 .nav.nav-dark .nav-links a { color: rgba(255,255,255,.6); }
-.nav.nav-dark .nav-links a:hover,
-.nav.nav-dark .nav-links a.active { color: #fff; background: rgba(255,255,255,.1); }
-.nav.nav-dark .btn-dark { background: #fff; color: var(--ink); }
-.nav.nav-dark .btn-avatar { background: rgba(255,255,255,.12); color: #fff; }
+.nav.nav-dark .nav-links a:hover { color: #fff; background: rgba(255,255,255,.1); }
+.nav.nav-dark .nav-links a.active {
+  color: var(--blue-soft); background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--blue-soft);
+}
+/* the blue CTA + avatar hold their brand colour on the dark glass too */
+.nav.nav-dark .btn-dark { background: var(--blue); color: #fff; }
+.nav.nav-dark .btn-avatar { background: var(--blue); color: #fff; }
 
 /* ============ Hero ============ */
 .hero {
@@ -322,7 +336,8 @@ a { text-decoration: none; color: inherit; }
   transform: translate(-50%, -50%);
   border-radius: 50%;
   filter: blur(80px);
-  background: radial-gradient(circle, rgba(255,255,255,.09) 0%, transparent 62%);
+  /* each scene glows in its own accent; Articles carries the brand blue */
+  background: radial-gradient(circle, rgba(57,121,255,.18) 0%, transparent 62%);
 }
 .row-scene[data-scene="1"] .scene-glow {
   background: radial-gradient(circle, rgba(225,29,72,.14) 0%, transparent 62%);
@@ -403,13 +418,14 @@ a { text-decoration: none; color: inherit; }
     inset -1px 0 0 rgba(255, 255, 255, .10),
     inset 0 -1px 0 rgba(255, 255, 255, .06);
 }
-/* soft sheen sweeping from the top-left, faint counter-glow bottom-right */
+/* soft sheen sweeping from the top-left, faint blue counter-glow bottom-right
+   — glass picks up the brand colour the way real glass tints its edge light */
 .feature-copy::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit;
   pointer-events: none;
   background:
     radial-gradient(130% 70% at 18% -12%, rgba(255, 255, 255, .15) 0%, transparent 55%),
-    radial-gradient(90% 50% at 88% 112%, rgba(255, 255, 255, .06) 0%, transparent 60%);
+    radial-gradient(90% 50% at 88% 112%, rgba(57, 121, 255, .16) 0%, transparent 60%);
 }
 .feature-copy[data-scene="0"] { opacity: 1; }
 .copy-left { left: 7%; }
@@ -437,9 +453,9 @@ a { text-decoration: none; color: inherit; }
 .fc-chips span {
   font-size: 12px; font-weight: 500;
   padding: 7px 14px; border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.16);
-  background: rgba(255,255,255,.04);
-  color: rgba(255,255,255,.75);
+  border: 1px solid rgba(57,121,255,.34);
+  background: rgba(57,121,255,.12);
+  color: rgba(255,255,255,.86);
 }
 .scene-progress {
   position: absolute; right: 48px; bottom: 42px; z-index: 7;
@@ -457,7 +473,7 @@ a { text-decoration: none; color: inherit; }
   transition: width .35s ease;
 }
 .scene-progress .dot.on { color: #fff; }
-.scene-progress .dot.on i { width: 34px; }
+.scene-progress .dot.on i { width: 34px; background: var(--blue); }
 
 /* ============ FAQ ============ */
 /* rises over the dark features section as a rounded white sheet */
@@ -546,14 +562,14 @@ a { text-decoration: none; color: inherit; }
   margin-bottom: -0.02em;
   text-align: center;
   white-space: nowrap;
-  color: var(--ink);
+  color: var(--blue); /* the wordmark is the brand's blue signature */
   width: 100%;
 }
 .footer-wordmark b {
   font-size: 19.2vw;
   font-weight: inherit;
 }
-.footer-wordmark .wordmark-quote { color: #97979e; }
+.footer-wordmark .wordmark-quote { color: var(--blue-soft); }
 
 /* ============ Features — mobile crossfade stage (desktop hidden) ============ */
 .features-mobile { display: none; height: 280vh; position: relative; }

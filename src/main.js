@@ -90,10 +90,10 @@ if (CAPTURE) {
         phoneH: PHONE_H,
         quality: "desktop",
         screens: {
-          home: "/assets/screen-home.jpg?v=4",
-          article: "/assets/screen-article.jpg?v=4",
-          qix: "/assets/screen-qix.jpg?v=4",
-          trax: "/assets/screen-trax.jpg?v=4",
+          home: "/assets/screen-home.jpg?v=5",
+          article: "/assets/screen-article.jpg?v=5",
+          qix: "/assets/screen-qix.jpg?v=5",
+          trax: "/assets/screen-trax.jpg?v=5",
         },
       });
       if (pending) phone3d.setBackPhone(pending);
@@ -463,11 +463,11 @@ function build() {
      * left/top so transforms stay free for the animations. Rebuilt on
      * every build() so resizes re-flow it. */
     const M_IMGS = [
-      "row-matchcenter.jpg?v=2", "sm-article.jpg", "row-live.jpg?v=2",
-      "row-notif2.jpg?v=2", "sm-home.jpg", "row-polls.jpg?v=2",
-      "row-saved.jpg?v=2", "row-wraps2.jpg?v=2", "row-habits.jpg?v=2",
-      "sm-qix.jpg", "row-qix.jpg?v=2", "row-trax.jpg?v=2",
-      "sm-trax.jpg", "row-wraps.jpg?v=2",
+      "card-matchcenter.jpg", "card-article.jpg", "card-live.jpg",
+      "card-xplaind.jpg", "card-home.jpg", "card-pix.jpg",
+      "card-readhistory.jpg", "card-wraps.jpg", "card-qixreels.jpg",
+      "card-ai.jpg", "card-qix.jpg", "card-trax.jpg",
+      "card-traxplayer.jpg", "card-pixdetails.jpg", "card-qixmore.jpg",
     ];
     // varied card heights (in px at a 300px column) — the masonry rhythm
     const M_HEIGHTS = [320, 200, 400, 250, 180, 360, 230, 300, 210, 340];

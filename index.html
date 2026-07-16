@@ -10,10 +10,10 @@
   <!-- start the heavy assets early; the intro waits for them.
        (the GLB is fetched by the desktop-only dynamic import — phones
        load the tiny pre-rendered sequence instead) -->
-  <link rel="preload" as="image" href="/assets/screen-home.jpg?v=4" />
-  <link rel="preload" as="image" href="/assets/screen-article.jpg?v=4" />
-  <link rel="preload" as="image" href="/assets/screen-qix.jpg?v=4" />
-  <link rel="preload" as="image" href="/assets/screen-trax.jpg?v=4" />
+  <link rel="preload" as="image" href="/assets/screen-home.jpg?v=5" />
+  <link rel="preload" as="image" href="/assets/screen-article.jpg?v=5" />
+  <link rel="preload" as="image" href="/assets/screen-qix.jpg?v=5" />
+  <link rel="preload" as="image" href="/assets/screen-trax.jpg?v=5" />
   <!-- the baked phone sequences start fetching before main.js runs
        (loaded via fetch + createImageBitmap, hence as="fetch") -->
   <link rel="preload" as="fetch" crossorigin href="/assets/phone-pose-a.webp" media="(max-width: 899px)" />
@@ -27,7 +27,7 @@
   <!-- ================= INTRO ================= -->
   <div class="intro" id="intro" aria-hidden="true">
     <div class="intro-mark">
-      <span class="intro-logo">Daily<b>Mattr’</b>.</span>
+      <span class="intro-logo"><img src="/assets/logo.svg" alt="dailymattr" /></span>
       <span class="intro-tag">your deeper read.</span>
     </div>
   </div>
@@ -36,7 +36,7 @@
 
   <!-- ================= NAV ================= -->
   <header class="nav">
-    <a class="brand" href="#top">Daily<b>Mattr’</b>.</a>
+    <a class="brand" href="#top"><img src="/assets/logo.svg" alt="dailymattr" /></a>
     <nav class="nav-links">
       <a href="#top" class="active">Home</a>
       <a href="#features">Features</a>
@@ -82,11 +82,11 @@
 
         <!-- phone fan -->
         <div class="fan">
-          <div class="fan-item fan-1"><img src="/assets/screen-trax.jpg?v=4" decoding="async" alt="Trax audio player" /></div>
-          <div class="fan-item fan-2"><img src="/assets/screen-article.jpg?v=4" decoding="async" alt="Article brief" /></div>
+          <div class="fan-item fan-1"><img src="/assets/screen-trax.jpg?v=5" decoding="async" alt="Trax audio player" /></div>
+          <div class="fan-item fan-2"><img src="/assets/screen-article.jpg?v=5" decoding="async" alt="Article brief" /></div>
           <div class="fan-anchor" id="anchor-hero"></div>
-          <div class="fan-item fan-3"><img src="/assets/screen-qix.jpg?v=4" decoding="async" alt="Qix visual stories" /></div>
-          <div class="fan-item fan-4"><img src="/assets/screen-polls.jpg?v=4" decoding="async" alt="Live polls" /></div>
+          <div class="fan-item fan-3"><img src="/assets/screen-qix.jpg?v=5" decoding="async" alt="Qix visual stories" /></div>
+          <div class="fan-item fan-4"><img src="/assets/screen-pix.jpg?v=5" decoding="async" alt="Pix visual headlines" /></div>
         </div>
       </div>
     </section>
@@ -175,21 +175,21 @@
       <div class="features-mobile">
         <div class="fm-stage">
         <div class="fm-block">
-          <div class="fm-phone"><img src="/assets/screen-article.jpg?v=4" decoding="async" loading="lazy" alt="Articles screen" /></div>
+          <div class="fm-phone"><img src="/assets/screen-article.jpg?v=5" decoding="async" loading="lazy" alt="Articles screen" /></div>
           <span class="fc-index">01 — READ</span>
           <h3><img class="fc-icon" src="/assets/icon-articles.svg" alt="" />Articles</h3>
           <p>Get the full story in just 60 words. Understand what happened, why it matters, and what comes next—without spending hours scrolling through long articles.</p>
           <div class="fc-chips"><span>60-word briefs</span><span>Ask AI</span><span>Why it matters</span></div>
         </div>
         <div class="fm-block">
-          <div class="fm-phone"><img src="/assets/screen-qix.jpg?v=4" decoding="async" loading="lazy" alt="Qix screen" /></div>
+          <div class="fm-phone"><img src="/assets/screen-qix.jpg?v=5" decoding="async" loading="lazy" alt="Qix screen" /></div>
           <span class="fc-index">02 — WATCH</span>
           <h3><img class="fc-icon" src="/assets/icon-qix.svg" alt="" />Qix</h3>
           <p>Watch the story unfold. Swipeable visual episodes that explain the news in under a minute — from mythology to markets, made to be seen.</p>
           <div class="fc-chips"><span>Visual stories</span><span>1-min episodes</span><span>Swipe to explore</span></div>
         </div>
         <div class="fm-block">
-          <div class="fm-phone"><img src="/assets/screen-trax.jpg?v=4" decoding="async" loading="lazy" alt="Trax screen" /></div>
+          <div class="fm-phone"><img src="/assets/screen-trax.jpg?v=5" decoding="async" loading="lazy" alt="Trax screen" /></div>
           <span class="fc-index">03 — LISTEN</span>
           <h3><img class="fc-icon" src="/assets/icon-trax.svg" alt="" />Trax</h3>
           <p>Listen on the move. Audio stories and daily wraps built for commutes, workouts, and everything in between — your news, hands-free.</p>
