@@ -363,6 +363,10 @@ function build() {
         start: 0,
         end: () => s4,
         scrub: SCRUB, // Lenis smooths wheels; touch gets a light scrub pass
+        /* re-capture tween start values on every ScrollTrigger refresh —
+         * otherwise a refresh that happens without a rebuild leaves stale
+         * captured starts that replay when scrubbing backward */
+        invalidateOnRefresh: true,
       },
     });
 
@@ -527,6 +531,7 @@ function build() {
             end: "+=340%",
             pin: true,
             scrub: SCRUB,
+            invalidateOnRefresh: true, // same stale-start protection as the flight
             onUpdate(self) {
               const idx = Math.min(2, Math.floor(self.progress * 2.999));
               if (idx !== lastDotIdx) {
@@ -729,11 +734,20 @@ function build() {
 /* ---------- rebuild on resize (measurements go stale) ---------- */
 let resizeT;
 let lastW = window.innerWidth;
+let lastH = window.innerHeight;
 window.addEventListener("resize", () => {
-  if (window.innerWidth === lastW) return; // ignore mobile URL-bar height changes
+  const wChanged = window.innerWidth !== lastW;
+  /* mobile ignores height-only resizes (the URL bar shows/hides every
+   * scroll). Desktop MUST rebuild on them: float/hover poses and the
+   * scroll waypoints are all vh-based, so a maximized/restored window
+   * otherwise keeps a stale phone size forever (the "small phone when
+   * scrolling back up" bug). */
+  const hChanged = IS_DESKTOP && window.innerHeight !== lastH;
+  if (!wChanged && !hChanged) return;
   clearTimeout(resizeT);
   resizeT = setTimeout(() => {
     lastW = window.innerWidth;
+    lastH = window.innerHeight;
     phone3d.resize();
     build();
     ScrollTrigger.refresh();
