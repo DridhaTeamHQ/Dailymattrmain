@@ -177,6 +177,31 @@ body.legal-page { background: var(--paper); }
 .footer-legal-links a { color: var(--ink-soft); }
 .footer-legal-links a:hover { color: var(--ink); text-decoration: underline; }
 
+/* ---- motion: staggered hero entrance + gentle scroll reveal ---- */
+@keyframes legal-rise {
+  from { opacity: 0; transform: translateY(26px); }
+  to   { opacity: 1; transform: none; }
+}
+.legal-hero-inner > * {
+  animation: legal-rise .85s cubic-bezier(.22, .7, .25, 1) both;
+}
+.legal-hero-inner .eyebrow  { animation-delay: .08s; }
+.legal-title                { animation-delay: .18s; }
+.legal-sub                  { animation-delay: .3s; }
+.legal-updated              { animation-delay: .42s; }
+
+/* [data-reveal] is stamped by JS, so content stays visible without it */
+[data-reveal] {
+  opacity: 0; transform: translateY(20px);
+  transition: opacity .7s ease, transform .7s cubic-bezier(.22, .7, .25, 1);
+}
+[data-reveal].in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .legal-hero-inner > * { animation: none; }
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+}
+
 /* ---- mobile ---- */
 @media (max-width: 900px) {
   .legal-hero { padding: calc(var(--nav-h) + 11px) 12px 0; }

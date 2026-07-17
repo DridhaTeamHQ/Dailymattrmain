@@ -275,7 +275,7 @@
     <footer class="footer" id="footer">
       <div class="footer-top">
         <div class="footer-brand">
-          <p class="footer-logoline"><span class="brand-mini">Daily<b>Mattr’</b>.</span> your deeper read.</p>
+          <p class="footer-logoline"><img class="footer-logo" src="/assets/logo.svg" alt="dailymattr" /><span>your deeper read.</span></p>
           <p class="footer-copy">Long Matters brings you the story behind the headline — with context, clarity, and perspective that help you understand what really matters.</p>
         </div>
         <div class="footer-cols">
@@ -313,6 +313,25 @@
       { rootMargin: "-20% 0px -70% 0px" }
     );
     document.querySelectorAll(".legal-article section[id]").forEach((s) => io.observe(s));
+
+    // gentle scroll reveal — stamped from JS so content is never hidden
+    // when scripts don't run
+    const reveal = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          e.target.classList.add("in");
+          reveal.unobserve(e.target);
+        }
+      },
+      { rootMargin: "0px 0px -8% 0px" }
+    );
+    document
+      .querySelectorAll(".legal-article section, .legal-crosslink, .legal-toc")
+      .forEach((el) => {
+        el.setAttribute("data-reveal", "");
+        reveal.observe(el);
+      });
   </script>
 </body>
 </html>

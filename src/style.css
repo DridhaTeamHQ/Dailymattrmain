@@ -538,7 +538,11 @@ a { text-decoration: none; color: inherit; }
   flex-wrap: wrap;
   padding: 0 6.5vw;
 }
-.footer-logoline { font-size: 24px; font-weight: 700; letter-spacing: -.5px; }
+.footer-logoline {
+  font-size: 24px; font-weight: 700; letter-spacing: -.5px;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.footer-logo { height: 34px; width: auto; }
 .brand-mini { font-family: var(--font-serif); }
 .brand-mini b { font-weight: 900; }
 .footer-copy { color: var(--ink-soft); font-size: 15px; line-height: 1.7; max-width: 360px; margin-top: 22px; }
