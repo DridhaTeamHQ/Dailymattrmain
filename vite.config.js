@@ -1,8 +1,21 @@
 import { defineConfig } from "vite";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      // multi-page: legal pages live at /privacypolicy and /termsandconditions
+      input: {
+        main: path.resolve(root, "index.html"),
+        privacypolicy: path.resolve(root, "privacypolicy/index.html"),
+        termsandconditions: path.resolve(root, "termsandconditions/index.html"),
+      },
+    },
+  },
   server: {
     // the dev server may be launched via the 8.3 short path (DAILYM~1),
     // which fails Vite's strict fs allow-list realpath check on Windows
