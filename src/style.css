@@ -549,9 +549,16 @@ a { text-decoration: none; color: inherit; }
 .footer-legal {
   text-align: right;
   color: var(--ink-soft);
-  font-size: 14px;
+  font-size: 17px;
+  font-weight: 500;
   margin-top: 40px;
   padding: 0 6.5vw;
+}
+.footer-legal .legal-brand {
+  color: var(--blue);
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: -.3px;
 }
 .footer-wordmark {
   font-family: var(--font-serif);
