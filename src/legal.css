@@ -115,8 +115,10 @@ body.legal-page { background: var(--paper); }
 .legal-article p { margin-bottom: 14px; }
 .legal-article p:last-child { margin-bottom: 0; }
 .legal-article strong { color: var(--ink); font-weight: 700; }
-.legal-article a { color: var(--blue); font-weight: 600; }
-.legal-article a:hover { text-decoration: underline; }
+/* inline links only — :not(.btn) keeps this off the crosslink CTA, whose
+   white-on-blue comes from .btn-dark (lower specificity than this rule) */
+.legal-article a:not(.btn) { color: var(--blue); font-weight: 600; }
+.legal-article a:not(.btn):hover { text-decoration: underline; }
 .legal-article ul { list-style: none; margin: 6px 0 16px; }
 .legal-article ul li {
   position: relative;
@@ -157,8 +159,9 @@ body.legal-page { background: var(--paper); }
   color: var(--blue-soft); font-weight: 700; margin-bottom: 18px;
 }
 .legal-contact-card p { color: rgba(255,255,255,.72); margin-bottom: 8px; font-size: 14.5px; }
-.legal-contact-card a { color: #fff; font-weight: 600; }
-.legal-contact-card a:hover { color: var(--blue-soft); }
+/* scoped past .legal-article a:not(.btn) so the card keeps white links */
+.legal-article .legal-contact-card a { color: #fff; font-weight: 600; }
+.legal-article .legal-contact-card a:hover { color: var(--blue-soft); }
 
 /* cross-link banner between the two policies */
 .legal-crosslink {
@@ -171,6 +174,9 @@ body.legal-page { background: var(--paper); }
 }
 .legal-crosslink .lx-copy h3 { margin: 0 0 4px; font-size: 18px; }
 .legal-crosslink .lx-copy p { margin: 0; color: var(--ink-soft); font-size: 14px; }
+.legal-crosslink .btn { font-size: 15px; padding: 13px 24px; }
+.legal-crosslink .btn svg { transition: transform .25s ease; }
+.legal-crosslink .btn:hover svg { transform: translateX(3px); }
 
 /* footer legal row (shared with landing) */
 .footer-legal-links { display: inline-flex; gap: 18px; margin-left: 18px; }
