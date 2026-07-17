@@ -561,23 +561,18 @@ a { text-decoration: none; color: inherit; }
   letter-spacing: -.3px;
 }
 .footer-wordmark {
-  font-family: var(--font-serif);
-  font-size: 14.8vw;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  line-height: .8;
   margin-top: 70px;
-  margin-bottom: -0.02em;
-  text-align: center;
-  white-space: nowrap;
-  color: var(--blue); /* the wordmark is the brand's blue signature */
+  margin-bottom: -1vw;
   width: 100%;
+  display: flex;
+  justify-content: center;
 }
-.footer-wordmark b {
-  font-size: 19.2vw;
-  font-weight: inherit;
+/* the main brand logo (same asset as the navbar), scaled to a giant
+   footer signature */
+.footer-wordmark img {
+  width: min(92vw, 1400px);
+  height: auto;
 }
-.footer-wordmark .wordmark-quote { color: var(--blue-soft); }
 
 /* ============ Features — mobile crossfade stage (desktop hidden) ============ */
 .features-mobile { display: none; height: 280vh; position: relative; }
