@@ -106,7 +106,7 @@ a { text-decoration: none; color: inherit; }
   transition: background .45s ease;
   will-change: transform;
 }
-.brand-hero img { height: 60px; width: auto; display: block;  }
+.brand-hero img { height: 80px; width: auto; display: block;  }
 .brand { display: flex; align-items: center; }
 .brand img { height: 26px; width: auto; display: block; }
 .nav-links { display: flex; gap: 6px; }
@@ -173,7 +173,8 @@ a { text-decoration: none; color: inherit; }
 }
 .word-track { display: flex; flex-direction: column; }
 .word-track span { display: block; height: 1.28em; line-height: 1.28em; }
-.hero-sub { color: rgba(255,255,255,.86); font-size: 18px; line-height: 1.55; margin-top: 26px; }
+.hero-sub1 { color: rgba(255,255,255,.86); font-size: 18px; line-height: 1.55; margin-top: 15px; }
+.hero-sub { color: rgba(255,255,255,.86); font-size: 18px; line-height: 1.55; margin-top: 3px; }
 .store-buttons { display: flex; gap: 14px; justify-content: center; margin-top: 30px; }
 
 /* phone fan — exact Figma geometry (Frame 182, 921x440): upright
@@ -546,6 +547,17 @@ a { text-decoration: none; color: inherit; }
 .brand-mini { font-family: var(--font-serif); }
 .brand-mini b { font-weight: 900; }
 .footer-copy { color: var(--ink-soft); font-size: 15px; line-height: 1.7; max-width: 360px; margin-top: 22px; }
+.footer-parent {
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  letter-spacing: .2px;
+}
+.footer-parent .legal-brand {
+  color: var(--blue);
+  font-weight: 700;
+}
 .footer-cols { display: flex; gap: 90px; }
 .footer-col h4 { font-size: 12px; letter-spacing: 1.5px; color: #97979e; font-weight: 600; margin-bottom: 18px; }
 .footer-col a { display: block; font-size: 14px; font-weight: 500; margin-bottom: 13px; color: var(--ink); }
