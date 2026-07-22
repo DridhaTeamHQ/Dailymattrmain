@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Support — DailyMattr’.</title>
+  <meta name="description" content="Get support for Daily Mattr from the Dridhatechnologies team." />
+  <link rel="icon" type="image/png" href="/assets/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body class="support-page">
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="nav">
+    <a class="brand" href="/"><img src="/assets/logo.svg" alt="dailymattr" /></a>
+    <nav class="nav-links">
+      <a href="/">Home</a>
+      <a href="/#features">Features</a>
+      <a href="/#showcase">What is Mattr</a>
+      <a href="https://longmattr.com/general" target="_blank" rel="noopener">News</a>
+      <a href="/support/" class="active">Support</a>
+      <a href="https://longmattr.com" target="_blank" rel="noopener" class="has-caret">Long Mattrs
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="m19 9-7 7-7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-dark shine" href="/#top">Download App</a>
+      <a class="btn btn-avatar" href="/#top" aria-label="Account"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4.5 20c1.6-3.2 4.4-5 7.5-5s5.9 1.8 7.5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></a>
+    </div>
+  </header>
+
+  <main>
+    <section class="support" id="support" aria-labelledby="support-title">
+      <div class="support-intro">
+        <p class="eyebrow"><mark>NEED A HAND?</mark> WE'RE HERE.</p>
+        <h1 id="support-title">Let’s get you<br/>back on track.</h1>
+        <p>Tell us what you need and we'll send it straight to our support team.</p>
+        <a class="support-email" href="mailto:support@dailymattr.com">support@dailymattr.com</a>
+      </div>
+      <form class="support-form" id="support-form" action="/api/support" method="post">
+        <div class="support-form-row">
+          <label><span>Your name</span><input name="name" type="text" autocomplete="name" required /></label>
+          <label><span>Email address</span><input name="email" type="email" autocomplete="email" required /></label>
+        </div>
+        <label class="support-topic-field">
+          <span>How can we help?</span>
+          <input id="support-topic-input" name="topic" type="hidden" required />
+          <button class="support-topic-trigger" type="button" id="support-topic-trigger" aria-haspopup="listbox" aria-expanded="false">
+            <span id="support-topic-value">Select a topic</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="support-topic-menu" id="support-topic-menu" role="listbox" aria-label="Support topic">
+            <button type="button" role="option" data-value="Account or subscription">Account or subscription</button>
+            <button type="button" role="option" data-value="App feedback">App feedback</button>
+            <button type="button" role="option" data-value="Technical issue">Technical issue</button>
+            <button type="button" role="option" data-value="Something else">Something else</button>
+          </div>
+        </label>
+        <label><span>Your message</span><textarea name="message" rows="5" required></textarea></label>
+        <div class="support-form-action">
+          <button class="btn btn-dark shine" type="submit">Send support request</button>
+          <p class="support-form-note" id="support-form-note" aria-live="polite">We'll send this directly to support@dailymattr.com.</p>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer" id="footer">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <p class="footer-logoline"><img class="footer-logo" src="/assets/logo.svg" alt="dailymattr" /><span>your deeper read.</span></p>
+        <p class="footer-copy">Daily Matters brings you the story behind the headline — with context, clarity, and perspective that help you understand what really matters.</p>
+        <p class="footer-parent">Daily Mattr is a part of <span class="legal-brand">Dridhatechnologies</span></p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col"><h4>PRODUCT</h4><a href="/">Home</a><a href="/#showcase">What is Mattr</a><a href="/support/">Support</a><a href="/#top">Download APP</a></div>
+        <div class="footer-col"><h4>LEGAL</h4><a href="/privacypolicy/">Privacy Policy</a><a href="/termsandconditions/">Terms &amp; Conditions</a></div>
+        <div class="footer-col footer-support"><h4>SUPPORT</h4><a href="/support/">Get help</a><a href="mailto:support@dailymattr.com">support@dailymattr.com</a></div>
+      </div>
+    </div>
+    <p class="footer-legal">© 2026 <span class="legal-brand">Dridhatechnologies</span>. All rights reserved.</p>
+    <div class="footer-wordmark" aria-hidden="true"><img src="/assets/logo.svg" alt="" /></div>
+  </footer>
+
+  <script type="module" src="/src/support.js"></script>
+</body>
+</html>
