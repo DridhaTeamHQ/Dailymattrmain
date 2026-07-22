@@ -20,9 +20,9 @@
       <a href="/">Home</a>
       <a href="/#features">Features</a>
       <a href="/#showcase">What is Mattr</a>
-      <a href="https://longmattr.com/general" target="_blank" rel="noopener">News</a>
+      <a href="https://dailymattr.com/general" target="_blank" rel="noopener">News</a>
       <a href="/support/" class="active">Support</a>
-      <a href="https://longmattr.com" target="_blank" rel="noopener" class="has-caret">Long Mattrs
+      <a href="https://dailymattr.com" target="_blank" rel="noopener" class="has-caret">DailyMattr
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="m19 9-7 7-7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
     </nav>
@@ -41,28 +41,50 @@
         <a class="support-email" href="mailto:support@dailymattr.com">support@dailymattr.com</a>
       </div>
       <form class="support-form" id="support-form" action="/api/support" method="post">
-        <div class="support-form-row">
-          <label><span>Your name</span><input name="name" type="text" autocomplete="name" required /></label>
-          <label><span>Email address</span><input name="email" type="email" autocomplete="email" required /></label>
-        </div>
-        <label class="support-topic-field">
-          <span>How can we help?</span>
-          <input id="support-topic-input" name="topic" type="hidden" required />
-          <button class="support-topic-trigger" type="button" id="support-topic-trigger" aria-haspopup="listbox" aria-expanded="false">
-            <span id="support-topic-value">Select a topic</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <div class="support-topic-menu" id="support-topic-menu" role="listbox" aria-label="Support topic">
-            <button type="button" role="option" data-value="Account or subscription">Account or subscription</button>
-            <button type="button" role="option" data-value="App feedback">App feedback</button>
-            <button type="button" role="option" data-value="Technical issue">Technical issue</button>
-            <button type="button" role="option" data-value="Something else">Something else</button>
+        <div class="support-form-content">
+          <div class="support-form-heading">
+            <div>
+              <p class="support-form-kicker">DailyMattr support</p>
+              <h2>How can we help?</h2>
+            </div>
+            <span class="support-availability"><i aria-hidden="true"></i> Online</span>
           </div>
-        </label>
-        <label><span>Your message</span><textarea name="message" rows="5" required></textarea></label>
-        <div class="support-form-action">
-          <button class="btn btn-dark shine" type="submit">Send support request</button>
-          <p class="support-form-note" id="support-form-note" aria-live="polite">We'll send this directly to support@dailymattr.com.</p>
+          <div class="support-form-row">
+            <label><span>Your name</span><input name="name" type="text" autocomplete="name" placeholder="Your full name" required /></label>
+            <label><span>Email address</span><input name="email" type="email" autocomplete="email" placeholder="you@example.com" required /></label>
+          </div>
+          <label class="support-topic-field">
+            <span>Support topic</span>
+            <input id="support-topic-input" name="topic" type="hidden" required />
+            <button class="support-topic-trigger" type="button" id="support-topic-trigger" aria-haspopup="listbox" aria-expanded="false">
+              <span id="support-topic-value">Select a topic</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="support-topic-menu" id="support-topic-menu" role="listbox" aria-label="Support topic">
+              <button type="button" role="option" data-value="Account or subscription">Account or subscription</button>
+              <button type="button" role="option" data-value="App feedback">App feedback</button>
+              <button type="button" role="option" data-value="Technical issue">Technical issue</button>
+              <button type="button" role="option" data-value="Something else">Something else</button>
+            </div>
+          </label>
+          <label><span>Your message</span><textarea name="message" rows="5" placeholder="Tell us what happened and how we can help..." required></textarea></label>
+          <div class="support-form-action">
+            <button class="btn btn-dark shine support-submit" type="submit">
+              <span class="support-submit-label">Send support request</span>
+              <span class="support-submit-loading" aria-hidden="true">Sending request</span>
+            </button>
+            <p class="support-form-note" id="support-form-note" aria-live="polite">Sent securely to support@dailymattr.com</p>
+          </div>
+        </div>
+        <div class="support-success" id="support-success" aria-hidden="true">
+          <div class="support-success-mark" aria-hidden="true">
+            <span></span>
+            <img src="/assets/favicon.png" alt="" />
+          </div>
+          <p class="support-success-kicker">Request sent successfully</p>
+          <h2>You're all set.</h2>
+          <p>Your message is with our support team. We'll reply to the email address you provided.</p>
+          <button class="support-send-another" id="support-send-another" type="button">Send another message</button>
         </div>
       </form>
     </section>
