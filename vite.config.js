@@ -39,7 +39,7 @@ export default defineConfig(({ mode }) => {
       configureServer(server) {
         server.middlewares.use("/__save", (req, res) => {
           const name = new URLSearchParams(req.url.split("?")[1] || "").get("name") || "";
-          if (req.method !== "POST" || !/^[a-z0-9-]+\.webp$/.test(name)) {
+          if (req.method !== "POST" || !/^[a-z0-9-]+\.(webp|png)$/.test(name)) {
             res.statusCode = 400;
             res.end("bad request");
             return;
