@@ -20,17 +20,14 @@ npm run preview  # preview the production build
 ```
 
 ## Support Email
-The `/support/` form posts to `/api/support` and sends mail through Resend.
-Set these environment variables in Vercel before deploying:
+No email provider is wired up. The `/support/` form validates the fields and
+then hands them to the visitor's own mail app via a pre-filled `mailto:` to
+support@dailymattr.com (see `src/support.js`). That means no API keys, no
+serverless function and no third-party service to maintain.
 
-```bash
-RESEND_API_KEY=re_xxxxxxxxx
-SUPPORT_TO_EMAIL=support@dailymattr.com
-SUPPORT_FROM_EMAIL=DailyMattr Support <support@dailymattr.com>
-```
-
-Replace `re_xxxxxxxxx` with the real API key in Vercel, not in source code.
-`SUPPORT_FROM_EMAIL` must use a sender/domain verified in Resend.
+To move back to server-side sending later: add an `api/support.js` function
+that accepts the JSON payload, and swap the `mailto:` handoff in
+`src/support.js` for a `fetch("/api/support", { method: "POST", ... })`.
 
 ## Structure
 - `index.html` — page markup (hero, showcase, features, FAQ, footer)
