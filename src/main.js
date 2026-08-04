@@ -777,13 +777,34 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
   });
 });
 
-/* ---------- FAQ tabs (visual only) ---------- */
-document.querySelectorAll(".faq-tabs .tab").forEach((tab) => {
-  tab.addEventListener("click", () => {
-    document.querySelectorAll(".faq-tabs .tab").forEach((t) => t.classList.remove("active"));
-    tab.classList.add("active");
-  });
+/* ---------- "Download App" points the eye at the store pills ---------- */
+const storePills = [...document.querySelectorAll(".store-buttons .btn-store")];
+let flagTimer;
+function flagStorePills() {
+  if (!storePills.length) return;
+  clearTimeout(flagTimer);
+  storePills.forEach((b) => b.classList.remove("is-flagged"));
+  // force a reflow so a second click restarts the pulse instead of being ignored
+  void storePills[0].offsetWidth;
+  storePills.forEach((b) => b.classList.add("is-flagged"));
+  flagTimer = setTimeout(
+    () => storePills.forEach((b) => b.classList.remove("is-flagged")),
+    3400
+  );
+}
+
+document.querySelectorAll('.nav-cta a[href="#top"]').forEach((a) => {
+  // the anchor handler above already runs the smooth scroll — wait for it
+  // to land before flashing, otherwise the pulse plays off-screen
+  a.addEventListener("click", () => setTimeout(flagStorePills, 900));
 });
+
+/* subpages link here as /#download — flash once the curtain is up */
+function flagFromHash() {
+  if (location.hash !== "#download") return;
+  history.replaceState(null, "", location.pathname + location.search);
+  flagStorePills();
+}
 
 /* one accordion item open at a time */
 document.querySelectorAll(".accordion details").forEach((d) => {
@@ -858,6 +879,8 @@ async function playIntro() {
       0.67
     )
     .to(introOff, { y: 0, a: 1, duration: 1.05, ease: "power3.out" }, 0.77);
+
+  await tl; // gsap timelines are thenable — resolve once the hero has settled
 }
 
 /* build after fonts are ready so measurements are stable */
@@ -865,7 +888,7 @@ const ready = document.fonts ? document.fonts.ready : Promise.resolve();
 ready.then(() => {
   build();
   ScrollTrigger.refresh();
-  playIntro();
+  playIntro().then(flagFromHash);
   // headless/pre-rendered contexts can report a 0-size viewport at load;
   // rebuild once a real viewport shows up
   if (!window.innerWidth || !window.innerHeight) {

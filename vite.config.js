@@ -14,10 +14,12 @@ export default defineConfig(({ mode }) => {
   return {
   build: {
     rollupOptions: {
-      // multi-page: legal pages live at /privacypolicy and /termsandconditions
+      // multi-page: legal pages live at /editorialguidelines, /privacypolicy
+      // and /termsandconditions
       input: {
         main: path.resolve(root, "index.html"),
         support: path.resolve(root, "support/index.html"),
+        editorialguidelines: path.resolve(root, "editorialguidelines/index.html"),
         privacypolicy: path.resolve(root, "privacypolicy/index.html"),
         termsandconditions: path.resolve(root, "termsandconditions/index.html"),
       },
