@@ -644,11 +644,16 @@ a { text-decoration: none; color: inherit; }
 }
 .footer-top {
   display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 60px;
-  flex-wrap: wrap;
+  gap: clamp(32px, 4vw, 80px);
+  /* brand block and link columns stay side by side on desktop */
+  flex-wrap: nowrap;
   padding: 0 6.5vw;
 }
+/* shrinks faster than the link columns, so the four columns keep a
+   single row for as long as they can */
+.footer-brand { flex: 0 4 380px; min-width: 230px; }
 .footer-logoline {
   font-size: 24px; font-weight: 700; letter-spacing: -.5px;
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
@@ -668,7 +673,17 @@ a { text-decoration: none; color: inherit; }
   color: var(--blue);
   font-weight: 700;
 }
-.footer-cols { display: flex; gap: 90px; }
+.footer-cols {
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  /* wrap inside the column block on narrow desktops instead of pushing
+     the whole block below the brand */
+  flex-wrap: wrap;
+  gap: 30px clamp(20px, 2.8vw, 80px);
+  min-width: 0;
+}
+.footer-col { min-width: 0; }
 .footer-col h4 { font-size: 12px; letter-spacing: 1.5px; color: #97979e; font-weight: 600; margin-bottom: 18px; }
 .footer-col a { display: block; font-size: 14px; font-weight: 500; margin-bottom: 13px; color: var(--ink); }
 .footer-col a:hover { text-decoration: underline; }
@@ -867,7 +882,10 @@ a { text-decoration: none; color: inherit; }
     gap: 40px;
     padding: 0 clamp(20px, 6vw, 34px);
   }
-  .footer-cols { gap: clamp(32px, 10vw, 90px); flex-wrap: wrap; }
+  /* stacked again below 900px — reset the desktop flex sizing so the
+     basis doesn't apply to height in a column container */
+  .footer-brand { flex: 0 1 auto; min-width: 0; }
+  .footer-cols { flex: 0 1 auto; justify-content: flex-start; gap: clamp(32px, 10vw, 90px); flex-wrap: wrap; }
   .footer-legal {
     text-align: left;
     padding: 0 clamp(20px, 6vw, 34px);
