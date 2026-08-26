@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Newsletter — dailymattr</title>
+  <meta name="description" content="Subscribe to the dailymattr newsletter — the day's news, minus the noise. Five stories that actually mattr, every morning." />
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=2" />
+  <link rel="icon" type="image/png" href="/assets/favicon.png?v=2" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+  <link rel="stylesheet" href="/src/newsletter.css" />
+</head>
+<body class="nl-body">
+
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="nav">
+    <a class="brand" href="/"><img src="/assets/logo.svg" alt="dailymattr" /></a>
+    <nav class="nav-links">
+      <a href="/">Home</a>
+      <a href="/#showcase">What are we</a>
+      <a href="/#features">Features</a>
+      <a href="/newsletter/" class="active">Newsletter</a>
+      <a href="/support/">Support</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-dark shine" href="https://play.google.com/store/apps/details?id=com.dailymattr&pcampaignid=web_share" target="_blank" rel="noopener noreferrer">Download App</a>
+    </div>
+  </header>
+
+  <main class="nl-main">
+    <!-- soft background blobs + doodles -->
+    <div class="nl-backdrop" aria-hidden="true">
+      <div class="nl-blob nl-blob-1"></div>
+      <div class="nl-blob nl-blob-2"></div>
+      <div class="nl-blob nl-blob-3"></div>
+      <span class="nl-doodle" style="left:5%;  top:18%; --rot:-12deg; --d:.25s; font-size:42px; color:#3979ff;">✦</span>
+      <span class="nl-doodle" style="right:7%; top:19%; --rot:12deg;  --d:.33s; font-size:44px; color:#8db4ff;">☻</span>
+      <span class="nl-doodle" style="left:8%;  bottom:20%; --rot:-12deg; --d:.41s; font-size:42px; color:#2c66ea;">✉</span>
+      <span class="nl-doodle" style="right:5%; bottom:24%; --rot:12deg;  --d:.49s; font-size:38px; color:#5b93ff;">☕</span>
+      <span class="nl-doodle" style="left:21%; top:38%; --rot:12deg;  --d:.57s; font-size:30px; color:#3979ff;">⚡</span>
+      <span class="nl-doodle" style="right:22%; top:40%; --rot:-12deg; --d:.65s; font-size:38px; color:#8db4ff;">✎</span>
+      <svg class="nl-squiggle" viewBox="0 0 175 70" fill="none">
+        <path d="M5 57C32 18 49 70 73 34C92 5 119 41 170 8" stroke="#3979ff" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 8" />
+        <path d="M163 5l8 3-5 7" stroke="#3979ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </div>
+
+    <div class="nl-wrap">
+      <div class="nl-head nl-rise">
+        <h1 class="nl-title">The news, minus the <span class="nl-noise">noise<span aria-hidden="true" class="nl-underline"></span></span>.</h1>
+        <p class="nl-sub">A smart little read on the stories shaping your world — delivered fresh, clear and actually enjoyable.</p>
+      </div>
+
+      <section class="nl-card nl-rise nl-rise-2">
+        <aside class="nl-aside">
+          <div class="nl-ring nl-ring-1" aria-hidden="true"></div>
+          <div class="nl-ring nl-ring-2" aria-hidden="true"></div>
+          <p class="nl-eyebrow">Your new ritual</p>
+          <h2 class="nl-aside-title">Open your inbox to something good.</h2>
+          <div class="nl-points">
+            <div class="nl-point">
+              <span class="nl-point-icon">🗞️</span>
+              <p><strong>The big picture</strong>A calm read of what matters today.</p>
+            </div>
+            <div class="nl-point">
+              <span class="nl-point-icon">🍿</span>
+              <p><strong>Culture &amp; curious bits</strong>The smart stuff you’ll want to share.</p>
+            </div>
+            <div class="nl-point">
+              <span class="nl-point-icon">☀️</span>
+              <p><strong>Every morning</strong>One email, five stories. 30 seconds, done.</p>
+            </div>
+          </div>
+          <p class="nl-aside-note">No doomscrolling. No clutter. Unsubscribe whenever.</p>
+        </aside>
+
+        <div class="nl-form-side">
+          <!-- form state -->
+          <form id="nl-form" class="nl-form" novalidate>
+            <img src="/assets/logo.svg" alt="dailymattr" class="nl-form-logo" />
+            <div class="nl-fields">
+              <label class="nl-label">First name <span class="nl-optional">(optional)</span>
+                <input id="nl-name" type="text" autocomplete="given-name" placeholder="What should we call you?" class="nl-input" />
+              </label>
+              <label class="nl-label">Email address
+                <input id="nl-email" type="email" required autocomplete="email" placeholder="you@example.com" class="nl-input" />
+              </label>
+            </div>
+            <label class="nl-consent">
+              <input id="nl-consent" type="checkbox" checked />
+              <span>I’m happy to receive the newsletter and occasional updates. I can unsubscribe anytime.</span>
+            </label>
+            <p id="nl-error" class="nl-error" role="alert" hidden></p>
+            <button id="nl-submit" type="submit" class="nl-button">
+              <span class="nl-button-label">Send me the good stuff <span class="nl-arrow">→</span></span>
+            </button>
+          </form>
+
+          <!-- result state (new / already subscribed / welcome back) -->
+          <div id="nl-done" class="nl-done" hidden>
+            <span id="nl-done-badge" class="nl-done-badge">🎉</span>
+            <h2 id="nl-done-title">You’re on the list!</h2>
+            <p id="nl-done-copy">Look out for a welcome note in your inbox. Good reads are on their way.</p>
+            <button id="nl-again" type="button" class="nl-again">Add another email</button>
+          </div>
+        </div>
+      </section>
+
+      <p class="nl-foot nl-rise nl-rise-3">Join 1,500+ readers making more sense of the day, one email at a time. <span class="nl-foot-star">✦</span></p>
+    </div>
+  </main>
+
+  <script type="module" src="/src/newsletter.js"></script>
+</body>
+</html>

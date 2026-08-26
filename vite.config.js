@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => {
       // and /termsandconditions
       input: {
         main: path.resolve(root, "index.html"),
+        newsletter: path.resolve(root, "newsletter/index.html"),
         support: path.resolve(root, "support/index.html"),
         editorialguidelines: path.resolve(root, "editorialguidelines/index.html"),
         privacypolicy: path.resolve(root, "privacypolicy/index.html"),
