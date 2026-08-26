@@ -61,10 +61,6 @@
   width: 100%; height: 7px; border-radius: 999px;
   background: rgba(57,121,255,.3); transform: rotate(-2deg);
 }
-.nl-sub {
-  margin: 20px auto 0; max-width: 560px;
-  font-size: clamp(15px, 2vw, 18px); line-height: 1.6; color: var(--ink-soft);
-}
 
 /* ---- the card ---- */
 .nl-card {
