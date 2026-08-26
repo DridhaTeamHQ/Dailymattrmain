@@ -10,7 +10,6 @@ const SUPABASE_ANON_KEY =
 const form = document.getElementById("nl-form");
 const nameInput = document.getElementById("nl-name");
 const emailInput = document.getElementById("nl-email");
-const consentInput = document.getElementById("nl-consent");
 const errorEl = document.getElementById("nl-error");
 const submitBtn = document.getElementById("nl-submit");
 const doneEl = document.getElementById("nl-done");
@@ -81,11 +80,6 @@ form.addEventListener("submit", async (event) => {
     emailInput.focus();
     return;
   }
-  if (!consentInput.checked) {
-    showError("Please confirm you are happy to receive the newsletter.");
-    return;
-  }
-
   submitBtn.disabled = true;
   submitBtn.querySelector(".nl-button-label").textContent = "Sending your invite…";
   try {
