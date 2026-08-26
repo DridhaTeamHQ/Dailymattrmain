@@ -170,9 +170,6 @@
 }
 .nl-again:hover { background: var(--blue); color: #fff; }
 
-.nl-foot { margin-top: 30px; text-align: center; font-size: 12px; color: var(--ink-soft); }
-.nl-foot-star { margin-left: 4px; color: var(--blue); }
-
 @media (max-width: 899px) {
   .nl-main { padding: calc(var(--nav-h) + 28px) 12px 56px; }
 }
