@@ -14,7 +14,7 @@ const crumbs = (trail) => html`
         )}
       </nav>`;
 
-/* compact card used by the hubs, the related rail and prev/next thumbs */
+/* compact card used by the hubs */
 export function card(post, { eager = false } = {}) {
   const title = cleanHeadline(post.headline);
   const artwork = artworkFor(post);
@@ -34,11 +34,36 @@ export function card(post, { eager = false } = {}) {
         </li>`;
 }
 
-export function renderArticle({ seo, post, related, prev, next }) {
+export function renderArticle({ seo, post, neighbours }) {
   const { title, heroImages: slides, points, cat, source } = seo;
   const host = hostnameOf(source);
+  const older = neighbours?.older || [];
+  const newer = neighbours?.newer || [];
+  /* one step back and one step forward — what the arrows and swipes follow */
+  const prev = older[0] || null;
+  const next = newer[0] || null;
+
+  const arrow = (post, dir, label) =>
+    post
+      ? html`<a class="story-arrow ${dir}" href="${articlePath(post)}" rel="${dir === "prev" ? "prev" : "next"}" data-story-step="${dir}" aria-label="${label}: ${truncateAtWord(cleanHeadline(post.headline), 60)}"><span aria-hidden="true">${dir === "prev" ? "‹" : "›"}</span></a>`
+      : "";
+
+  /* Every neighbour is a real anchor, not a scripted jump: this is how a
+     crawler walks from story to story now that the related grid is gone, and
+     how the page still works with JavaScript off. */
+  const moreList = (posts, heading) =>
+    posts.length
+      ? html`
+        <div class="story-more-col">
+          <h2>${heading}</h2>
+          <ul>
+            ${posts.map((p) => html`<li><a href="${articlePath(p)}">${truncateAtWord(cleanHeadline(p.headline), 90)}</a></li>`)}
+          </ul>
+        </div>`
+      : "";
+
   return html`
-    <article class="article">
+    <article class="article" data-story${raw(prev ? ` data-prev="${articlePath(prev)}"` : "")}${raw(next ? ` data-next="${articlePath(next)}"` : "")}>
 ${crumbs(seo.trail)}
       <div class="article-layout">
         <div class="article-media">
@@ -89,23 +114,38 @@ ${crumbs(seo.trail)}
 
           ${prev || next
             ? html`
-          <nav class="article-nav" aria-label="More stories">
-            ${prev ? html`<a href="${articlePath(prev)}" rel="prev"><small>Previous</small><span>${truncateAtWord(cleanHeadline(prev.headline), 85)}</span></a>` : ""}
-            ${next ? html`<a href="${articlePath(next)}" rel="next"><small>Next</small><span>${truncateAtWord(cleanHeadline(next.headline), 85)}</span></a>` : ""}
+          <nav class="story-nav" aria-label="Previous and next story">
+            ${prev ? html`<a href="${articlePath(prev)}" rel="prev" data-story-step="prev"><small>Previous</small><span>${truncateAtWord(cleanHeadline(prev.headline), 85)}</span></a>` : ""}
+            ${next ? html`<a href="${articlePath(next)}" rel="next" data-story-step="next"><small>Next</small><span>${truncateAtWord(cleanHeadline(next.headline), 85)}</span></a>` : ""}
           </nav>`
+            : ""}
+
+          ${older.length || newer.length
+            ? html`
+          <div class="story-more">
+            ${moreList(newer, "Newer")}
+            ${moreList(older, "Older")}
+          </div>`
             : ""}
         </div>
       </div>
+
+      ${arrow(prev, "prev", "Previous story")}
+      ${arrow(next, "next", "Next story")}
     </article>
 
-    ${related.length
-      ? html`
-    <section class="news-wrap news-related">
-      <h2>More in ${cat ? cat.label : "News"}</h2>
-      <ol class="news-grid">
-        ${related.map((p) => card(p))}
-      </ol>
-    </section>`
-      : ""}
+    <!-- shown after a run of stories; hidden until the script opens it, so an
+         empty dialog never flashes and nothing shifts -->
+    <div class="app-gate" id="app-gate" hidden>
+      <div class="app-gate-backdrop" data-gate-dismiss></div>
+      <div class="app-gate-panel" role="dialog" aria-modal="true" aria-labelledby="app-gate-title">
+        <button class="app-gate-close" type="button" data-gate-dismiss aria-label="Close and keep reading">×</button>
+        <p class="app-gate-kicker">Enjoying DailyMattr?</p>
+        <h2 id="app-gate-title">Get 100 stories a day in the app</h2>
+        <p class="app-gate-copy">Read, watch and listen — every story in one place, free.</p>
+        <a class="app-gate-cta" href="${PLAY_URL}" target="_blank" rel="noopener noreferrer">Download the app</a>
+        <button class="app-gate-skip" type="button" data-gate-dismiss>Keep reading</button>
+      </div>
+    </div>
 `;
 }

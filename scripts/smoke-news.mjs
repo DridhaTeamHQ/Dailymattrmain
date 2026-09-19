@@ -87,6 +87,16 @@ console.log("\narticle");
   check("slides use the resizer", /render\/image\/public\/.*?width=\d+/.test(body));
   check("srcset present", body.includes("srcset="));
   check("bullets rendered", (body.match(/<li>[^<]{30,}<\/li>/g) || []).length >= 3);
+  check("no related grid", !body.includes("news-related"));
+  check("story has prev/next data", /data-story[^>]*data-(prev|next)="/.test(body));
+  check("neighbour links are real anchors", (body.match(/data-story-step="(prev|next)"/g) || []).length >= 1);
+  check("at most 3 older + 3 newer listed", (() => {
+    const more = body.match(/<div class="story-more">[\s\S]*?<\/div>\s*<\/div>/);
+    return !more || (more[0].match(/<li><a href="\/news\//g) || []).length <= 6;
+  })());
+  check("app prompt present and hidden", body.includes('id="app-gate"') && /id="app-gate"[^>]*\shidden/.test(body));
+  check("prompt has a close and a skip", body.includes("app-gate-close") && body.includes("app-gate-skip"));
+  check("story nav script injected", body.includes("dm.prompts") && body.includes("touchend"));
   check("dateModified >= datePublished", (() => {
     const ld = JSON.parse(body.match(/<script type="application\/ld\+json">(\{"@context":"https:\/\/schema\.org","@type":"NewsArticle".*?)<\/script>/)[1]);
     return new Date(ld.dateModified) >= new Date(ld.datePublished);

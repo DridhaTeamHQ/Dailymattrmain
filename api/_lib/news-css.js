@@ -128,14 +128,42 @@ export const NEWS_CSS = `
 .article-cta p { font-size: 15px; font-weight: 600; }
 .article-cta a { background: var(--blue); color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; padding: 11px 20px; border-radius: 999px; }
 
-.article-nav { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin: 34px 0; }
-.article-nav a { text-decoration: none; color: var(--ink); border: 1px solid var(--mist); border-radius: 16px; padding: 14px 16px; }
-.article-nav a:hover { border-color: var(--ink); }
-.article-nav small { display: block; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 6px; }
-.article-nav span { font-size: 14.5px; line-height: 1.4; font-weight: 600; }
+/* ---------- story to story ---------- */
+.story-nav { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin: 34px 0 30px; }
+.story-nav a { text-decoration: none; color: var(--ink); border: 1px solid var(--mist); border-radius: 16px; padding: 14px 16px; }
+.story-nav a:hover { border-color: var(--ink); }
+.story-nav small { display: block; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 6px; }
+.story-nav span { font-size: 14.5px; line-height: 1.4; font-weight: 600; }
 
-.news-related { margin-top: 54px; }
-.news-related h2 { font-size: 20px; margin-bottom: 20px; letter-spacing: -0.01em; }
+/* the rest of the run: plain links, so the chain stays crawlable without a
+   wall of thumbnails */
+.story-more { display: grid; gap: 22px clamp(24px, 4vw, 56px); grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); margin-bottom: 8px; padding-top: 24px; border-top: 1px solid var(--mist); }
+.story-more h2 { font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin-bottom: 12px; }
+.story-more ul { list-style: none; display: grid; gap: 11px; }
+.story-more a { color: var(--ink); text-decoration: none; font-size: 14.5px; line-height: 1.45; font-weight: 500; }
+.story-more a:hover { color: var(--blue); }
+
+/* big arrows beside the story on a pointer device; touch gets the swipe */
+.story-arrow { position: fixed; top: 50%; transform: translateY(-50%); z-index: 40; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; text-decoration: none; font-size: 26px; line-height: 1; color: var(--ink); background: var(--paper); border: 1px solid var(--mist); box-shadow: 0 6px 22px rgba(10,10,11,.10); transition: transform .18s ease, border-color .18s ease; }
+.story-arrow:hover { border-color: var(--ink); transform: translateY(-50%) scale(1.06); }
+.story-arrow.prev { left: clamp(8px, 2vw, 26px); }
+.story-arrow.next { right: clamp(8px, 2vw, 26px); }
+@media (hover: none), (max-width: 1040px) { .story-arrow { display: none; } }
+
+/* ---------- app prompt ---------- */
+.app-gate { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 20px; }
+.app-gate[hidden] { display: none; }
+.app-gate-backdrop { position: absolute; inset: 0; background: rgba(10,10,11,.55); backdrop-filter: blur(2px); }
+.app-gate-panel { position: relative; width: min(420px, 100%); background: var(--coal); color: #fff; border-radius: var(--radius-panel); padding: 34px 28px 28px; text-align: center; box-shadow: 0 24px 60px rgba(10,10,11,.4); }
+.app-gate-kicker { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--blue-soft); font-weight: 600; }
+.app-gate-panel h2 { font-size: 23px; line-height: 1.25; letter-spacing: -0.01em; margin: 10px 0 8px; }
+.app-gate-copy { font-size: 14.5px; line-height: 1.5; color: #b6b6bd; }
+.app-gate-cta { display: block; margin: 22px 0 10px; background: var(--blue); color: #fff; text-decoration: none; font-weight: 700; font-size: 15px; padding: 13px 20px; border-radius: 999px; }
+.app-gate-cta:hover { background: var(--blue-soft); }
+.app-gate-skip { background: none; border: 0; color: #9a9aa2; font-size: 13.5px; font-weight: 600; cursor: pointer; padding: 6px; font-family: inherit; }
+.app-gate-skip:hover { color: #fff; }
+.app-gate-close { position: absolute; top: 12px; right: 14px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: rgba(255,255,255,.1); color: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
+.app-gate-close:hover { background: rgba(255,255,255,.2); }
 
 .news-empty { padding: 60px 0; color: var(--ink-soft); }
 .news-empty h1 { font-size: 30px; color: var(--ink); margin-bottom: 12px; }

@@ -3,6 +3,111 @@
  * horizontal scroller and a crawler still sees every image. This only adds
  * the arrows, the dots and keyboard support. */
 
+/* Story-to-story navigation: arrows on a pointer, swipe on a touch screen,
+ * left/right keys anywhere. Every destination is already an <a> in the page,
+ * so with JavaScript off the links still work — this only adds the gestures
+ * and the app prompt.
+ *
+ * The prompt appears after a run of stories, and X (or "Keep reading")
+ * continues to the story that was pending, so nobody loses the swipe they
+ * just made. It gives up after a few appearances per visit rather than
+ * standing in front of someone who is reading a long run. */
+export const STORY_NAV_JS = `
+(() => {
+  const article = document.querySelector("[data-story]");
+  if (!article) return;
+
+  const RUN = 3;          // stories between prompts
+  const MAX_PROMPTS = 3;  // per visit, then never again
+  const KEY_RUN = "dm.run";
+  const KEY_SEEN = "dm.prompts";
+
+  const store = {
+    get(k) { try { return +sessionStorage.getItem(k) || 0; } catch { return 0; } },
+    set(k, v) { try { sessionStorage.setItem(k, String(v)); } catch {} },
+  };
+
+  const gate = document.getElementById("app-gate");
+  let pending = "";
+
+  const closeGate = () => {
+    if (gate) gate.hidden = true;
+    document.body.style.overflow = "";
+    const url = pending;
+    pending = "";
+    if (url) location.href = url;
+  };
+
+  const openGate = (url) => {
+    if (!gate) { location.href = url; return; }
+    pending = url;
+    gate.hidden = false;
+    document.body.style.overflow = "hidden";
+    const close = gate.querySelector(".app-gate-close");
+    if (close) close.focus();
+  };
+
+  const go = (dir) => {
+    const url = article.getAttribute(dir === "next" ? "data-next" : "data-prev");
+    if (!url) return;
+    const run = store.get(KEY_RUN) + 1;
+    const seen = store.get(KEY_SEEN);
+    if (run >= RUN && seen < MAX_PROMPTS) {
+      store.set(KEY_RUN, 0);
+      store.set(KEY_SEEN, seen + 1);
+      openGate(url);
+      return;
+    }
+    store.set(KEY_RUN, run);
+    location.href = url;
+  };
+
+  // the arrows and the previous/next cards are real links; intercept so the
+  // run is counted, and let a modified click (new tab) through untouched
+  document.querySelectorAll("[data-story-step]").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      e.preventDefault();
+      go(el.getAttribute("data-story-step"));
+    });
+  });
+
+  if (gate) {
+    gate.querySelectorAll("[data-gate-dismiss]").forEach((el) => el.addEventListener("click", closeGate));
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !gate.hidden) closeGate(); });
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (!gate || !gate.hidden) return;
+    const t = e.target;
+    if (t && (t.closest("input, textarea, select") || t.isContentEditable)) return;
+    if (e.key === "ArrowRight") go("next");
+    if (e.key === "ArrowLeft") go("prev");
+  });
+
+  // swipe: horizontal, decisive, and not while the reader is panning the card
+  // rail or has started the gesture on a link
+  let x0 = 0, y0 = 0, t0 = 0, tracking = false;
+  addEventListener("touchstart", (e) => {
+    if (e.touches.length !== 1 || (gate && !gate.hidden)) { tracking = false; return; }
+    const target = e.target;
+    if (target && target.closest && target.closest(".article-slides")) { tracking = false; return; }
+    const t = e.touches[0];
+    x0 = t.clientX; y0 = t.clientY; t0 = Date.now(); tracking = true;
+  }, { passive: true });
+
+  addEventListener("touchend", (e) => {
+    if (!tracking) return;
+    tracking = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - x0, dy = t.clientY - y0;
+    if (Date.now() - t0 > 800) return;             // a slow drag is not a swipe
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
+    go(dx < 0 ? "next" : "prev");                  // finger left = forward
+  }, { passive: true });
+})();
+`;
+
 export const CAROUSEL_JS = `
 (() => {
   const pix = document.querySelector(".pix");

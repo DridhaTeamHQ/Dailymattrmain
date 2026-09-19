@@ -56,20 +56,22 @@ const db = {
     return data || [];
   },
 
-  /* chronological neighbours within the same category */
-  async getPrevNext(post) {
+  /* The chronological neighbours within the same category: up to `span` older
+   * and `span` newer. The reader swipes through these one page at a time, and
+   * every one is a real link in the markup, so crawlers walk the same chain. */
+  async getNeighbours(post, span = 3) {
     const base = () => {
       let q = live(pixDb().from("pix_posts").select(COLS)).neq("id", post.id);
       if (post.category_id != null) q = q.eq("category_id", post.category_id);
       return q;
     };
-    const [prev, next] = await Promise.all([
-      base().lt("published_at", post.published_at).order("published_at", { ascending: false }).limit(1),
-      base().gt("published_at", post.published_at).order("published_at", { ascending: true }).limit(1),
+    const [older, newer] = await Promise.all([
+      base().lt("published_at", post.published_at).order("published_at", { ascending: false }).limit(span),
+      base().gt("published_at", post.published_at).order("published_at", { ascending: true }).limit(span),
     ]);
-    if (prev.error) fail(prev.error, "getPrev");
-    if (next.error) fail(next.error, "getNext");
-    return { prev: prev.data?.[0] || null, next: next.data?.[0] || null };
+    if (older.error) fail(older.error, "getOlder");
+    if (newer.error) fail(newer.error, "getNewer");
+    return { older: older.data || [], newer: newer.data || [] };
   },
 
   /* one page of the feed or a hub. Requests size+1 rows so "is there a next
@@ -115,7 +117,7 @@ const pick = () => (useSnapshot() ? snapshot : db);
 
 export const getPostByPublishedId = (...a) => pick().getPostByPublishedId(...a);
 export const getRelated = (...a) => pick().getRelated(...a);
-export const getPrevNext = (...a) => pick().getPrevNext(...a);
+export const getNeighbours = (...a) => pick().getNeighbours(...a);
 export const listLive = (...a) => pick().listLive(...a);
 export const listRecentForNews = (...a) => pick().listRecentForNews(...a);
 export const listBetween = (...a) => pick().listBetween(...a);

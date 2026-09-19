@@ -5,9 +5,9 @@ import { articleHead, hubHead, articleTrail, noindexHead } from "./seo.js";
 import { renderArticle } from "./render-article.js";
 import { renderHub } from "./render-hub.js";
 import { renderError } from "./render-error.js";
-import { CAROUSEL_JS } from "./news-js.js";
+import { CAROUSEL_JS, STORY_NAV_JS } from "./news-js.js";
 import { categoryBySlug, hubPath, CATEGORIES } from "./categories.js";
-import { getPostByPublishedId, getRelated, getPrevNext, listLive } from "./queries.js";
+import { getPostByPublishedId, getNeighbours, listLive } from "./queries.js";
 import { SITE_NAME, PAGE_SIZE } from "./site.js";
 
 const errorPage = (status) =>
@@ -69,10 +69,7 @@ async function article({ slug, id, trailing }) {
    * redirects rather than serving duplicate content */
   if (trailing || slug !== slugify(post.headline)) return moved(canonical);
 
-  const [related, neighbours] = await Promise.all([
-    getRelated(post.category_id, post.id, 8),
-    getPrevNext(post),
-  ]);
+  const neighbours = await getNeighbours(post, 3);
 
   const seo = articleHead(post);
   seo.trail = articleTrail(post, seo.title);
@@ -85,9 +82,9 @@ async function article({ slug, id, trailing }) {
     body: page({
       title: seo.title,
       head: seo.head,
-      main: renderArticle({ seo, post, related, prev: neighbours.prev, next: neighbours.next }),
+      main: renderArticle({ seo, post, neighbours }),
       preloadImage: seo.heroImages[0]?.url || "",
-      script: seo.heroImages.length > 1 ? CAROUSEL_JS : "",
+      script: (seo.heroImages.length > 1 ? CAROUSEL_JS : "") + STORY_NAV_JS,
     }),
   };
 }

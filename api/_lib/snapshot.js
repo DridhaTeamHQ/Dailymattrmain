@@ -32,10 +32,15 @@ export const snapshot = {
   async getRelated(categoryId, excludeId, limit = 8) {
     return all().filter((p) => p.id !== excludeId && inCategory(p, categoryId)).slice(0, limit);
   },
-  async getPrevNext(post) {
+  async getNeighbours(post, span = 3) {
+    /* all() is newest-first, so the rows after this one are the older ones */
     const siblings = all().filter((p) => inCategory(p, post.category_id));
     const i = siblings.findIndex((p) => p.id === post.id);
-    return { prev: siblings[i + 1] || null, next: i > 0 ? siblings[i - 1] : null };
+    if (i < 0) return { older: [], newer: [] };
+    return {
+      older: siblings.slice(i + 1, i + 1 + span),
+      newer: siblings.slice(Math.max(0, i - span), i).reverse(),
+    };
   },
   async listLive({ categoryId = null, page = 1, size = 30 } = {}) {
     const rows = all().filter((p) => inCategory(p, categoryId));
