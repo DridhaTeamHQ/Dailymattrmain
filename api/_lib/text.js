@@ -26,15 +26,13 @@ export const metaDescription = (points, max = 155) => truncateAtWord(points.join
 const dateFmt = new Intl.DateTimeFormat("en-IN", {
   timeZone: TIME_ZONE, day: "numeric", month: "long", year: "numeric",
 });
-const timeFmt = new Intl.DateTimeFormat("en-IN", {
-  timeZone: TIME_ZONE, hour: "numeric", minute: "2-digit", hour12: true,
-});
 
-/* "07:05 am, 19 September 2026" — the byline style readers see in the app */
-export function formatIST(iso) {
+/* "19 September 2026", in Indian time. Date only — the exact minute is in the
+ * <time datetime> attribute for machines, but readers don't need it. */
+export function formatDate(iso) {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return `${timeFmt.format(d).replace(/\s?(am|pm)/i, (m) => m.trim().toLowerCase())}, ${dateFmt.format(d)}`;
+  return dateFmt.format(d);
 }
 
 /* later of the two, so dateModified is never before datePublished */

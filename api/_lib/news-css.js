@@ -35,22 +35,68 @@ export const NEWS_CSS = `
 .news-pager a { font-size: 14px; font-weight: 600; color: var(--ink); text-decoration: none; padding: 10px 18px; border: 1px solid var(--mist); border-radius: 999px; }
 .news-pager a:hover { border-color: var(--ink); }
 
-/* ---------- article ---------- */
-.article { width: min(760px, 100% - 40px); margin-inline: auto; }
-.article h1 { font-size: clamp(25px, 3.6vw, 38px); line-height: 1.18; letter-spacing: -0.02em; }
-.article .news-meta { margin-top: 14px; font-size: 13px; }
+/* ---------- article: cards on the left, words on the right ---------- */
+.article { width: min(1120px, 100% - 40px); margin-inline: auto; }
+.article-layout { display: grid; grid-template-columns: minmax(280px, 400px) minmax(0, 1fr); gap: clamp(28px, 4vw, 64px); align-items: start; }
+/* the cards stay in view while the reader scrolls the text beside them */
+.article-media { position: sticky; top: calc(var(--nav-h) + 20px); }
+.article-text { min-width: 0; }
+.article h1 { font-size: clamp(25px, 3.2vw, 38px); line-height: 1.18; letter-spacing: -0.02em; }
+.article .news-meta { margin: 14px 0 26px; font-size: 13.5px; }
+/* Phones: the card is pinned and the text slides up over it as a sheet —
+   the way a story reads in the app. The media box sticks below the nav for
+   as long as the layout lasts; the text column paints above it, starts
+   overlapping by a little so its edge shows on first paint, and covers the
+   card as the reader scrolls. When the text runs out the pinned card is
+   released and the page continues normally. */
+@media (max-width: 860px) {
+  .article { width: 100%; }
+  .article .news-crumb { padding: 0 20px; }
+  .article-layout { display: block; }
+  .article-media {
+    position: sticky; top: var(--nav-h); z-index: 0;
+    height: calc(76vh - var(--nav-h)); height: calc(76svh - var(--nav-h));
+    background: var(--coal); overflow: hidden;
+  }
+  .article-media .pix { height: 100%; margin: 0; }
+  .article-media::after {
+    /* grounds the sheet's edge on the picture */
+    content: ""; position: absolute; inset: auto 0 0 0; height: 96px; pointer-events: none;
+    background: linear-gradient(to bottom, rgba(10,10,11,0), rgba(10,10,11,.55));
+  }
+  .article-text {
+    position: relative; z-index: 1;
+    margin-top: -28px; padding: 30px 20px 40px;
+    background: var(--paper); border-radius: 26px 26px 0 0;
+    box-shadow: 0 -14px 34px rgba(10,10,11,.22);
+  }
+  .article-text::before {
+    content: ""; display: block; width: 40px; height: 4px; border-radius: 2px;
+    background: var(--mist); margin: -12px auto 20px;
+  }
+}
 
-.article-slides { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 26px 0 30px; padding-bottom: 8px; list-style: none; }
 /* ---------- Pix carousel ---------- */
-.pix { position: relative; margin: 26px 0 32px; }
+.pix { position: relative; margin: 0 0 8px; }
 .article-slides { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; list-style: none; padding-bottom: 8px; justify-content: center; scrollbar-width: none; }
 .article-slides::-webkit-scrollbar { display: none; }
 /* the box owns the aspect ratio, so the layout never shifts as the image
    arrives; posters are not all the same size, and object-fit keeps the odd
    one letterboxed rather than stretched */
-.article-slides li { flex: 0 0 auto; scroll-snap-align: center; aspect-ratio: 923 / 1704; height: min(74vh, 640px); }
+.article-slides li { flex: 0 0 100%; scroll-snap-align: center; aspect-ratio: 923 / 1704; }
 .article-slides img { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: 18px; background: var(--coal); }
-@media (max-width: 640px) { .article-slides { justify-content: flex-start; } .article-slides li { width: 80vw; height: auto; } }
+@media (max-width: 860px) {
+  /* inside the pinned box: one full-height card per swipe, no rounded
+     corners against the dark surround, dots laid over the picture */
+  .article-slides { height: 100%; gap: 0; padding: 0; justify-content: flex-start; }
+  .article-slides li { flex-basis: 100%; height: 100%; aspect-ratio: auto; }
+  .article-slides img { border-radius: 0; }
+  .pix-nav { display: none; }
+  .pix-dots { position: absolute; left: 0; right: 0; bottom: 44px; z-index: 1; margin: 0; }
+  .pix-dots button { background: rgba(255,255,255,.45); }
+  .pix-dots button[aria-current="true"] { background: #fff; }
+  .pix-count { display: none; }
+}
 
 .pix-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; border: 0; background: rgba(10,10,11,.72); color: #fff; font-size: 19px; line-height: 1; cursor: pointer; display: grid; place-items: center; transition: background .2s ease, opacity .2s ease; }
 .pix-nav:hover { background: var(--coal); }

@@ -67,9 +67,9 @@ export function articleHead(post) {
     isAccessibleForFree: true,
     image: slides.map((s) => s.url),
     publisher,
-    author: post.user_name
-      ? { "@type": "Person", name: String(post.user_name) }
-      : { "@type": "Organization", name: `${SITE_NAME} Desk` },
+    /* the desk, not the individual writer — user_name is an internal CMS
+     * login and is not shown on the page either */
+    author: { "@type": "Organization", name: SITE_NAME, url: `${ORIGIN}/` },
     ...(cat ? { articleSection: cat.label } : {}),
     ...(keywords.length ? { keywords } : {}),
     /* we summarise someone else's reporting — say so in the markup */
