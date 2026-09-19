@@ -142,9 +142,13 @@ ${crumbs(seo.trail)}
         <button class="app-gate-close" type="button" data-gate-dismiss aria-label="Close and keep reading">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
         </button>
-        <div class="app-gate-shot" aria-hidden="true">
-          <img src="/assets/screen-home.jpg?v=5" width="900" height="2045" alt="" loading="lazy" decoding="async" />
+        <div class="app-gate-stage">
+          <span class="app-gate-glow" aria-hidden="true"></span>
+          <figure class="gs"><img src="/assets/app-brief.webp" width="416" height="741" alt="60-word summaries — context to impact" loading="lazy" decoding="async" /></figure>
+          <figure class="gs"><img src="/assets/app-qix.webp" width="416" height="742" alt="Infotainment videos — visually appealing explainers" loading="lazy" decoding="async" /></figure>
+          <figure class="gs"><img src="/assets/app-pix.webp" width="418" height="741" alt="News Shots — image-based news you swipe through" loading="lazy" decoding="async" /></figure>
         </div>
+        <div class="app-gate-dots" role="tablist" aria-label="App features"></div>
         <div class="app-gate-body">
           <p class="app-gate-mark">&ldquo;dailymattr&rdquo;</p>
           <h2 id="app-gate-title">Read 100 stories a&nbsp;day</h2>

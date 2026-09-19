@@ -173,54 +173,99 @@ export const NEWS_CSS = `
    rather than shadows; the one shadow is there because the panel floats. */
 .app-gate { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 20px; }
 .app-gate[hidden] { display: none; }
-.app-gate-backdrop { position: absolute; inset: 0; background: rgba(10,10,11,.62); animation: gate-fade .22s ease-out; }
-@supports (backdrop-filter: blur(3px)) { .app-gate-backdrop { backdrop-filter: blur(3px); } }
+/* light enough that the frosted panel above it still reads as bright glass
+   rather than grey - backdrop-filter samples this layer too */
+.app-gate-backdrop { position: absolute; inset: 0; background: rgba(10,10,11,.46); animation: gate-fade .3s ease-out both; }
+@supports (backdrop-filter: blur(4px)) { .app-gate-backdrop { backdrop-filter: blur(5px); } }
 
 /* Light, like the page it interrupts, so it reads as part of the site rather
    than an ad pasted over it. The app screen does the persuading — it is the
    only picture, and it runs off the bottom edge so the panel feels like a
    window onto something larger. */
+/* Frosted glass: one translucent surface, a top-lit rim and a single deep
+   shadow. The opacity is high enough that the panel stays bright over the
+   dimmed page instead of turning grey, and the saturate() keeps the app
+   screens' colour alive through the blur. */
 .app-gate-panel {
-  position: relative; width: min(500px, 100%); max-height: calc(100vh - 40px); overflow: hidden;
-  display: grid; grid-template-columns: 152px minmax(0, 1fr); gap: 26px; align-items: center;
-  background: var(--paper); color: var(--ink);
-  border-radius: var(--radius-panel); padding: 34px 32px 34px 30px;
-  box-shadow: 0 30px 80px rgba(10,10,11,.32);
-  animation: gate-rise .24s cubic-bezier(.2,.7,.3,1);
+  position: relative; width: min(436px, 100%); max-height: calc(100vh - 40px); overflow: hidden;
+  background: rgba(255,255,255,.82); color: var(--ink);
+  border: 1px solid rgba(255,255,255,.9); border-radius: 30px;
+  padding: 26px 28px 24px; text-align: center;
+  box-shadow: 0 40px 90px rgba(10,10,11,.34), 0 2px 6px rgba(10,10,11,.06), inset 0 1px 0 rgba(255,255,255,.95);
+  animation: gate-rise .58s cubic-bezier(.16,1,.3,1) both;
+}
+@supports (backdrop-filter: blur(30px)) {
+  .app-gate-panel { background: rgba(255,255,255,.7); backdrop-filter: blur(32px) saturate(180%); }
 }
 
-.app-gate-shot { align-self: stretch; min-height: 232px; margin: -34px 0 -34px 0; border-radius: 20px; overflow: hidden; background: var(--mist); box-shadow: 0 10px 30px rgba(10,10,11,.18); }
-.app-gate-shot img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+/* One screen at a time, as large as the panel allows. Fanning three of them
+   looked richer but rendered each headline too small to read, and the
+   headline is the whole pitch. The outgoing screen slides left as the next
+   arrives from the right. */
+.app-gate-stage { position: relative; height: 372px; display: grid; place-items: center; }
+.app-gate-glow { position: absolute; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, rgba(57,121,255,.2), transparent 68%); filter: blur(30px); pointer-events: none; }
+.app-gate-stage .gs {
+  position: absolute; height: 100%; margin: 0; border-radius: 18px; overflow: hidden;
+  box-shadow: 0 20px 48px rgba(10,10,11,.24);
+  transition: transform .62s cubic-bezier(.22,1,.3,1), opacity .44s ease;
+  will-change: transform, opacity;
+}
+.app-gate-stage .gs img { display: block; height: 100%; width: auto; }
+.app-gate-stage .gs[data-pos="0"] { transform: translateX(0) scale(1); opacity: 1; z-index: 3; }
+.app-gate-stage .gs[data-pos="1"] { transform: translateX(46px) scale(.94); opacity: 0; z-index: 1; }
+.app-gate-stage .gs[data-pos="2"] { transform: translateX(-46px) scale(.94); opacity: 0; z-index: 1; }
 
-.app-gate-body { text-align: left; }
+.app-gate-dots { display: flex; gap: 6px; justify-content: center; margin: 16px 0 2px; }
+.app-gate-dots button { width: 6px; height: 6px; padding: 0; border: 0; border-radius: 50%; background: rgba(10,10,11,.18); cursor: pointer; transition: background .3s ease, width .3s ease; }
+.app-gate-dots button[aria-selected="true"] { background: var(--blue); width: 20px; border-radius: 3px; }
+
+.app-gate-body { margin-top: 10px; }
 .app-gate-mark { font-family: var(--font-serif); font-size: 13.5px; color: var(--ink-soft); }
-.app-gate-panel h2 { font-size: 25px; font-weight: 700; line-height: 1.14; letter-spacing: -0.025em; margin: 10px 0 0; }
-.app-gate-copy { font-size: 14px; line-height: 1.5; color: var(--ink-soft); margin: 10px 0 0; }
+.app-gate-panel h2 { font-size: 25px; font-weight: 700; line-height: 1.14; letter-spacing: -0.025em; margin: 8px 0 0; }
+.app-gate-copy { font-size: 14px; line-height: 1.5; color: var(--ink-soft); margin: 9px auto 0; max-width: 32ch; }
 
-.app-gate-cta { display: inline-flex; align-items: center; justify-content: center; gap: 9px; margin: 20px 0 0; background: var(--blue); color: #fff; text-decoration: none; font-weight: 700; font-size: 14.5px; padding: 12px 20px; border-radius: 999px; transition: background .18s ease, transform .18s ease; }
-.app-gate-cta:hover { background: var(--blue-soft); transform: translateY(-1px); }
+.app-gate-cta { display: flex; align-items: center; justify-content: center; gap: 9px; margin: 18px 0 0; background: var(--blue); color: #fff; text-decoration: none; font-weight: 700; font-size: 14.5px; padding: 13px 20px; border-radius: 999px; box-shadow: 0 8px 22px rgba(57,121,255,.34); transition: background .2s ease, transform .2s ease, box-shadow .2s ease; }
+.app-gate-cta:hover { background: var(--blue-soft); transform: translateY(-2px); box-shadow: 0 12px 28px rgba(57,121,255,.42); }
 .app-gate-cta svg { margin-top: -1px; }
-.app-gate-skip { display: block; background: none; border: 0; color: var(--ink-soft); font-size: 13.5px; font-weight: 600; cursor: pointer; padding: 12px 2px 0; font-family: inherit; transition: color .18s ease; }
+.app-gate-skip { display: block; width: 100%; background: none; border: 0; color: var(--ink-soft); font-size: 13.5px; font-weight: 600; cursor: pointer; padding: 12px 2px 0; font-family: inherit; transition: color .18s ease; }
 .app-gate-skip:hover { color: var(--ink); }
 
-.app-gate-close { position: absolute; top: 12px; right: 12px; z-index: 2; width: 32px; height: 32px; display: grid; place-items: center; border: 0; border-radius: 50%; background: rgba(10,10,11,.06); color: var(--ink-soft); cursor: pointer; transition: background .18s ease, color .18s ease; }
-.app-gate-close:hover { background: rgba(10,10,11,.12); color: var(--ink); }
+.app-gate-close { position: absolute; top: 14px; right: 14px; z-index: 5; width: 32px; height: 32px; display: grid; place-items: center; border: 0; border-radius: 50%; background: rgba(10,10,11,.06); color: var(--ink-soft); cursor: pointer; transition: background .18s ease, color .18s ease; }
+.app-gate-close:hover { background: rgba(10,10,11,.14); color: var(--ink); }
+
+/* the panel settles first, then its contents arrive in order */
+.app-gate-stage { animation: gate-in .6s cubic-bezier(.16,1,.3,1) .1s both; }
+.app-gate-dots { animation: gate-in .5s cubic-bezier(.16,1,.3,1) .26s both; }
+.app-gate-mark { animation: gate-in .5s cubic-bezier(.16,1,.3,1) .3s both; }
+.app-gate-panel h2 { animation: gate-in .5s cubic-bezier(.16,1,.3,1) .36s both; }
+.app-gate-copy { animation: gate-in .5s cubic-bezier(.16,1,.3,1) .42s both; }
+.app-gate-cta { animation: gate-in .5s cubic-bezier(.16,1,.3,1) .48s both; }
+.app-gate-skip { animation: gate-in .5s cubic-bezier(.16,1,.3,1) .54s both; }
 
 @keyframes gate-fade { from { opacity: 0; } }
-@keyframes gate-rise { from { opacity: 0; transform: translateY(10px) scale(.97); } }
+@keyframes gate-rise { from { opacity: 0; transform: translateY(26px) scale(.94); } }
+@keyframes gate-in { from { opacity: 0; transform: translateY(14px); } }
 
 /* on a phone it arrives as a sheet from the bottom edge, where the thumb is */
 @media (max-width: 560px) {
   .app-gate { place-items: end stretch; padding: 0; }
   .app-gate-panel {
-    width: 100%; max-height: 90vh; grid-template-columns: 116px minmax(0, 1fr); gap: 20px;
-    border-radius: 26px 26px 0 0; padding: 26px 22px calc(24px + env(safe-area-inset-bottom)) 20px;
+    width: 100%; max-height: 92vh;
+    border-radius: 28px 28px 0 0; border-bottom: 0;
+    padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
     animation-name: gate-sheet;
   }
-  .app-gate-shot { min-height: 200px; margin: -26px 0 calc(-24px - env(safe-area-inset-bottom)) 0; border-radius: 16px; }
+  .app-gate-stage { height: min(46vh, 330px); }
   .app-gate-panel h2 { font-size: 22px; }
 }
-@keyframes gate-sheet { from { transform: translateY(100%); } }
+@keyframes gate-sheet { from { opacity: 0; transform: translateY(100%); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .app-gate-backdrop, .app-gate-panel, .app-gate-stage, .app-gate-dots,
+  .app-gate-mark, .app-gate-panel h2, .app-gate-copy, .app-gate-cta, .app-gate-skip { animation: none; }
+  .app-gate-stage .gs { transition: none; }
+  .app-gate-cta:hover { transform: none; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .app-gate-backdrop, .app-gate-panel { animation: none; }

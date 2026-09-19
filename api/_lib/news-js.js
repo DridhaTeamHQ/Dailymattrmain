@@ -29,8 +29,44 @@ export const STORY_NAV_JS = `
   const gate = document.getElementById("app-gate");
   let pending = "";
 
+  /* the three app screens cycle while the prompt is open: the one in front
+     steps back and the next comes forward. Paused while the pointer is over
+     the stack so a reader can look at one, and never started at all when the
+     visitor has asked for less motion. */
+  const shots = gate ? [...gate.querySelectorAll(".app-gate-stage .gs")] : [];
+  const dotWrap = gate ? gate.querySelector(".app-gate-dots") : null;
+  const stage = gate ? gate.querySelector(".app-gate-stage") : null;
+  const still = matchMedia("(prefers-reduced-motion: reduce)");
+  let at = 0, timer = 0, held = false;
+
+  const paint = () => {
+    shots.forEach((s, i) => s.setAttribute("data-pos", String((i - at + shots.length) % shots.length)));
+    if (dotWrap) [...dotWrap.children].forEach((d, i) => d.setAttribute("aria-selected", String(i === at)));
+  };
+
+  const step = (to) => { at = (to + shots.length) % shots.length; paint(); };
+  const stop = () => { clearInterval(timer); timer = 0; };
+  const play = () => { stop(); if (shots.length > 1 && !still.matches) timer = setInterval(() => { if (!held) step(at + 1); }, 3000); };
+
+  if (dotWrap && shots.length > 1) {
+    shots.forEach((s, i) => {
+      const d = document.createElement("button");
+      d.type = "button";
+      d.setAttribute("role", "tab");
+      d.setAttribute("aria-label", (s.querySelector("img") || {}).alt || "Feature " + (i + 1));
+      d.addEventListener("click", () => { step(i); play(); });
+      dotWrap.appendChild(d);
+    });
+  }
+  if (stage) {
+    stage.addEventListener("pointerenter", () => { held = true; });
+    stage.addEventListener("pointerleave", () => { held = false; });
+  }
+  paint();
+
   const closeGate = () => {
     if (gate) gate.hidden = true;
+    stop();
     document.body.style.overflow = "";
     const url = pending;
     pending = "";
@@ -40,8 +76,11 @@ export const STORY_NAV_JS = `
   const openGate = (url) => {
     if (!gate) { location.href = url; return; }
     pending = url;
+    at = 0;
+    paint();
     gate.hidden = false;
     document.body.style.overflow = "hidden";
+    play();
     const close = gate.querySelector(".app-gate-close");
     if (close) close.focus();
   };

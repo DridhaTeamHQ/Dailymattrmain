@@ -98,7 +98,11 @@ console.log("\narticle");
   check("prompt has a close and a skip", body.includes("app-gate-close") && body.includes("app-gate-skip"));
   check("story nav script injected", body.includes("dm.prompts") && body.includes("data-story-step"));
   check("no swipe handler", !body.includes("touchstart") && !body.includes("touchend"));
-  check("prompt shows the app screen", body.includes("app-gate-shot") && body.includes("/assets/screen-home.jpg"));
+  check("prompt shows all three app screens", ["app-brief", "app-qix", "app-pix"].every((n) => body.includes(`/assets/${n}.webp`)));
+  check("app screens carry alt text", (() => {
+    const stage = body.match(/<div class="app-gate-stage">[\s\S]*?<\/div>/);
+    return stage && (stage[0].match(/alt="[^"]{15,}"/g) || []).length === 3;
+  })());
   check("prompt has one accent action", (body.match(/class="app-gate-cta"/g) || []).length === 1);
   check("dateModified >= datePublished", (() => {
     const ld = JSON.parse(body.match(/<script type="application\/ld\+json">(\{"@context":"https:\/\/schema\.org","@type":"NewsArticle".*?)<\/script>/)[1]);
