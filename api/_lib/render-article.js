@@ -72,6 +72,8 @@ ${crumbs(seo.trail)}
             ${cat ? html`<a href="${hubPath(cat)}">${cat.label}</a>` : ""}
           </p>
 
+          <!-- the same words the card carries as pixels, as real text: this is
+               what search engines and screen readers read -->
           <div class="article-body">
             <ul>
               ${points.map((p) => html`<li>${p}</li>`)}

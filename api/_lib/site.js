@@ -2,7 +2,11 @@
  * marketing HTML hard-codes (nav items, store link, brand strings) is
  * mirrored here so the news pages read as the same site. */
 
-export const ORIGIN = (process.env.SITE_ORIGIN || "https://dailymattr.com").replace(/\/+$/, "");
+/* The canonical host is www — Vercel redirects the apex to it — so every
+ * canonical, og:url, JSON-LD url and sitemap entry must say www too, or they
+ * all point at a redirect. Override with SITE_ORIGIN if the primary domain
+ * ever changes. */
+export const ORIGIN = (process.env.SITE_ORIGIN || "https://www.dailymattr.com").replace(/\/+$/, "");
 export const SITE_NAME = "DailyMattr";
 export const LEGAL_NAME = "Dridha Technologies Private Limited";
 export const SUPPORT_EMAIL = "support@dailymattr.com";

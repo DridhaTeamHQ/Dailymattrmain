@@ -25,7 +25,7 @@ console.log("\n/news/ (feed)");
   check("200", r.status === 200, `got ${r.status}`);
   check("has article links", (String(r.body).match(/href="\/news\/[a-z0-9-]+-\d+"/g) || []).length >= 20);
   check("CollectionPage + ItemList", String(r.body).includes('"CollectionPage"') && String(r.body).includes('"ItemList"'));
-  check("canonical", String(r.body).includes('rel="canonical" href="https://dailymattr.com/news/"'));
+  check("canonical", String(r.body).includes('rel="canonical" href="https://www.dailymattr.com/news/"'));
   check("images are real <img>", (String(r.body).match(/<img[^>]+src="https:\/\//g) || []).length >= 20);
   check("thumbs are responsive", (String(r.body).match(/srcset="[^"]+320w[^"]*480w"/g) || []).length >= 20);
   check("every resized URL keeps aspect", (() => {
@@ -46,7 +46,7 @@ console.log("\n/news/india/ (hub)");
   const r = await routeNews({ rest: "india/" });
   check("200", r.status === 200, `got ${r.status}`);
   check("h1", String(r.body).includes("<h1>India news</h1>"));
-  check("canonical", String(r.body).includes('href="https://dailymattr.com/news/india/"'));
+  check("canonical", String(r.body).includes('href="https://www.dailymattr.com/news/india/"'));
   check("breadcrumb", String(r.body).includes('"BreadcrumbList"'));
 }
 
@@ -61,7 +61,7 @@ console.log("\n/news/page/2/");
   const r = await routeNews({ rest: "page/2/" });
   check("200", r.status === 200, `got ${r.status}`);
   check("prev link", String(r.body).includes('rel="prev"'));
-  check("canonical is page 2", String(r.body).includes('href="https://dailymattr.com/news/page/2/"'));
+  check("canonical is page 2", String(r.body).includes('href="https://www.dailymattr.com/news/page/2/"'));
 }
 {
   const r = await routeNews({ rest: "page/1/" });
@@ -75,8 +75,8 @@ console.log("\narticle");
   check("200", r.status === 200, `got ${r.status}`);
   check("NewsArticle", body.includes('"NewsArticle"'));
   check("BreadcrumbList", body.includes('"BreadcrumbList"'));
-  check("canonical self", body.includes(`href="https://dailymattr.com/news/${canonicalTail}"`));
-  check("mainEntityOfPage is self", body.includes(`"@id":"https://dailymattr.com/news/${canonicalTail}"`));
+  check("canonical self", body.includes(`href="https://www.dailymattr.com/news/${canonicalTail}"`));
+  check("mainEntityOfPage is self", body.includes(`"@id":"https://www.dailymattr.com/news/${canonicalTail}"`));
   check("max-image-preview:large", body.includes("max-image-preview:large"));
   check("og:type article", body.includes('property="og:type" content="article"'));
   check("twitter large image", body.includes('content="summary_large_image"'));

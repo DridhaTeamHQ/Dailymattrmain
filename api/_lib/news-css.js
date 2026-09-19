@@ -78,7 +78,12 @@ export const NEWS_CSS = `
 
 /* ---------- Pix carousel ---------- */
 .pix { position: relative; margin: 0 0 8px; }
-.article-slides { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; list-style: none; padding-bottom: 8px; justify-content: center; scrollbar-width: none; }
+/* start-aligned on purpose: with two or more full-width cards the row
+   overflows, and centring it would centre the overflow, so the reader sees
+   half of card 1 and half of card 2 with no way to scroll back to the start.
+   A single card fills the column either way. (No backticks in these
+   comments - the whole stylesheet is one JS template literal.) */
+.article-slides { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; list-style: none; padding-bottom: 8px; scrollbar-width: none; }
 .article-slides::-webkit-scrollbar { display: none; }
 /* the box owns the aspect ratio, so the layout never shifts as the image
    arrives; posters are not all the same size, and object-fit keeps the odd

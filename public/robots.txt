@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://dailymattr.com/sitemap-pages.xml
+Sitemap: https://www.dailymattr.com/sitemap-pages.xml
