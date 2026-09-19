@@ -143,27 +143,89 @@ export const NEWS_CSS = `
 .story-more a { color: var(--ink); text-decoration: none; font-size: 14.5px; line-height: 1.45; font-weight: 500; }
 .story-more a:hover { color: var(--blue); }
 
-/* big arrows beside the story on a pointer device; touch gets the swipe */
+/* arrows beside the story, on every device */
 .story-arrow { position: fixed; top: 50%; transform: translateY(-50%); z-index: 40; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; text-decoration: none; font-size: 26px; line-height: 1; color: var(--ink); background: var(--paper); border: 1px solid var(--mist); box-shadow: 0 6px 22px rgba(10,10,11,.10); transition: transform .18s ease, border-color .18s ease; }
 .story-arrow:hover { border-color: var(--ink); transform: translateY(-50%) scale(1.06); }
 .story-arrow.prev { left: clamp(8px, 2vw, 26px); }
 .story-arrow.next { right: clamp(8px, 2vw, 26px); }
-@media (hover: none), (max-width: 1040px) { .story-arrow { display: none; } }
+/* On a phone they sit in a bar along the bottom, within thumb reach. A bar
+   rather than free-floating buttons: circles hovering over a headline cover
+   words and look broken, and the page gets padding so nothing ends up
+   permanently underneath them. */
+@media (max-width: 860px) {
+  .story-arrow { top: auto; bottom: calc(15px + env(safe-area-inset-bottom)); transform: none; width: 44px; height: 44px; box-shadow: none; }
+  .story-arrow:hover { transform: none; }
+  .story-arrow.prev { left: 16px; }
+  .story-arrow.next { right: 16px; }
+  .article::after {
+    content: ""; position: fixed; z-index: 39; left: 0; right: 0; bottom: 0;
+    height: calc(74px + env(safe-area-inset-bottom));
+    background: var(--paper); border-top: 1px solid var(--mist);
+  }
+  /* so the end of the story is never stuck under the bar */
+  .news-page { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+}
 
-/* ---------- app prompt ---------- */
+/* ---------- app prompt ----------
+   A quiet word from the newsroom, not an ad: the serif wordmark anchors it,
+   the number carries the whole proposition, and the blue appears exactly once
+   - on the thing to press. On dark, depth comes from tone and a hairline
+   rather than shadows; the one shadow is there because the panel floats. */
 .app-gate { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 20px; }
 .app-gate[hidden] { display: none; }
-.app-gate-backdrop { position: absolute; inset: 0; background: rgba(10,10,11,.55); backdrop-filter: blur(2px); }
-.app-gate-panel { position: relative; width: min(420px, 100%); background: var(--coal); color: #fff; border-radius: var(--radius-panel); padding: 34px 28px 28px; text-align: center; box-shadow: 0 24px 60px rgba(10,10,11,.4); }
-.app-gate-kicker { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--blue-soft); font-weight: 600; }
-.app-gate-panel h2 { font-size: 23px; line-height: 1.25; letter-spacing: -0.01em; margin: 10px 0 8px; }
-.app-gate-copy { font-size: 14.5px; line-height: 1.5; color: #b6b6bd; }
-.app-gate-cta { display: block; margin: 22px 0 10px; background: var(--blue); color: #fff; text-decoration: none; font-weight: 700; font-size: 15px; padding: 13px 20px; border-radius: 999px; }
-.app-gate-cta:hover { background: var(--blue-soft); }
-.app-gate-skip { background: none; border: 0; color: #9a9aa2; font-size: 13.5px; font-weight: 600; cursor: pointer; padding: 6px; font-family: inherit; }
-.app-gate-skip:hover { color: #fff; }
-.app-gate-close { position: absolute; top: 12px; right: 14px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: rgba(255,255,255,.1); color: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
-.app-gate-close:hover { background: rgba(255,255,255,.2); }
+.app-gate-backdrop { position: absolute; inset: 0; background: rgba(10,10,11,.62); animation: gate-fade .22s ease-out; }
+@supports (backdrop-filter: blur(3px)) { .app-gate-backdrop { backdrop-filter: blur(3px); } }
+
+/* Light, like the page it interrupts, so it reads as part of the site rather
+   than an ad pasted over it. The app screen does the persuading — it is the
+   only picture, and it runs off the bottom edge so the panel feels like a
+   window onto something larger. */
+.app-gate-panel {
+  position: relative; width: min(500px, 100%); max-height: calc(100vh - 40px); overflow: hidden;
+  display: grid; grid-template-columns: 152px minmax(0, 1fr); gap: 26px; align-items: center;
+  background: var(--paper); color: var(--ink);
+  border-radius: var(--radius-panel); padding: 34px 32px 34px 30px;
+  box-shadow: 0 30px 80px rgba(10,10,11,.32);
+  animation: gate-rise .24s cubic-bezier(.2,.7,.3,1);
+}
+
+.app-gate-shot { align-self: stretch; min-height: 232px; margin: -34px 0 -34px 0; border-radius: 20px; overflow: hidden; background: var(--mist); box-shadow: 0 10px 30px rgba(10,10,11,.18); }
+.app-gate-shot img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+
+.app-gate-body { text-align: left; }
+.app-gate-mark { font-family: var(--font-serif); font-size: 13.5px; color: var(--ink-soft); }
+.app-gate-panel h2 { font-size: 25px; font-weight: 700; line-height: 1.14; letter-spacing: -0.025em; margin: 10px 0 0; }
+.app-gate-copy { font-size: 14px; line-height: 1.5; color: var(--ink-soft); margin: 10px 0 0; }
+
+.app-gate-cta { display: inline-flex; align-items: center; justify-content: center; gap: 9px; margin: 20px 0 0; background: var(--blue); color: #fff; text-decoration: none; font-weight: 700; font-size: 14.5px; padding: 12px 20px; border-radius: 999px; transition: background .18s ease, transform .18s ease; }
+.app-gate-cta:hover { background: var(--blue-soft); transform: translateY(-1px); }
+.app-gate-cta svg { margin-top: -1px; }
+.app-gate-skip { display: block; background: none; border: 0; color: var(--ink-soft); font-size: 13.5px; font-weight: 600; cursor: pointer; padding: 12px 2px 0; font-family: inherit; transition: color .18s ease; }
+.app-gate-skip:hover { color: var(--ink); }
+
+.app-gate-close { position: absolute; top: 12px; right: 12px; z-index: 2; width: 32px; height: 32px; display: grid; place-items: center; border: 0; border-radius: 50%; background: rgba(10,10,11,.06); color: var(--ink-soft); cursor: pointer; transition: background .18s ease, color .18s ease; }
+.app-gate-close:hover { background: rgba(10,10,11,.12); color: var(--ink); }
+
+@keyframes gate-fade { from { opacity: 0; } }
+@keyframes gate-rise { from { opacity: 0; transform: translateY(10px) scale(.97); } }
+
+/* on a phone it arrives as a sheet from the bottom edge, where the thumb is */
+@media (max-width: 560px) {
+  .app-gate { place-items: end stretch; padding: 0; }
+  .app-gate-panel {
+    width: 100%; max-height: 90vh; grid-template-columns: 116px minmax(0, 1fr); gap: 20px;
+    border-radius: 26px 26px 0 0; padding: 26px 22px calc(24px + env(safe-area-inset-bottom)) 20px;
+    animation-name: gate-sheet;
+  }
+  .app-gate-shot { min-height: 200px; margin: -26px 0 calc(-24px - env(safe-area-inset-bottom)) 0; border-radius: 16px; }
+  .app-gate-panel h2 { font-size: 22px; }
+}
+@keyframes gate-sheet { from { transform: translateY(100%); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .app-gate-backdrop, .app-gate-panel { animation: none; }
+  .app-gate-cta:hover { transform: none; }
+}
 
 .news-empty { padding: 60px 0; color: var(--ink-soft); }
 .news-empty h1 { font-size: 30px; color: var(--ink); margin-bottom: 12px; }

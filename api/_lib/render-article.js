@@ -139,12 +139,22 @@ ${crumbs(seo.trail)}
     <div class="app-gate" id="app-gate" hidden>
       <div class="app-gate-backdrop" data-gate-dismiss></div>
       <div class="app-gate-panel" role="dialog" aria-modal="true" aria-labelledby="app-gate-title">
-        <button class="app-gate-close" type="button" data-gate-dismiss aria-label="Close and keep reading">×</button>
-        <p class="app-gate-kicker">Enjoying DailyMattr?</p>
-        <h2 id="app-gate-title">Get 100 stories a day in the app</h2>
-        <p class="app-gate-copy">Read, watch and listen — every story in one place, free.</p>
-        <a class="app-gate-cta" href="${PLAY_URL}" target="_blank" rel="noopener noreferrer">Download the app</a>
-        <button class="app-gate-skip" type="button" data-gate-dismiss>Keep reading</button>
+        <button class="app-gate-close" type="button" data-gate-dismiss aria-label="Close and keep reading">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        </button>
+        <div class="app-gate-shot" aria-hidden="true">
+          <img src="/assets/screen-home.jpg?v=5" width="900" height="2045" alt="" loading="lazy" decoding="async" />
+        </div>
+        <div class="app-gate-body">
+          <p class="app-gate-mark">&ldquo;dailymattr&rdquo;</p>
+          <h2 id="app-gate-title">Read 100 stories a&nbsp;day</h2>
+          <p class="app-gate-copy">Text, video and audio explainers — fact-checked, human-picked, free.</p>
+          <a class="app-gate-cta" href="${PLAY_URL}" target="_blank" rel="noopener noreferrer">
+            <svg width="17" height="17" viewBox="0 0 512 512" fill="currentColor" aria-hidden="true"><path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/></svg>
+            Get it on Google Play
+          </a>
+          <button class="app-gate-skip" type="button" data-gate-dismiss>Keep reading</button>
+        </div>
       </div>
     </div>
 `;

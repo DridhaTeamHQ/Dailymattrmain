@@ -3,10 +3,9 @@
  * horizontal scroller and a crawler still sees every image. This only adds
  * the arrows, the dots and keyboard support. */
 
-/* Story-to-story navigation: arrows on a pointer, swipe on a touch screen,
- * left/right keys anywhere. Every destination is already an <a> in the page,
- * so with JavaScript off the links still work — this only adds the gestures
- * and the app prompt.
+/* Story-to-story navigation: arrows on every device, plus the left and right
+ * keys. Every destination is already an <a> in the page, so with JavaScript
+ * off the links still work — this only adds the keys and the app prompt.
  *
  * The prompt appears after a run of stories, and X (or "Keep reading")
  * continues to the story that was pending, so nobody loses the swipe they
@@ -85,26 +84,6 @@ export const STORY_NAV_JS = `
     if (e.key === "ArrowLeft") go("prev");
   });
 
-  // swipe: horizontal, decisive, and not while the reader is panning the card
-  // rail or has started the gesture on a link
-  let x0 = 0, y0 = 0, t0 = 0, tracking = false;
-  addEventListener("touchstart", (e) => {
-    if (e.touches.length !== 1 || (gate && !gate.hidden)) { tracking = false; return; }
-    const target = e.target;
-    if (target && target.closest && target.closest(".article-slides")) { tracking = false; return; }
-    const t = e.touches[0];
-    x0 = t.clientX; y0 = t.clientY; t0 = Date.now(); tracking = true;
-  }, { passive: true });
-
-  addEventListener("touchend", (e) => {
-    if (!tracking) return;
-    tracking = false;
-    const t = e.changedTouches[0];
-    const dx = t.clientX - x0, dy = t.clientY - y0;
-    if (Date.now() - t0 > 800) return;             // a slow drag is not a swipe
-    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
-    go(dx < 0 ? "next" : "prev");                  // finger left = forward
-  }, { passive: true });
 })();
 `;
 
