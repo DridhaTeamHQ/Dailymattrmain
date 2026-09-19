@@ -59,10 +59,15 @@ export function slidesFor(post) {
   return poster ? [{ url: poster, width: SLIDE_W, height: SLIDE_H }] : [];
 }
 
-/* Poster for og:image and list thumbnails: the rendered first card when it is
- * reachable, otherwise the bare background image the CMS stored on Supabase.
- * Order matters — main_image_url is only the artwork the card is built on
- * (no headline, date or logo), so it must never win over a real card. */
+/* The story's artwork: the picture the card was built on, without the
+ * headline, date or logo baked in. This is what the article page and the
+ * grid show — the words are already on the page as text, so a card that
+ * repeats them is the same story twice. */
+export const artworkFor = (post) => allowedImage(post.main_image_url) || slidesFor(post)[0]?.url || "";
+
+/* Poster for og:image: the rendered first card when it is reachable — a
+ * headline baked into the picture is exactly what a WhatsApp or X preview
+ * wants — otherwise the artwork. */
 export const posterFor = (post) => slidesFor(post)[0]?.url || allowedImage(post.main_image_url) || "";
 
 export const thumbAttrs = (url) => ({

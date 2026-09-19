@@ -90,6 +90,9 @@ export const NEWS_CSS = `
    one letterboxed rather than stretched */
 .article-slides li { flex: 0 0 100%; scroll-snap-align: center; aspect-ratio: 923 / 1704; }
 .article-slides img { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: 18px; background: var(--coal); }
+/* a plain photograph is cropped to the box rather than letterboxed — only a
+   designed card needs to be shown whole */
+.article-slides img.is-artwork { object-fit: cover; }
 @media (max-width: 860px) {
   /* inside the pinned box: one full-height card per swipe, no rounded
      corners against the dark surround, dots laid over the picture */

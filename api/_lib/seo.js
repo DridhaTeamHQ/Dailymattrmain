@@ -2,7 +2,7 @@ import { esc, jsonLdScript } from "./html.js";
 import { ORIGIN, SITE_NAME, PUBLISHER_LOGO, OG_DEFAULT, PLAY_URL, LEGAL_NAME } from "./site.js";
 import { cleanHeadline, articlePath } from "./slug.js";
 import { bullets, metaDescription, modifiedAt, truncateAtWord } from "./text.js";
-import { slidesFor, posterFor } from "./media.js";
+import { slidesFor, posterFor, artworkFor } from "./media.js";
 import { categoryById, hubPath } from "./categories.js";
 import { safeUrl } from "./html.js";
 
@@ -48,6 +48,9 @@ export function articleHead(post) {
   const url = ORIGIN + articlePath(post);
   const slides = slidesFor(post);
   const poster = posterFor(post);
+  const artwork = artworkFor(post);
+  /* what the article page actually shows: the artwork alone */
+  const heroImages = artwork ? [{ url: artwork, artwork: true }] : slides.slice(0, 1);
   const cat = categoryById(post.category_id);
   const source = safeUrl(post.source_url);
   const keywords = Array.isArray(post.keywords) ? post.keywords.filter(Boolean).slice(0, 10) : [];
@@ -65,7 +68,8 @@ export function articleHead(post) {
     dateModified: modifiedAt(post),
     inLanguage: "en-IN",
     isAccessibleForFree: true,
-    image: slides.map((s) => s.url),
+    /* the picture on the page first, then the rendered cards */
+    image: [...new Set([...heroImages.map((h) => h.url), ...slides.map((s) => s.url)])],
     publisher,
     /* the desk, not the individual writer — user_name is an internal CMS
      * login and is not shown on the page either */
@@ -100,7 +104,7 @@ export function articleHead(post) {
     `  ${jsonLdScript(ld)}\n` +
     `  ${jsonLdScript(breadcrumbLd(articleTrail(post, title)))}\n`;
 
-  return { title, desc, head, url, slides, poster, points, cat, source };
+  return { title, desc, head, url, slides, heroImages, poster, points, cat, source };
 }
 
 export function hubHead({ title, description, path, posts, page = 1, hasNext = false, trail }) {

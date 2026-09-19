@@ -142,7 +142,10 @@ console.log("\ncard source precedence");
   const withWeb = { ...base, web_pages: [{ url: sb + "web/x/2-text.jpg", width: 920, height: 1700, sort_order: 2 }, { url: sb + "web/x/1-poster.jpg", width: 920, height: 1700, sort_order: 1 }] };
   const ws = slidesFor(withWeb);
   check("web_pages win and are ordered by sort_order", ws.length === 2 && ws[0].url.endsWith("1-poster.jpg") && ws[1].url.endsWith("2-text.jpg"));
-  check("og/thumb poster is the rendered card, not the artwork", posterFor(withWeb).endsWith("1-poster.jpg"));
+  check("og:image poster is the rendered card", posterFor(withWeb).endsWith("1-poster.jpg"));
+  const { artworkFor } = await import("../api/_lib/media.js");
+  check("page/grid artwork is the plain picture even when cards exist", artworkFor(withWeb).endsWith("/bg/art.png"));
+  check("artwork falls back to the card when there is no picture", artworkFor({ ...withWeb, main_image_url: null }).endsWith("1-poster.jpg"));
   const badHost = { ...base, web_pages: [{ url: "https://evil.example/x.jpg", sort_order: 1 }] };
   check("web_pages on a foreign host are ignored", slidesFor(badHost)[0].url.includes("/bg/art.png"));
 }

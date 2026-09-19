@@ -1,7 +1,7 @@
 import { html, raw } from "./html.js";
 import { articlePath, cleanHeadline } from "./slug.js";
 import { formatDate, truncateAtWord, hostnameOf } from "./text.js";
-import { posterFor, thumbAttrs, slideAttrs } from "./media.js";
+import { artworkFor, thumbAttrs, slideAttrs } from "./media.js";
 import { categoryById, hubPath } from "./categories.js";
 import { PLAY_URL } from "./site.js";
 
@@ -17,10 +17,10 @@ const crumbs = (trail) => html`
 /* compact card used by the hubs, the related rail and prev/next thumbs */
 export function card(post, { eager = false } = {}) {
   const title = cleanHeadline(post.headline);
-  const poster = posterFor(post);
+  const artwork = artworkFor(post);
   const cat = categoryById(post.category_id);
   const href = articlePath(post);
-  const img = poster ? thumbAttrs(poster) : null;
+  const img = artwork ? thumbAttrs(artwork) : null;
   return html`
         <li class="news-card">
           ${img
@@ -35,7 +35,7 @@ export function card(post, { eager = false } = {}) {
 }
 
 export function renderArticle({ seo, post, related, prev, next }) {
-  const { title, slides, points, cat, source } = seo;
+  const { title, heroImages: slides, points, cat, source } = seo;
   const host = hostnameOf(source);
   return html`
     <article class="article">
@@ -49,7 +49,7 @@ ${crumbs(seo.trail)}
               ${slides.map((s, i) => {
                 const img = slideAttrs(s.url);
                 return html`
-              <li><img src="${img.src}" srcset="${img.srcset}" sizes="(max-width: 860px) 86vw, 420px" alt="${title}${slides.length > 1 ? ` — card ${i + 1} of ${slides.length}` : ""}"${raw(i === 0 ? ' loading="eager" fetchpriority="high"' : ' loading="lazy"')} decoding="async" /></li>`;
+              <li><img${raw(s.artwork ? ' class="is-artwork"' : "")} src="${img.src}" srcset="${img.srcset}" sizes="(max-width: 860px) 86vw, 420px" alt="${title}${slides.length > 1 ? ` — card ${i + 1} of ${slides.length}` : ""}"${raw(i === 0 ? ' loading="eager" fetchpriority="high"' : ' loading="lazy"')} decoding="async" /></li>`;
               })}
             </ol>
             ${slides.length > 1

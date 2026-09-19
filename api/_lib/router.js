@@ -86,8 +86,8 @@ async function article({ slug, id, trailing }) {
       title: seo.title,
       head: seo.head,
       main: renderArticle({ seo, post, related, prev: neighbours.prev, next: neighbours.next }),
-      preloadImage: seo.slides[0]?.url || "",
-      script: seo.slides.length > 1 ? CAROUSEL_JS : "",
+      preloadImage: seo.heroImages[0]?.url || "",
+      script: seo.heroImages.length > 1 ? CAROUSEL_JS : "",
     }),
   };
 }
