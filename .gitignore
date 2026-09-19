@@ -18,3 +18,6 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+
+# dev-only Pix sample used when the service-role key is absent
+api/_data/pix-snapshot.json

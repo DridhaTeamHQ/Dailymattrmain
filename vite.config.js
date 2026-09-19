@@ -14,6 +14,14 @@ export default defineConfig(({ mode }) => {
   return {
   build: {
     rollupOptions: {
+      output: {
+        // the server-rendered /news pages link the site stylesheet by name,
+        // so it needs a stable path; everything else stays content-hashed
+        assetFileNames: (info) => {
+          const names = info.names ?? (info.name ? [info.name] : []);
+          return names.includes("style.css") ? "assets/site.css" : "assets/[name]-[hash][extname]";
+        },
+      },
       // multi-page: legal pages live at /editorialguidelines, /privacypolicy
       // and /termsandconditions
       input: {
@@ -32,6 +40,40 @@ export default defineConfig(({ mode }) => {
     fs: { strict: false },
   },
   plugins: [
+    {
+      // dev-only mount of the /news serverless route. In production Vercel
+      // rewrites /news/* to api/news.js; here the same router runs through
+      // ssrLoadModule so edits under api/ take effect without a restart.
+      name: "news-dev",
+      apply: "serve",
+      configureServer(server) {
+        process.env.NEWS_DEV = "1";
+        server.middlewares.use(async (req, res, next) => {
+          const path = new URL(req.url, "http://localhost").pathname;
+          if (path !== "/news" && !path.startsWith("/news/")) return next();
+          try {
+            const { routeNews } = await server.ssrLoadModule("/api/_lib/router.js");
+            const out = await routeNews({
+              rest: path === "/news" ? "" : path.slice("/news/".length),
+              bare: path === "/news",
+            });
+            if (out.status === 301) {
+              res.statusCode = 301;
+              res.setHeader("Location", out.location);
+              res.end();
+              return;
+            }
+            res.statusCode = out.status;
+            res.setHeader("Content-Type", "text/html; charset=utf-8");
+            res.setHeader("Cache-Control", "no-store");
+            res.end(String(out.body));
+          } catch (err) {
+            server.ssrFixStacktrace?.(err);
+            next(err);
+          }
+        });
+      },
+    },
     {
       // dev-only sink for the offline phone capture (?capture=1):
       // the page POSTs the baked webp blobs here so they land in
