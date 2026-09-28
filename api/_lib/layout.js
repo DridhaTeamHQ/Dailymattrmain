@@ -17,19 +17,26 @@ const navHtml = (active) => html`
 /* mirrors the marketing footer, plus a column of news hubs so every article
  * links into every section (crawl depth stays flat) */
 const footerHtml = () => html`
-  <footer class="footer news-footer">
-    <div class="news-wrap">
+  <footer class="footer" id="footer">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <p class="footer-logoline"><img class="footer-logo" src="/assets/logo.svg" alt="dailymattr" /><span>your deeper read.</span></p>
+        <p class="footer-copy">dailymattr brings you the story behind the headline - with context, clarity, and perspective that help you understand what really matters.</p>
+        <p class="footer-parent"><span style="color: #3979ff;">dailymattr</span> is a part of <span class="legal-brand2">DRIDHA TECHNOLOGIES PRIVATE LIMITED</span></p>
+      </div>
       <div class="footer-cols">
         <div class="footer-col">
           <h4>PRODUCT</h4>
           <a href="/">Home</a>
           <a href="/#showcase">What are we</a>
           <a href="/#features">Features</a>
-          <a href="/news/">News</a>
+          <a href="/newsletter/">Newsletter</a>
+          <a href="/support/">Support</a>
           <a href="${PLAY_URL}" target="_blank" rel="noopener noreferrer">Download APP</a>
         </div>
         <div class="footer-col">
           <h4>NEWS</h4>
+          <a href="/news/">Latest</a>
           ${CATEGORIES.map((c) => html`<a href="${hubPath(c)}">${c.label}</a>`)}
         </div>
         <div class="footer-col">
@@ -44,8 +51,9 @@ const footerHtml = () => html`
           <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>
         </div>
       </div>
-      <p class="footer-legal">© 2026 <span class="legal-brand">${LEGAL_NAME.toUpperCase()}</span>. All rights reserved.</p>
     </div>
+    <p class="footer-legal">© 2026 <span class="legal-brand">${LEGAL_NAME.toUpperCase()}</span>. All rights reserved.</p>
+    <div class="footer-wordmark" aria-hidden="true"><img src="/assets/logo.svg" alt="" /></div>
   </footer>`;
 
 /* `head` is pre-escaped markup from seo.js; `main` likewise from a renderer */
