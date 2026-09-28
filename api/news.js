@@ -9,6 +9,7 @@ export default async function handler(req, res) {
     const out = await routeNews({
       rest: param(req, "p"),
       bare: param(req, "bare") === "1",
+      query: req.query || {},
     });
     if (out.status === 301) return redirect301(res, out.location);
     return send(res, out);

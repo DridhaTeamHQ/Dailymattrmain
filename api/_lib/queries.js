@@ -1,6 +1,7 @@
 import { pixDb, hasServiceKey } from "./supabase.js";
 import { snapshot, hasSnapshot } from "./snapshot.js";
 import { PAGE_SIZE } from "./site.js";
+import { isValidDateStr, dateRangeForDay } from "./text.js";
 
 /* Only the columns a page needs. The carousel and keywords are pulled out of
  * published_response with JSON-path aliases so the (large) blob itself never
@@ -76,11 +77,16 @@ const db = {
 
   /* one page of the feed or a hub. Requests size+1 rows so "is there a next
    * page" costs no count query. */
-  async listLive({ categoryId = null, page = 1, size = PAGE_SIZE } = {}) {
+  async listLive({ categoryId = null, page = 1, size = PAGE_SIZE, date = null } = {}) {
     const from = (page - 1) * size;
     let q = live(pixDb().from("pix_posts").select(COLS))
-      .order("published_at", { ascending: false }).range(from, from + size);
+      .order("published_at", { ascending: false });
     if (categoryId != null) q = q.eq("category_id", categoryId);
+    if (date && isValidDateStr(date)) {
+      const { startIso, endIso } = dateRangeForDay(date);
+      q = q.gte("published_at", startIso).lte("published_at", endIso);
+    }
+    q = q.range(from, from + size);
     const { data, error } = await q;
     if (error) fail(error, "listLive");
     const rows = data || [];

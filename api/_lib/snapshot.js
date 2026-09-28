@@ -1,6 +1,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { isValidDateStr, dateRangeForDay } from "./text.js";
 
 /* Local development fallback. pix_posts has no anon read policy, so without
  * PIX_SUPABASE_SERVICE_ROLE_KEY there is no way to reach the real database —
@@ -42,8 +43,16 @@ export const snapshot = {
       newer: siblings.slice(Math.max(0, i - span), i).reverse(),
     };
   },
-  async listLive({ categoryId = null, page = 1, size = 30 } = {}) {
-    const rows = all().filter((p) => inCategory(p, categoryId));
+  async listLive({ categoryId = null, page = 1, size = 30, date = null } = {}) {
+    let rows = all().filter((p) => inCategory(p, categoryId));
+    if (date && isValidDateStr(date)) {
+      const { startIso, endIso } = dateRangeForDay(date);
+      const s = new Date(startIso).getTime(), e = new Date(endIso).getTime();
+      rows = rows.filter((p) => {
+        const t = new Date(p.published_at).getTime();
+        return t >= s && t <= e;
+      });
+    }
     const from = (page - 1) * size;
     return { posts: rows.slice(from, from + size), hasNext: rows.length > from + size };
   },

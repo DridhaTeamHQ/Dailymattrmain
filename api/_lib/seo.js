@@ -1,5 +1,5 @@
 import { esc, jsonLdScript } from "./html.js";
-import { ORIGIN, SITE_NAME, PUBLISHER_LOGO, OG_DEFAULT, PLAY_URL, LEGAL_NAME } from "./site.js";
+import { ORIGIN, SITE_NAME, PUBLISHER_LOGO, OG_DEFAULT, PLAY_URL, APP_STORE_URL, LEGAL_NAME } from "./site.js";
 import { cleanHeadline, articlePath } from "./slug.js";
 import { bullets, metaDescription, modifiedAt, truncateAtWord } from "./text.js";
 import { slidesFor, posterFor, artworkFor } from "./media.js";
@@ -16,7 +16,7 @@ const publisher = {
   legalName: LEGAL_NAME,
   url: `${ORIGIN}/`,
   logo: { "@type": "ImageObject", url: PUBLISHER_LOGO.url, width: PUBLISHER_LOGO.width, height: PUBLISHER_LOGO.height },
-  sameAs: [PLAY_URL],
+  sameAs: [PLAY_URL, APP_STORE_URL],
 };
 
 export function breadcrumbLd(trail) {
@@ -107,7 +107,7 @@ export function articleHead(post) {
   return { title, desc, head, url, slides, heroImages, poster, points, cat, source };
 }
 
-export function hubHead({ title, description, path, posts, page = 1, hasNext = false, trail }) {
+export function hubHead({ title, description, path, posts, page = 1, hasNext = false, trail, date = null }) {
   const url = ORIGIN + path;
   const canonical = page > 1 ? `${url}page/${page}/` : url;
   const ld = {
@@ -132,7 +132,7 @@ export function hubHead({ title, description, path, posts, page = 1, hasNext = f
   const head =
     meta("description", description) +
     `  <link rel="canonical" href="${canonical}" />\n` +
-    meta("robots", "index,follow,max-image-preview:large") +
+    meta("robots", date ? "noindex,follow" : "index,follow,max-image-preview:large") +
     (page > 1 ? `  <link rel="prev" href="${page === 2 ? url : `${url}page/${page - 1}/`}" />\n` : "") +
     (hasNext ? `  <link rel="next" href="${url}page/${page + 1}/" />\n` : "") +
     prop("og:type", "website") +

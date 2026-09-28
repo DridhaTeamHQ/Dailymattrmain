@@ -49,13 +49,16 @@ export default defineConfig(({ mode }) => {
       configureServer(server) {
         process.env.NEWS_DEV = "1";
         server.middlewares.use(async (req, res, next) => {
-          const path = new URL(req.url, "http://localhost").pathname;
+          const url = new URL(req.url, "http://localhost");
+          const path = url.pathname;
           if (path !== "/news" && !path.startsWith("/news/")) return next();
           try {
             const { routeNews } = await server.ssrLoadModule("/api/_lib/router.js");
+            const query = Object.fromEntries(url.searchParams);
             const out = await routeNews({
               rest: path === "/news" ? "" : path.slice("/news/".length),
               bare: path === "/news",
+              query,
             });
             if (out.status === 301) {
               res.statusCode = 301;

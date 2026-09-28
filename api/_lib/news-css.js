@@ -14,10 +14,34 @@ export const NEWS_CSS = `
 .news-head h1 { font-size: clamp(26px, 4vw, 40px); line-height: 1.15; letter-spacing: -0.02em; }
 .news-head p { margin-top: 10px; color: var(--ink-soft); max-width: 62ch; font-size: 15px; }
 
-.news-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 30px; }
-.news-tabs a { font-size: 13.5px; font-weight: 600; padding: 8px 14px; border-radius: 999px; text-decoration: none; color: var(--ink); background: #f3f3f6; }
+.news-filter-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 18px; margin: 22px 0 28px; }
+.news-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.news-tabs a { font-size: 13.5px; font-weight: 600; padding: 8px 14px; border-radius: 999px; text-decoration: none; color: var(--ink); background: #f3f3f6; transition: background .15s ease, color .15s ease; }
 .news-tabs a:hover { background: var(--mist); }
 .news-tabs a[aria-current] { background: var(--blue); color: #fff; }
+
+.news-date-filter { display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.date-picker-box { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #e0e0e6; border-radius: 999px; padding: 6px 14px 6px 12px; box-shadow: 0 1px 3px rgba(0,0,0,.04); transition: border-color .18s ease, box-shadow .18s ease; }
+.date-picker-box:hover, .date-picker-box:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(57,121,255,.14); }
+.date-icon { color: var(--ink-soft); flex-shrink: 0; display: block; }
+.news-date-input { border: none; background: transparent; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--ink); outline: none; cursor: pointer; padding: 2px 0; }
+.news-date-input::-webkit-calendar-picker-indicator { cursor: pointer; opacity: .7; transition: opacity .15s ease; }
+.news-date-input::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+.date-clear-pill { font-size: 12.5px; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: #f3f3f6; color: var(--ink-soft); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: background .15s ease, color .15s ease; }
+.date-clear-pill:hover { background: #e7e7ec; color: var(--ink); }
+.date-submit-btn { display: none; }
+
+.news-active-filter { display: flex; align-items: center; gap: 12px; background: rgba(57,121,255,.07); border: 1px solid rgba(57,121,255,.2); color: var(--ink); font-size: 13.5px; padding: 9px 16px; border-radius: 12px; margin: -10px 0 24px; }
+.news-active-filter b { color: var(--blue); }
+.news-active-filter-clear { color: var(--blue); font-weight: 600; font-size: 12.5px; text-decoration: underline; margin-left: auto; }
+.news-empty-state { text-align: center; padding: 48px 20px; background: #fff; border-radius: 16px; border: 1px dashed #dcdce2; margin: 16px 0 32px; }
+.news-empty-state .news-empty { padding: 0; margin-bottom: 4px; font-size: 16px; }
+
+@media (max-width: 640px) {
+  .news-filter-bar { flex-direction: column; align-items: stretch; gap: 12px; }
+  .news-date-filter { width: 100%; }
+  .date-picker-box { flex: 1; justify-content: space-between; }
+}
 
 .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 26px 22px; list-style: none; }
 .news-card { display: flex; flex-direction: column; gap: 10px; }

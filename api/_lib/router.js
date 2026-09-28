@@ -9,6 +9,7 @@ import { CAROUSEL_JS, STORY_NAV_JS } from "./news-js.js";
 import { categoryBySlug, hubPath, CATEGORIES } from "./categories.js";
 import { getPostByPublishedId, getNeighbours, listLive } from "./queries.js";
 import { SITE_NAME, PAGE_SIZE } from "./site.js";
+import { isValidDateStr, formatDate } from "./text.js";
 
 const errorPage = (status) =>
   page({
@@ -22,20 +23,24 @@ const moved = (location) => ({ status: 301, location, cache: CACHE.redirect });
 
 /* `rest` is everything after "/news/"; `bare` marks a request for "/news"
  * with no trailing slash. Both come from the rewrite (or the dev middleware). */
-export async function routeNews({ rest = "", bare = false }) {
-  if (bare) return moved("/news/");
+export async function routeNews({ rest = "", bare = false, query = {} }) {
+  const rawDate = query?.date ? String(query.date).trim() : null;
+  const date = isValidDateStr(rawDate) ? rawDate : null;
+  const querySuffix = date ? `?date=${encodeURIComponent(date)}` : "";
+
+  if (bare) return moved(`/news/${querySuffix}`);
 
   const m = /^(?<body>.*?)(?<slash>\/?)$/.exec(rest);
   const body = m.groups.body;
   const trailing = m.groups.slash === "/";
 
   /* /news/ and /news/page/N/ */
-  if (body === "") return trailing || rest === "" ? feed({ page: 1 }) : moved("/news/");
+  if (body === "") return trailing || rest === "" ? feed({ page: 1, date }) : moved(`/news/${querySuffix}`);
   const feedPage = /^page\/(\d{1,4})$/.exec(body);
   if (feedPage) {
     const n = Number(feedPage[1]);
-    if (n === 1) return moved("/news/");
-    return trailing ? feed({ page: n }) : moved(`/news/page/${n}/`);
+    if (n === 1) return moved(`/news/${querySuffix}`);
+    return trailing ? feed({ page: n, date }) : moved(`/news/page/${n}/${querySuffix}`);
   }
 
   /* /news/<category>/ and /news/<category>/page/N/ */
@@ -45,9 +50,9 @@ export async function routeNews({ rest = "", bare = false }) {
     if (cat) {
       const n = hub[2] ? Number(hub[2]) : 1;
       const base = hubPath(cat);
-      if (hub[2] && n === 1) return moved(base);
-      const want = n === 1 ? base : `${base}page/${n}/`;
-      return trailing ? feed({ page: n, cat }) : moved(want);
+      if (hub[2] && n === 1) return moved(`${base}${querySuffix}`);
+      const want = n === 1 ? `${base}${querySuffix}` : `${base}page/${n}/${querySuffix}`;
+      return trailing ? feed({ page: n, cat, date }) : moved(want);
     }
   }
 
@@ -89,13 +94,16 @@ async function article({ slug, id, trailing }) {
   };
 }
 
-async function feed({ page: n, cat = null }) {
-  const { posts, hasNext } = await listLive({ categoryId: cat?.id ?? null, page: n, size: PAGE_SIZE });
+async function feed({ page: n, cat = null, date = null }) {
+  const { posts, hasNext } = await listLive({ categoryId: cat?.id ?? null, page: n, size: PAGE_SIZE, date });
   if (!posts.length && n > 1) return fail(404);
 
   const path = cat ? hubPath(cat) : "/news/";
   const heading = cat ? `${cat.label} news` : "Latest news";
-  const description = cat
+  const formattedDate = date ? formatDate(`${date}T00:00:00+05:30`) : "";
+  const description = date
+    ? `Browse ${cat ? cat.label.toLowerCase() : "latest"} news from ${formattedDate || date} on DailyMattr.`
+    : cat
     ? cat.description
     : "The latest news in short from DailyMattr — 100 fact-checked, human-picked stories a day across India, world, business, technology, sports and entertainment.";
   const trail = [
@@ -103,20 +111,22 @@ async function feed({ page: n, cat = null }) {
     ...(cat ? [{ name: "News", path: "/news/" }, { name: cat.label, path }] : [{ name: "News", path: "/news/" }]),
   ];
 
+  const pageTitle = `${heading}${date ? ` (${formattedDate || date})` : ""}${n > 1 ? ` — page ${n}` : ""} — ${SITE_NAME}`;
+
   const { head } = hubHead({
-    title: `${heading} — ${SITE_NAME}`,
-    description, path, posts, page: n, hasNext, trail,
+    title: pageTitle,
+    description, path, posts, page: n, hasNext, trail, date,
   });
 
   return {
     status: 200,
     type: "html",
-    cache: CACHE.feed,
+    cache: date ? CACHE.error : CACHE.feed,
     tags: ["news", "news-hub", ...(cat ? [`news-cat-${cat.slug}`] : [])],
     body: page({
-      title: `${heading}${n > 1 ? ` — page ${n}` : ""} — ${SITE_NAME}`,
+      title: pageTitle,
       head,
-      main: renderHub({ heading, description, path, trail, posts, page: n, hasNext }),
+      main: renderHub({ heading, description, path, trail, posts, page: n, hasNext, date }),
     }),
   };
 }

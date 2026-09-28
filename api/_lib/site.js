@@ -12,6 +12,8 @@ export const LEGAL_NAME = "Dridha Technologies Private Limited";
 export const SUPPORT_EMAIL = "support@dailymattr.com";
 export const PLAY_URL =
   "https://play.google.com/store/apps/details?id=com.dailymattr&pcampaignid=web_share";
+export const APP_STORE_URL =
+  "https://apps.apple.com/in/app/dailymattr/id6791996138";
 
 /* rectangular raster logo for NewsArticle.publisher — Google rejects SVG
  * and square marks here. The file is supplied by the design team. */
