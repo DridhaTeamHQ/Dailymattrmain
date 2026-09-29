@@ -84,6 +84,7 @@ a { text-decoration: none; color: inherit; }
 .btn:hover { transform: translateY(-1px); }
 .btn-dark { background: var(--blue); color: #fff; position: relative; overflow: hidden; }
 .btn-dark:hover { background: #2f68e6; }
+.download-trigger { appearance: none; }
 .btn-ghost { background: transparent; color: var(--ink); padding: 9px 10px; }
 .btn-avatar {
   background: var(--blue); color: #fff;
@@ -129,8 +130,19 @@ a { text-decoration: none; color: inherit; }
   will-change: transform;
 }
 .brand-hero img { height: 80px; width: auto; display: block;  }
-.brand { display: flex; align-items: center; }
-.brand img { height: 26px; width: auto; display: block; }
+.brand { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.brand img { width: 156px; height: 32px; display: block; }
+.brand-tagline {
+  color: var(--blue);
+  font-family: var(--font-sans);
+  font-size: 7.7px;
+  font-weight: 500;
+  line-height: 12px;
+  letter-spacing: 1px;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
 .nav-links { display: flex; gap: 6px; }
 .nav-links a {
   font-size: 13px; font-weight: 500; color: var(--ink-soft);
@@ -248,9 +260,9 @@ a { text-decoration: none; color: inherit; }
 .showcase-title span { color: #5c5c62; }
 .giant-words {
   position: absolute; top: 46%; left: 0; right: 0;
-  font-size: clamp(90px, 13.5vw, 200px);
-  font-weight: 800; letter-spacing: -2px; white-space: nowrap;
-  color: #17171a; text-align: center;
+  font-size: clamp(64px, 10vw, 150px);
+  font-weight: 800; letter-spacing: -3px; white-space: nowrap;
+  color: #202025; text-align: center;
   user-select: none; pointer-events: none;
 }
 .showcase-copy {
@@ -452,6 +464,7 @@ a { text-decoration: none; color: inherit; }
     radial-gradient(90% 50% at 88% 112%, rgba(57, 121, 255, .16) 0%, transparent 60%);
 }
 .feature-copy[data-scene="0"] { opacity: 1; }
+.feature-copy[data-scene="0"] { top: 25%; }
 .copy-left { left: 7%; }
 .copy-right { right: 7%; }
 .feature-copy h3 {
@@ -826,7 +839,7 @@ a { text-decoration: none; color: inherit; }
   .eyebrow { order: 1; }
   .showcase-title { order: 2; font-size: clamp(27px, 6.4vw, 42px); line-height: 1.14; }
   .eyebrow, .showcase-title { padding-left: clamp(20px, 6vw, 40px); padding-right: 24px; }
-  .giant-words { font-size: 30vw; } /* stays absolute, decorative */
+  .giant-words { font-size: 22vw; line-height: .9; white-space: normal; } /* stays absolute, decorative */
   .showcase-stage {
     order: 3; position: relative; left: auto; right: auto; top: auto;
     width: 100%; height: clamp(300px, 44vh, 500px);

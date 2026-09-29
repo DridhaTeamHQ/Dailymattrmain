@@ -1,6 +1,6 @@
 import { html, raw } from "./html.js";
 import { NEWS_CSS } from "./news-css.js";
-import { NAV, PLAY_URL, SITE_NAME, LEGAL_NAME, SUPPORT_EMAIL, ORIGIN } from "./site.js";
+import { NAV, PLAY_URL, APP_STORE_URL, SITE_NAME, LEGAL_NAME, SUPPORT_EMAIL, ORIGIN } from "./site.js";
 import { CATEGORIES, hubPath } from "./categories.js";
 
 /* In production the marketing CSS is emitted at a stable path (see
@@ -32,7 +32,8 @@ const footerHtml = () => html`
           <a href="/#features">Features</a>
           <a href="/newsletter/">Newsletter</a>
           <a href="/support/">Support</a>
-          <a href="${PLAY_URL}" target="_blank" rel="noopener noreferrer">Download APP</a>
+          <a href="${PLAY_URL}" target="_blank" rel="noopener noreferrer">Android App (Google Play)</a>
+          <a href="${APP_STORE_URL}" target="_blank" rel="noopener noreferrer">iOS App (App Store)</a>
         </div>
         <div class="footer-col">
           <h4>NEWS</h4>

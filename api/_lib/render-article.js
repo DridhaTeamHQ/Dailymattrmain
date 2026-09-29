@@ -3,7 +3,7 @@ import { articlePath, cleanHeadline } from "./slug.js";
 import { formatDate, truncateAtWord, hostnameOf } from "./text.js";
 import { artworkFor, thumbAttrs, slideAttrs } from "./media.js";
 import { categoryById, hubPath } from "./categories.js";
-import { PLAY_URL } from "./site.js";
+import { PLAY_URL, APP_STORE_URL } from "./site.js";
 
 const crumbs = (trail) => html`
       <nav class="news-crumb" aria-label="Breadcrumb">
@@ -107,9 +107,33 @@ ${crumbs(seo.trail)}
 
           ${source ? html`<p class="article-source">Source: <a href="${source}" target="_blank" rel="noopener nofollow">${host}</a></p>` : ""}
 
-          <div class="article-cta">
-            <p>Get 100 stories a day — read, watch and listen on DailyMattr.</p>
-            <a href="${PLAY_URL}" target="_blank" rel="noopener noreferrer">Download the app</a>
+          <div class="article-cta" aria-label="Get DailyMattr App">
+            <div class="acta-left">
+              <div class="acta-icon" aria-hidden="true">
+                <img src="/assets/apple-touch-icon.png" width="30" height="30" alt="" loading="lazy" decoding="async" />
+              </div>
+              <div class="acta-text">
+                <span class="acta-title">Get 100 stories a day on the app</span>
+                <span class="acta-sub">Read, watch &amp; listen · Free on iOS &amp; Android</span>
+              </div>
+            </div>
+            <div class="acta-actions">
+              <a class="acta-pill acta-play" href="${PLAY_URL}" target="_blank" rel="noopener noreferrer" aria-label="Get on Google Play">
+                <svg width="15" height="15" viewBox="0 0 512 512" fill="none" aria-hidden="true">
+                  <path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1z" fill="#FFC107"/>
+                  <path d="M47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0z" fill="#00D2FF"/>
+                  <path d="M472.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8z" fill="#FF3A44"/>
+                  <path d="M104.6 499l280.8-161.2-60.1-60.1L104.6 499z" fill="#00E676"/>
+                </svg>
+                <span>Google Play</span>
+              </a>
+              <a class="acta-pill acta-apple" href="${APP_STORE_URL}" target="_blank" rel="noopener noreferrer" aria-label="Download on App Store">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.84c.66-.8 1.11-1.92.99-3.04-1 .04-2.14.67-2.82 1.47-.6.69-1.12 1.83-1 2.93 1.12.09 2.17-.56 2.83-1.36z"/>
+                </svg>
+                <span>App Store</span>
+              </a>
+            </div>
           </div>
 
           ${prev || next
@@ -152,11 +176,17 @@ ${crumbs(seo.trail)}
         <div class="app-gate-body">
           <p class="app-gate-mark">&ldquo;dailymattr&rdquo;</p>
           <h2 id="app-gate-title">Read 100 stories a&nbsp;day</h2>
-          <p class="app-gate-copy">Text, video and audio explainers — fact-checked, human-picked, free.</p>
-          <a class="app-gate-cta" href="${PLAY_URL}" target="_blank" rel="noopener noreferrer">
-            <svg width="17" height="17" viewBox="0 0 512 512" fill="currentColor" aria-hidden="true"><path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/></svg>
-            Get it on Google Play
-          </a>
+          <p class="app-gate-copy">Image, video and audio explainers — fact-checked, handpicked, free.</p>
+          <div class="app-gate-buttons">
+            <a class="app-gate-cta app-gate-play" href="${PLAY_URL}" target="_blank" rel="noopener noreferrer">
+              <svg width="17" height="17" viewBox="0 0 512 512" fill="currentColor" aria-hidden="true"><path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/></svg>
+              Google Play
+            </a>
+            <a class="app-gate-cta app-gate-apple" href="${APP_STORE_URL}" target="_blank" rel="noopener noreferrer">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.84c.66-.8 1.11-1.92.99-3.04-1 .04-2.14.67-2.82 1.47-.6.69-1.12 1.83-1 2.93 1.12.09 2.17-.56 2.83-1.36z"/></svg>
+              App Store
+            </a>
+          </div>
           <button class="app-gate-skip" type="button" data-gate-dismiss>Keep reading</button>
         </div>
       </div>

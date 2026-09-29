@@ -469,7 +469,7 @@ function build() {
     const M_IMGS = [
       "card-matchcenter.jpg", "card-article.jpg", "card-live.jpg",
       "card-xplaind.jpg", "card-home.jpg", "card-pix.jpg",
-      "card-readhistory.jpg", "card-wraps.jpg", "card-qixreels.jpg",
+      "card-readhistory.jpg", "card-qixreels.jpg",
       "card-ai.jpg", "card-qix.jpg", "card-trax.jpg",
       "card-traxplayer.jpg", "card-pixdetails.jpg", "card-qixmore.jpg",
     ];
@@ -793,10 +793,12 @@ function flagStorePills() {
   );
 }
 
-document.querySelectorAll('.nav-cta a[href="#top"]').forEach((a) => {
-  // the anchor handler above already runs the smooth scroll — wait for it
-  // to land before flashing, otherwise the pulse plays off-screen
-  a.addEventListener("click", () => setTimeout(flagStorePills, 900));
+document.querySelectorAll(".download-trigger").forEach((button) => {
+  button.addEventListener("click", () => {
+    flagStorePills();
+    const hero = document.querySelector("#hero");
+    if (hero) lenis.scrollTo(hero, { offset: -70, duration: 1.4 });
+  });
 });
 
 /* subpages link here as /#download — flash once the curtain is up */
