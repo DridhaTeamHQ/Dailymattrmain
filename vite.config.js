@@ -48,6 +48,12 @@ export default defineConfig(({ mode }) => {
             server.ssrLoadModule("/api/admin.js").then(({ default: handler }) => handler(req, res)).catch(next);
             return;
           }
+          if (req.url?.startsWith("/api/support")) {
+            const url = new URL(req.url, "http://localhost");
+            req.query = Object.fromEntries(url.searchParams);
+            server.ssrLoadModule("/api/support.js").then(({ default: handler }) => handler(req, res)).catch(next);
+            return;
+          }
           if (req.url === "/admin" || req.url?.startsWith("/admin?")) {
             res.statusCode = 302;
             res.setHeader("Location", "/admin/");

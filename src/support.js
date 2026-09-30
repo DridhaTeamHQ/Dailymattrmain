@@ -1,8 +1,6 @@
 /* Submissions land in the `support_requests` table in Supabase. The browser
  * only ever holds the publishable key, and row level security allows nothing
  * but INSERT — reading the queue happens in the dashboard. */
-import { getSupabase } from "./supabaseClient.js";
-
 const IDLE_NOTE = "We usually reply within one business day";
 
 const supportForm = document.getElementById("support-form");
@@ -154,13 +152,12 @@ supportForm?.addEventListener("submit", async (event) => {
   supportNote.textContent = "Sending your request...";
 
   try {
-    const { error } = await getSupabase().from("support_requests").insert({
-      name: data.name.trim(),
-      email: data.email.trim(),
-      topic: data.topic,
-      message: data.message.trim(),
+    const response = await fetch("/api/support", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: data.name.trim(), email: data.email.trim(), topic: data.topic, message: data.message.trim() }),
     });
-    if (error) throw error;
+    if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || "Support request failed");
   } catch (error) {
     console.error("Support request failed", error);
     supportForm.classList.remove("is-sending");

@@ -83,7 +83,7 @@ ${preloadImage ? `  <link rel="preload" as="image" href="${preloadImage}" fetchp
 </head>
 <body class="news-body">
   <header class="nav">
-    <a class="brand" href="/"><img src="/assets/logo.svg" alt="${SITE_NAME}" /></a>
+    <a class="brand" href="/"><img src="/assets/logo.svg" alt="${SITE_NAME}" /><span class="brand-tagline">Stories that mattr</span></a>
 ${navHtml(activeNav)}
     <div class="nav-cta">
       <a class="btn btn-dark shine" href="${PLAY_URL}" target="_blank" rel="noopener noreferrer">Download App</a>
