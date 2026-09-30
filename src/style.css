@@ -270,7 +270,22 @@ a { text-decoration: none; color: inherit; }
   font-size: clamp(64px, 10vw, 150px);
   font-weight: 800; letter-spacing: -3px; white-space: nowrap;
   color: #202025; text-align: center;
-  user-select: none; pointer-events: none;
+  overflow: hidden; user-select: none; pointer-events: none;
+}
+.giant-words span {
+  display: block;
+  flex: 0 0 auto;
+  white-space: pre;
+}
+.giant-words-track {
+  display: flex;
+  width: max-content;
+  gap: 0;
+  animation: giant-words-marquee 22s linear infinite;
+}
+@keyframes giant-words-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 .showcase-copy {
   position: relative; z-index: 3;
@@ -846,7 +861,8 @@ a { text-decoration: none; color: inherit; }
   .eyebrow { order: 1; }
   .showcase-title { order: 2; font-size: clamp(27px, 6.4vw, 42px); line-height: 1.14; }
   .eyebrow, .showcase-title { padding-left: clamp(20px, 6vw, 40px); padding-right: 24px; }
-  .giant-words { font-size: 22vw; line-height: .9; white-space: normal; } /* stays absolute, decorative */
+  .giant-words { font-size: 22vw; line-height: .9; white-space: nowrap; } /* stays absolute, decorative */
+  .giant-words-track { animation-duration: 16s; }
   .showcase-stage {
     order: 3; position: relative; left: auto; right: auto; top: auto;
     width: 100%; height: clamp(300px, 44vh, 500px);
