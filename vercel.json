@@ -7,6 +7,8 @@
     "api/*.js": { "maxDuration": 10 }
   },
   "rewrites": [
+    { "source": "/admin", "destination": "/admin/" },
+    { "source": "/admin/dashboard", "destination": "/admin/dashboard/" },
     { "source": "/news", "destination": "/api/news?p=&bare=1" },
     { "source": "/news/(.*)", "destination": "/api/news?p=$1" }
   ],

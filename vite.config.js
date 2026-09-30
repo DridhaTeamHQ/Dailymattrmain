@@ -26,6 +26,8 @@ export default defineConfig(({ mode }) => {
         editorialguidelines: path.resolve(root, "editorialguidelines/index.html"),
         privacypolicy: path.resolve(root, "privacypolicy/index.html"),
         termsandconditions: path.resolve(root, "termsandconditions/index.html"),
+        admin: path.resolve(root, "admin/index.html"),
+        adminDashboard: path.resolve(root, "admin/dashboard/index.html"),
       },
     },
   },
@@ -35,6 +37,27 @@ export default defineConfig(({ mode }) => {
     fs: { strict: false },
   },
   plugins: [
+    {
+      name: "admin-route",
+      apply: "serve",
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          if (req.url?.startsWith("/api/admin")) {
+            const url = new URL(req.url, "http://localhost");
+            req.query = Object.fromEntries(url.searchParams);
+            server.ssrLoadModule("/api/admin.js").then(({ default: handler }) => handler(req, res)).catch(next);
+            return;
+          }
+          if (req.url === "/admin" || req.url?.startsWith("/admin?")) {
+            res.statusCode = 302;
+            res.setHeader("Location", "/admin/");
+            res.end();
+            return;
+          }
+          next();
+        });
+      },
+    },
     {
       // News is rendered at request time, so retain an uncached alias for it.
       // Vite's HTML pages use the content-hashed stylesheet directly.
