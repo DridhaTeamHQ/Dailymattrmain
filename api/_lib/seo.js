@@ -1,8 +1,8 @@
 import { esc, jsonLdScript } from "./html.js";
-import { ORIGIN, SITE_NAME, PUBLISHER_LOGO, OG_DEFAULT, PLAY_URL, APP_STORE_URL, LEGAL_NAME } from "./site.js";
+import { ORIGIN, SITE_NAME, PUBLISHER_LOGO, OG_DEFAULT, PLAY_URL, APP_STORE_URL, LEGAL_NAME, PAGE_SIZE } from "./site.js";
 import { cleanHeadline, articlePath } from "./slug.js";
 import { bullets, metaDescription, modifiedAt, truncateAtWord } from "./text.js";
-import { slidesFor, posterFor, artworkFor } from "./media.js";
+import { slidesFor, posterFor, artworkFor, ogImageFor } from "./media.js";
 import { categoryById, hubPath } from "./categories.js";
 import { safeUrl } from "./html.js";
 
@@ -48,6 +48,7 @@ export function articleHead(post) {
   const url = ORIGIN + articlePath(post);
   const slides = slidesFor(post);
   const poster = posterFor(post);
+  const og = ogImageFor(post);
   const artwork = artworkFor(post);
   /* what the article page actually shows: the artwork alone */
   const heroImages = artwork ? [{ url: artwork, artwork: true }] : slides.slice(0, 1);
@@ -82,7 +83,7 @@ export function articleHead(post) {
 
   const head =
     meta("description", desc) +
-    `  <link rel="canonical" href="${url}" />\n` +
+    `  <link rel="canonical" href="${esc(url)}" />\n` +
     meta("robots", "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1") +
     prop("og:type", "article") +
     prop("og:site_name", SITE_NAME) +
@@ -90,8 +91,9 @@ export function articleHead(post) {
     prop("og:title", title) +
     prop("og:description", desc) +
     prop("og:url", url) +
-    prop("og:image", poster) +
-    (poster ? prop("og:image:width", "920") + prop("og:image:height", "1700") + prop("og:image:alt", title) : "") +
+    prop("og:image", og?.url) +
+    (og?.width ? prop("og:image:width", String(og.width)) + prop("og:image:height", String(og.height)) : "") +
+    (og ? prop("og:image:alt", title) : "") +
     prop("article:published_time", new Date(post.published_at).toISOString()) +
     prop("article:modified_time", modifiedAt(post)) +
     (cat ? prop("article:section", cat.label) : "") +
@@ -110,6 +112,8 @@ export function articleHead(post) {
 export function hubHead({ title, description, path, posts, page = 1, hasNext = false, trail, date = null }) {
   const url = ORIGIN + path;
   const canonical = page > 1 ? `${url}page/${page}/` : url;
+  /* prev/next follow the same filtered series the on-page pager links to */
+  const qs = date ? `?date=${encodeURIComponent(date)}` : "";
   const ld = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -123,7 +127,7 @@ export function hubHead({ title, description, path, posts, page = 1, hasNext = f
       "@type": "ItemList",
       itemListElement: posts.map((p, i) => ({
         "@type": "ListItem",
-        position: (page - 1) * posts.length + i + 1,
+        position: (page - 1) * PAGE_SIZE + i + 1,
         url: ORIGIN + articlePath(p),
         name: cleanHeadline(p.headline),
       })),
@@ -133,8 +137,8 @@ export function hubHead({ title, description, path, posts, page = 1, hasNext = f
     meta("description", description) +
     `  <link rel="canonical" href="${canonical}" />\n` +
     meta("robots", date ? "noindex,follow" : "index,follow,max-image-preview:large") +
-    (page > 1 ? `  <link rel="prev" href="${page === 2 ? url : `${url}page/${page - 1}/`}" />\n` : "") +
-    (hasNext ? `  <link rel="next" href="${url}page/${page + 1}/" />\n` : "") +
+    (page > 1 ? `  <link rel="prev" href="${page === 2 ? url : `${url}page/${page - 1}/`}${esc(qs)}" />\n` : "") +
+    (hasNext ? `  <link rel="next" href="${url}page/${page + 1}/${esc(qs)}" />\n` : "") +
     prop("og:type", "website") +
     prop("og:site_name", SITE_NAME) +
     prop("og:title", title) +

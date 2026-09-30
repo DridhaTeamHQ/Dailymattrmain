@@ -5,6 +5,10 @@ import { createPhoneSeq, createPhoneSeqDesktop } from "./phoneSeq.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
+/* tells the CSS failsafe that the script loaded and owns the intro curtain
+ * (see .intro in style.css) */
+document.documentElement.classList.add("intro-live");
+
 /* ---------------------------------------------------------------
  * Lenis smooth scrolling — the page itself scrolls on an eased
  * curve, so the pinned sections, the DOM, and the 3D phone all read
@@ -16,7 +20,8 @@ gsap.registerPlugin(ScrollTrigger);
  * — smooth-scroll-controlled touch felt sticky and unnatural. */
 const lenis = new Lenis({
   lerp: 0.09,
-  smoothWheel: true,
+  // eased wheel scrolling is motion too; reduced-motion readers get native steps
+  smoothWheel: !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   syncTouch: false,
 });
 /* scrub maps 1:1 everywhere. Touch scroll positions already update at
@@ -624,7 +629,8 @@ function build() {
 
     /* ---------- hero word rotator ---------- */
     const words = document.querySelectorAll(".word-track span").length;
-    const rot = gsap.timeline({ repeat: -1 });
+    // the rotator markup is currently commented out of index.html
+    const rot = words > 1 ? gsap.timeline({ repeat: -1 }) : null;
     for (let i = 1; i < words; i++) {
       rot.to(".word-track", {
         y: () => -i * document.querySelector(".word-track span").offsetHeight,
@@ -633,7 +639,7 @@ function build() {
         delay: 1.6,
       });
     }
-    rot.to(".word-track", { y: 0, duration: 0 }); // 5th word is a clone of the 1st
+    rot?.to(".word-track", { y: 0, duration: 0 }); // 5th word is a clone of the 1st
 
     /* ---------- hero panel goes full-bleed as the dark world takes over.
      * Desktop only: animating background-color/border-radius REPAINTS the
@@ -907,4 +913,9 @@ ready.then(() => {
       }
     }, 250);
   }
+}).catch((err) => {
+  // a failed build must not leave the intro curtain over the page
+  console.error(err);
+  document.getElementById("intro")?.remove();
+  lenis.start();
 });

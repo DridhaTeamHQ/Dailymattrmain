@@ -53,6 +53,10 @@ a { text-decoration: none; color: inherit; }
   will-change: transform; /* pre-promote: the curtain lift must not
                              wait for layer rasterization */
 }
+/* failsafe: if main.js never runs (blocked, failed to load), the curtain
+ * would cover the page forever — drop it after 15s */
+html:not(.intro-live) .intro { animation: intro-failsafe 0s linear 15s forwards; }
+@keyframes intro-failsafe { to { visibility: hidden; } }
 .intro-mark { overflow: hidden; text-align: center; will-change: transform, opacity; }
 .intro-logo {
   display: block;
@@ -117,6 +121,9 @@ a { text-decoration: none; color: inherit; }
   animation: shine 3.4s ease infinite;
 }
 @keyframes shine { 55% { transform: translateX(120%); } 100% { transform: translateX(120%); } }
+@media (prefers-reduced-motion: reduce) {
+  .shine::after { animation: none; }
+}
 
 /* ============ Nav ============ */
 .nav {
@@ -286,6 +293,9 @@ a { text-decoration: none; color: inherit; }
 @keyframes giant-words-marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .giant-words-track { animation: none; }
 }
 .showcase-copy {
   position: relative; z-index: 3;
@@ -619,9 +629,14 @@ a { text-decoration: none; color: inherit; }
   border: 1px solid rgba(255,255,255,.16);
   background: #202023; box-shadow: 0 18px 45px rgba(0,0,0,.34);
   opacity: 0; pointer-events: none; transform: translateY(-6px);
-  transition: opacity .18s ease, transform .18s ease;
+  /* visibility keeps the closed options out of the tab order; it flips only
+     after the fade-out so the animation is unchanged */
+  visibility: hidden;
+  transition: opacity .18s ease, transform .18s ease, visibility 0s linear .18s;
 }
-.support-topic-menu.is-open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.support-topic-menu.is-open { opacity: 1; pointer-events: auto; transform: translateY(0); visibility: visible; transition-delay: 0s; }
+.support-topic-menu button:focus-visible { background: rgba(60,123,255,.18); color: #fff; outline: none; }
+.support-form .support-hp { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .support-topic-menu button {
   appearance: none; border: 0; border-radius: 8px; background: transparent;
   color: rgba(255,255,255,.78); cursor: pointer; font: inherit; font-size: 14px;

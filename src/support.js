@@ -61,11 +61,14 @@ function showProblem(problem) {
   supportForm.classList.add("has-error");
 
   if (problem.field === "topic") {
+    topicTrigger?.setAttribute("aria-invalid", "true");
     topicTrigger?.focus();
     setTopicMenu(true);
     return;
   }
-  supportForm.querySelector(`[name='${problem.field}']`)?.focus();
+  const field = supportForm.querySelector(`[name='${problem.field}']`);
+  field?.setAttribute("aria-invalid", "true");
+  field?.focus();
 }
 
 topicTrigger?.addEventListener("click", () => {
@@ -83,6 +86,27 @@ topicMenu?.addEventListener("click", (event) => {
     item.setAttribute("aria-selected", String(item === option));
   });
   setTopicMenu(false);
+  topicTrigger?.focus();
+});
+
+const topicOptions = () => [...(topicMenu?.querySelectorAll("[role='option']") || [])];
+
+// Arrow keys open the list from the trigger and move between its options.
+topicTrigger?.addEventListener("keydown", (event) => {
+  if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+  event.preventDefault();
+  setTopicMenu(true);
+  const options = topicOptions();
+  (options.find((item) => item.getAttribute("aria-selected") === "true") || options[0])?.focus();
+});
+
+topicMenu?.addEventListener("keydown", (event) => {
+  const options = topicOptions();
+  const index = options.indexOf(document.activeElement);
+  const next = { ArrowDown: index + 1, ArrowUp: index - 1, Home: 0, End: options.length - 1 }[event.key];
+  if (next === undefined) return;
+  event.preventDefault();
+  options[(next + options.length) % options.length]?.focus();
 });
 
 document.addEventListener("click", (event) => {
@@ -92,11 +116,15 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") setTopicMenu(false);
+  if (event.key !== "Escape") return;
+  const inMenu = topicMenu?.contains(document.activeElement);
+  setTopicMenu(false);
+  if (inMenu) topicTrigger?.focus();
 });
 
 // Clear a validation complaint as soon as the visitor starts fixing it.
 supportForm?.addEventListener("input", () => {
+  supportForm.querySelectorAll("[aria-invalid]").forEach((field) => field.removeAttribute("aria-invalid"));
   if (!supportForm.classList.contains("has-error")) return;
   supportForm.classList.remove("has-error");
   supportNote.textContent = IDLE_NOTE;
@@ -155,7 +183,7 @@ supportForm?.addEventListener("submit", async (event) => {
     const response = await fetch("/api/support", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: data.name.trim(), email: data.email.trim(), topic: data.topic, message: data.message.trim() }),
+      body: JSON.stringify({ name: data.name.trim(), email: data.email.trim(), topic: data.topic, message: data.message.trim(), website: data.website || "" }),
     });
     if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || "Support request failed");
   } catch (error) {

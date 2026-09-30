@@ -5,3 +5,6 @@ async function loadMessages() { const state = $("message-state"); try { const { 
 $("refresh").addEventListener("click", loadMessages); $("logout").addEventListener("click", async () => { await request("logout", { method: "POST" }); window.location.replace("/admin/"); });
 $("password-form").addEventListener("submit", async (e) => { e.preventDefault(); const data = Object.fromEntries(new FormData(e.currentTarget)); const state = $("password-state"); if (data.password !== data.confirm) { state.textContent = "Passwords do not match."; return; } try { await request("password", { method: "POST", body: JSON.stringify({ password: data.password }) }); state.textContent = "Password updated."; e.currentTarget.reset(); } catch (err) { state.textContent = err.message; } });
 loadMessages();
+const now = new Date();
+$("today").textContent = `${now.toLocaleDateString("en-GB", { weekday: "long" })} · ${now.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`;
+$("greeting").textContent = `Good ${now.getHours() < 12 ? "morning" : now.getHours() < 17 ? "afternoon" : "evening"}, admin.`;

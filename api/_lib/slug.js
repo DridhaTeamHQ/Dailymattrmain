@@ -32,4 +32,8 @@ export function slugify(h) {
  * post — so it is the part of the URL the route actually resolves on. */
 export const isValidId = (id) => /^\d{1,12}$/.test(String(id || ""));
 
-export const articlePath = (post) => `/news/${slugify(post.headline)}-${post.published_id}`;
+/* the id comes from the database, so it is checked before it reaches a URL;
+ * a malformed one (which the route could never resolve anyway) links to the
+ * feed instead of carrying arbitrary text into href/data attributes */
+export const articlePath = (post) =>
+  isValidId(post.published_id) ? `/news/${slugify(post.headline)}-${post.published_id}` : "/news/";

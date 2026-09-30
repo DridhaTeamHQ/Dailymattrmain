@@ -30,6 +30,9 @@ const live = (q) =>
 
 const isLive = (p) => p.approved && !p.rejected && p.published_at && new Date(p.published_at) <= new Date();
 
+/* rejected after its publish time had passed, i.e. it was public once */
+const wasTakenDown = (p) => p.rejected && p.published_at && new Date(p.published_at) <= new Date();
+
 const fail = (error, what) => { throw new Error(`${what}: ${error.message}`); };
 
 /* Without the service-role key the real table is unreachable (no anon policy),
@@ -39,13 +42,16 @@ const useSnapshot = () => !hasServiceKey() && hasSnapshot();
 export const dataSource = () => (hasServiceKey() ? "supabase" : useSnapshot() ? "snapshot" : "none");
 
 const db = {
-  /* { post } | { gone: true } (existed, no longer public) | null (never existed) */
+  /* { post } | { gone: true } (was published, since rejected) | null (never
+   * public: no such id, or not approved / scheduled for later — those may
+   * still go live, so they must not be marked permanently gone) */
   async getPostByPublishedId(id) {
     const { data, error } = await pixDb().from("pix_posts").select(COLS).eq("published_id", String(id)).limit(5);
     if (error) fail(error, "getPostByPublishedId");
     if (!data?.length) return null;
     const post = data.find(isLive);
-    return post ? { post } : { gone: true };
+    if (post) return { post };
+    return data.some(wasTakenDown) ? { gone: true } : null;
   },
 
   async getRelated(categoryId, excludeId, limit = 8) {

@@ -33,8 +33,10 @@ export default defineConfig(({ mode }) => {
   },
   server: {
     // the dev server may be launched via the 8.3 short path (DAILYM~1),
-    // which fails Vite's strict fs allow-list realpath check on Windows
-    fs: { strict: false },
+    // which fails Vite's strict fs allow-list realpath check on Windows, so
+    // allow both spellings of the project root. Keep strict on: it is also
+    // what stops the dev server from serving .env, .git and the rest of disk.
+    fs: { allow: [root, fs.realpathSync.native(root)] },
   },
   plugins: [
     {
@@ -90,6 +92,16 @@ export default defineConfig(({ mode }) => {
           const url = new URL(req.url, "http://localhost");
           const path = url.pathname;
           if (path !== "/news" && !path.startsWith("/news/")) return next();
+          // same as api/news.js: read-only, and ?bare is never taken from
+          // the visitor (bare is decided by the path alone below)
+          if (req.method !== "GET" && req.method !== "HEAD") {
+            res.statusCode = 405;
+            res.setHeader("Allow", "GET, HEAD");
+            res.setHeader("Content-Type", "text/plain; charset=utf-8");
+            res.setHeader("Cache-Control", "no-store");
+            res.end("Method Not Allowed\n");
+            return;
+          }
           try {
             const { routeNews } = await server.ssrLoadModule("/api/_lib/router.js");
             const query = Object.fromEntries(url.searchParams);
@@ -105,7 +117,8 @@ export default defineConfig(({ mode }) => {
               return;
             }
             res.statusCode = out.status;
-            res.setHeader("Content-Type", "text/html; charset=utf-8");
+            // the router says what it returned (the sitemaps are XML)
+            res.setHeader("Content-Type", out.type === "xml" ? "application/xml; charset=utf-8" : "text/html; charset=utf-8");
             res.setHeader("Cache-Control", "no-store");
             res.end(String(out.body));
           } catch (err) {

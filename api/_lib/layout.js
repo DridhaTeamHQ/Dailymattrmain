@@ -1,4 +1,4 @@
-import { html, raw } from "./html.js";
+import { html, raw, esc } from "./html.js";
 import { NEWS_CSS } from "./news-css.js";
 import { NAV, PLAY_URL, APP_STORE_URL, SITE_NAME, LEGAL_NAME, SUPPORT_EMAIL, ORIGIN } from "./site.js";
 import { CATEGORIES, hubPath } from "./categories.js";
@@ -13,7 +13,7 @@ const SITE_CSS = process.env.NEWS_DEV === "1"
 const FONT = "Be+Vietnam+Pro:wght@400;500;600;700;800";
 
 const navHtml = (active) => html`
-    <nav class="nav-links">
+    <nav class="nav-links" aria-label="Main">
       ${NAV.map((n) => html`<a href="${n.href}"${raw(n.href === active ? ' class="active"' : "")}>${n.label}</a>`)}
     </nav>`;
 
@@ -60,26 +60,29 @@ const footerHtml = () => html`
     <div class="footer-wordmark" aria-hidden="true"><img src="/assets/logo.svg" alt="" /></div>
   </footer>`;
 
-/* `head` is pre-escaped markup from seo.js; `main` likewise from a renderer */
-export function page({ title, head, main, activeNav = "/news/", preloadImage = "", script = "" }) {
+/* `head` is pre-escaped markup from seo.js; `main` likewise from a renderer.
+ * `title` is plain text and is escaped here. `preloadImage` is the hero's
+ * { src, srcset, sizes } — the same attributes its <img> carries, so the
+ * preload fetches the file the browser will actually pick. */
+export function page({ title, head, main, activeNav = "/news/", preloadImage = null, script = "" }) {
   return `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${title}</title>
+  <title>${esc(title)}</title>
 ${head}
   <link rel="icon" href="/favicon.ico" sizes="32x32" />
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=2" />
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png?v=2" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preconnect" href="https://coggfnbqqyiqfsxvtaym.supabase.co" crossorigin />
+  <link rel="preconnect" href="https://coggfnbqqyiqfsxvtaym.supabase.co" />
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=${FONT}&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${FONT}&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${FONT}&display=swap" /></noscript>
   <link rel="stylesheet" href="${SITE_CSS}" />
-${preloadImage ? `  <link rel="preload" as="image" href="${preloadImage}" fetchpriority="high" />\n` : ""}  <style>${NEWS_CSS}</style>
+${preloadImage?.src ? `  <link rel="preload" as="image" href="${esc(preloadImage.src)}" imagesrcset="${esc(preloadImage.srcset)}" imagesizes="${esc(preloadImage.sizes)}" fetchpriority="high" />\n` : ""}  <style>${NEWS_CSS}</style>
 </head>
 <body class="news-body">
   <header class="nav">

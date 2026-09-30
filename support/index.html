@@ -60,6 +60,8 @@
       </div>
       <form class="support-form" id="support-form">
         <div class="support-form-content">
+          <!-- honeypot: hidden from people, filled in by form bots -->
+          <input class="support-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
           <div class="support-form-heading">
             <div>
               <p class="support-form-kicker">DailyMattr support</p>
@@ -72,9 +74,9 @@
             <label><span>Email address</span><input name="email" type="email" autocomplete="email" placeholder="you@example.com" maxlength="254" required /></label>
           </div>
           <label class="support-topic-field">
-            <span>Support topic</span>
+            <span id="support-topic-label">Support topic</span>
             <input id="support-topic-input" name="topic" type="hidden" required />
-            <button class="support-topic-trigger" type="button" id="support-topic-trigger" aria-haspopup="listbox" aria-expanded="false">
+            <button class="support-topic-trigger" type="button" id="support-topic-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="support-topic-menu" aria-labelledby="support-topic-label support-topic-value">
               <span id="support-topic-value">Select a topic</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
@@ -119,9 +121,9 @@
         <div class="footer-cols">
           <div class="footer-col">
             <h4>PRODUCT</h4>
-            <a href="#top">Home</a>
-            <a href="#showcase">What are we</a>
-            <a href="#features">Features</a>
+            <a href="/">Home</a>
+            <a href="/#showcase">What are we</a>
+            <a href="/#features">Features</a>
             <a href="/support/">Support</a>
             <a href="https://play.google.com/store/apps/details?id=com.dailymattr&pcampaignid=web_share" target="_blank" rel="noopener noreferrer">Download APP</a>
           </div>

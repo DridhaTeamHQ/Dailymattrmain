@@ -64,10 +64,15 @@ export const STORY_NAV_JS = `
   }
   paint();
 
+  /* whatever had focus when the prompt opened gets it back on close */
+  let opener = null;
+
   const closeGate = () => {
     if (gate) gate.hidden = true;
     stop();
     document.body.style.overflow = "";
+    if (opener && opener.focus) opener.focus();
+    opener = null;
     const url = pending;
     pending = "";
     if (url) location.href = url;
@@ -76,6 +81,7 @@ export const STORY_NAV_JS = `
   const openGate = (url) => {
     if (!gate) { location.href = url; return; }
     pending = url;
+    opener = document.activeElement;
     at = 0;
     paint();
     gate.hidden = false;
@@ -83,6 +89,19 @@ export const STORY_NAV_JS = `
     play();
     const close = gate.querySelector(".app-gate-close");
     if (close) close.focus();
+  };
+
+  /* aria-modal: Tab and Shift+Tab cycle inside the panel while it is open */
+  const trapTab = (e) => {
+    if (e.key !== "Tab" || !gate || gate.hidden) return;
+    const panel = gate.querySelector("[role=dialog]") || gate;
+    const items = [...panel.querySelectorAll("a[href], button:not([disabled]), [tabindex]:not([tabindex='-1'])")]
+      .filter((el) => el.offsetParent !== null);
+    if (!items.length) return;
+    const first = items[0], last = items[items.length - 1];
+    if (!panel.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+    else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   };
 
   const go = (dir) => {
@@ -113,6 +132,7 @@ export const STORY_NAV_JS = `
   if (gate) {
     gate.querySelectorAll("[data-gate-dismiss]").forEach((el) => el.addEventListener("click", closeGate));
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !gate.hidden) closeGate(); });
+    document.addEventListener("keydown", trapTab);
   }
 
   document.addEventListener("keydown", (e) => {

@@ -70,6 +70,26 @@ export const artworkFor = (post) => allowedImage(post.main_image_url) || slidesF
  * wants — otherwise the artwork. */
 export const posterFor = (post) => slidesFor(post)[0]?.url || allowedImage(post.main_image_url) || "";
 
+/* The poster at share size for og:image. The resizer never upscales, so the
+ * rendered size is only known when the source size is: the CMS records it
+ * for the cards, not for the bare artwork — then width/height are 0 and the
+ * caller leaves the dimension tags out rather than guess. */
+export function ogImageFor(post, max = 1200) {
+  const url = posterFor(post);
+  if (!url) return null;
+  const pages = [
+    ...(Array.isArray(post.web_pages) ? post.web_pages : []),
+    ...(Array.isArray(post.media_pages) ? post.media_pages : []),
+  ];
+  const src = pages.find((p) => allowedImage(p?.url) === url && Number(p?.width) > 0 && Number(p?.height) > 0);
+  if (!src) return { url: sized(url, max), width: 0, height: 0 };
+  const w = Math.min(max, Number(src.width));
+  const out = sized(url, w);
+  /* not a Supabase object: served as-is at its own size */
+  if (out === url) return { url, width: Number(src.width), height: Number(src.height) };
+  return { url: out, width: w, height: Math.round((Number(src.height) * w) / Number(src.width)) };
+}
+
 export const thumbAttrs = (url) => ({
   src: sized(url, IMAGE_WIDTHS.thumb[0]),
   srcset: srcSet(url, IMAGE_WIDTHS.thumb),

@@ -1,9 +1,12 @@
-import { html, raw } from "./html.js";
+import { html, raw, esc } from "./html.js";
 import { articlePath, cleanHeadline } from "./slug.js";
 import { formatDate, truncateAtWord, hostnameOf } from "./text.js";
 import { artworkFor, thumbAttrs, slideAttrs } from "./media.js";
 import { categoryById, hubPath } from "./categories.js";
 import { PLAY_URL, APP_STORE_URL } from "./site.js";
+
+/* the hero's sizes attribute; the router's preload repeats it */
+export const SLIDE_SIZES = "(max-width: 860px) 86vw, 420px";
 
 const crumbs = (trail) => html`
       <nav class="news-crumb" aria-label="Breadcrumb">
@@ -63,7 +66,7 @@ export function renderArticle({ seo, post, neighbours }) {
       : "";
 
   return html`
-    <article class="article" data-story${raw(prev ? ` data-prev="${articlePath(prev)}"` : "")}${raw(next ? ` data-next="${articlePath(next)}"` : "")}>
+    <article class="article" data-story${raw(prev ? ` data-prev="${esc(articlePath(prev))}"` : "")}${raw(next ? ` data-next="${esc(articlePath(next))}"` : "")}>
 ${crumbs(seo.trail)}
       <div class="article-layout">
         <div class="article-media">
@@ -74,7 +77,7 @@ ${crumbs(seo.trail)}
               ${slides.map((s, i) => {
                 const img = slideAttrs(s.url);
                 return html`
-              <li><img${raw(s.artwork ? ' class="is-artwork"' : "")} src="${img.src}" srcset="${img.srcset}" sizes="(max-width: 860px) 86vw, 420px" alt="${title}${slides.length > 1 ? ` — card ${i + 1} of ${slides.length}` : ""}"${raw(i === 0 ? ' loading="eager" fetchpriority="high"' : ' loading="lazy"')} decoding="async" /></li>`;
+              <li><img${raw(s.artwork ? ' class="is-artwork"' : "")} src="${img.src}" srcset="${img.srcset}" sizes="${SLIDE_SIZES}" alt="${title}${slides.length > 1 ? ` — card ${i + 1} of ${slides.length}` : ""}"${raw(i === 0 ? ' loading="eager" fetchpriority="high"' : ' loading="lazy"')} decoding="async" /></li>`;
               })}
             </ol>
             ${slides.length > 1
@@ -107,7 +110,7 @@ ${crumbs(seo.trail)}
 
           ${source ? html`<p class="article-source">Source: <a href="${source}" target="_blank" rel="noopener nofollow">${host}</a></p>` : ""}
 
-          <div class="article-cta" aria-label="Get DailyMattr App">
+          <div class="article-cta" role="group" aria-label="Get DailyMattr App">
             <div class="acta-left">
               <div class="acta-icon" aria-hidden="true">
                 <img src="/assets/apple-touch-icon.png" width="30" height="30" alt="" loading="lazy" decoding="async" />

@@ -2,7 +2,9 @@ import { CACHE } from "./http.js";
 import { page } from "./layout.js";
 import { articlePath, slugify, isValidId, cleanHeadline } from "./slug.js";
 import { articleHead, hubHead, articleTrail, noindexHead } from "./seo.js";
-import { renderArticle } from "./render-article.js";
+import { renderArticle, SLIDE_SIZES } from "./render-article.js";
+import { slideAttrs } from "./media.js";
+import { newsSitemap, sitemapIndex, monthSitemap } from "./sitemap.js";
 import { renderHub } from "./render-hub.js";
 import { renderError } from "./render-error.js";
 import { CAROUSEL_JS, STORY_NAV_JS } from "./news-js.js";
@@ -11,9 +13,11 @@ import { getPostByPublishedId, getNeighbours, listLive } from "./queries.js";
 import { SITE_NAME, PAGE_SIZE } from "./site.js";
 import { isValidDateStr, formatDate } from "./text.js";
 
-const errorPage = (status) =>
+export const errorPage = (status) =>
   page({
-    title: status === 410 ? `Story no longer available — ${SITE_NAME}` : `Not found — ${SITE_NAME}`,
+    title: status === 410 ? `Story no longer available — ${SITE_NAME}`
+      : status === 500 ? `Something went wrong — ${SITE_NAME}`
+      : `Not found — ${SITE_NAME}`,
     head: noindexHead("This story is not available."),
     main: renderError(status),
   });
@@ -34,13 +38,22 @@ export async function routeNews({ rest = "", bare = false, query = {} }) {
   const body = m.groups.body;
   const trailing = m.groups.slash === "/";
 
-  /* /news/ and /news/page/N/ */
+  /* /news/sitemap.xml (Google News, last 48 h), /news/sitemap-index.xml and
+   * the monthly /news/sitemap-YYYY-MM.xml it lists */
+  if (rest === "sitemap.xml") return newsSitemap();
+  if (rest === "sitemap-index.xml") return sitemapIndex();
+  const month = /^sitemap-(\d{4})-(\d{2})\.xml$/.exec(rest);
+  if (month) return (await monthSitemap(Number(month[1]), Number(month[2]))) || fail(404);
+
+  /* /news/ and /news/page/N/ — page 0 doesn't exist, and a zero-padded
+   * number redirects to the one canonical form like every other variant */
   if (body === "") return trailing || rest === "" ? feed({ page: 1, date }) : moved(`/news/${querySuffix}`);
   const feedPage = /^page\/(\d{1,4})$/.exec(body);
   if (feedPage) {
     const n = Number(feedPage[1]);
+    if (n < 1) return fail(404);
     if (n === 1) return moved(`/news/${querySuffix}`);
-    return trailing ? feed({ page: n, date }) : moved(`/news/page/${n}/${querySuffix}`);
+    return trailing && feedPage[1] === String(n) ? feed({ page: n, date }) : moved(`/news/page/${n}/${querySuffix}`);
   }
 
   /* /news/<category>/ and /news/<category>/page/N/ */
@@ -49,10 +62,11 @@ export async function routeNews({ rest = "", bare = false, query = {} }) {
     const cat = categoryBySlug(hub[1]);
     if (cat) {
       const n = hub[2] ? Number(hub[2]) : 1;
+      if (n < 1) return fail(404);
       const base = hubPath(cat);
       if (hub[2] && n === 1) return moved(`${base}${querySuffix}`);
       const want = n === 1 ? `${base}${querySuffix}` : `${base}page/${n}/${querySuffix}`;
-      return trailing ? feed({ page: n, cat, date }) : moved(want);
+      return trailing && (!hub[2] || hub[2] === String(n)) ? feed({ page: n, cat, date }) : moved(want);
     }
   }
 
@@ -88,7 +102,7 @@ async function article({ slug, id, trailing }) {
       title: seo.title,
       head: seo.head,
       main: renderArticle({ seo, post, neighbours }),
-      preloadImage: seo.heroImages[0]?.url || "",
+      preloadImage: seo.heroImages[0] ? { ...slideAttrs(seo.heroImages[0].url), sizes: SLIDE_SIZES } : null,
       script: (seo.heroImages.length > 1 ? CAROUSEL_JS : "") + STORY_NAV_JS,
     }),
   };
@@ -113,9 +127,12 @@ async function feed({ page: n, cat = null, date = null }) {
 
   const pageTitle = `${heading}${date ? ` (${formattedDate || date})` : ""}${n > 1 ? ` — page ${n}` : ""} — ${SITE_NAME}`;
 
+  /* page 2+ would otherwise repeat page 1's meta description word for word;
+   * the title already carries the same marker */
   const { head } = hubHead({
     title: pageTitle,
-    description, path, posts, page: n, hasNext, trail, date,
+    description: n > 1 ? `${description} — page ${n}` : description,
+    path, posts, page: n, hasNext, trail, date,
   });
 
   return {
