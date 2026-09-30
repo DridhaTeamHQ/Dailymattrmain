@@ -550,7 +550,10 @@ function build() {
        * while each scene's content SCROLLS UP past it. Scenes 1 and 2
        * start parked below the viewport and ride up through it. */
       gsap.set(rows, { autoAlpha: 1, y: (i) => (i === 0 ? 0 : vh) });
-      gsap.set(copies, { autoAlpha: 1, y: (i) => (i === 0 ? 0 : vh) });
+      // Keep every feature card vertically centered while the scene timeline
+      // moves it in and out; yPercent prevents GSAP's y transform from
+      // overwriting the card's CSS translateY(-50%) centering.
+      gsap.set(copies, { autoAlpha: 1, yPercent: -50, y: (i) => (i === 0 ? 0 : vh) });
 
       /* the wall plays the reference entrance — staggered rise from
        * below, blur resolving to focus — as the pin arrives */
