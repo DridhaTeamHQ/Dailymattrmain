@@ -15,12 +15,7 @@ export default defineConfig(({ mode }) => {
   build: {
     rollupOptions: {
       output: {
-        // the server-rendered /news pages link the site stylesheet by name,
-        // so it needs a stable path; everything else stays content-hashed
-        assetFileNames: (info) => {
-          const names = info.names ?? (info.name ? [info.name] : []);
-          return names.includes("style.css") ? "assets/site.css" : "assets/[name]-[hash][extname]";
-        },
+        assetFileNames: "assets/[name]-[hash][extname]",
       },
       // multi-page: legal pages live at /editorialguidelines, /privacypolicy
       // and /termsandconditions
@@ -40,6 +35,20 @@ export default defineConfig(({ mode }) => {
     fs: { strict: false },
   },
   plugins: [
+    {
+      // News is rendered at request time, so retain an uncached alias for it.
+      // Vite's HTML pages use the content-hashed stylesheet directly.
+      name: "news-stylesheet-alias",
+      apply: "build",
+      generateBundle(_options, bundle) {
+        const stylesheet = Object.values(bundle).find((asset) =>
+          asset.type === "asset" &&
+          (asset.names ?? [asset.name]).includes("style.css")
+        );
+        if (!stylesheet) this.error("Shared site stylesheet was not emitted");
+        this.emitFile({ type: "asset", fileName: "assets/site.css", source: stylesheet.source });
+      },
+    },
     {
       // dev-only mount of the /news serverless route. In production Vercel
       // rewrites /news/* to api/news.js; here the same router runs through

@@ -3,9 +3,12 @@ import { NEWS_CSS } from "./news-css.js";
 import { NAV, PLAY_URL, APP_STORE_URL, SITE_NAME, LEGAL_NAME, SUPPORT_EMAIL, ORIGIN } from "./site.js";
 import { CATEGORIES, hubPath } from "./categories.js";
 
-/* In production the marketing CSS is emitted at a stable path (see
- * vite.config.js assetFileNames); the dev server serves the source file. */
-const SITE_CSS = process.env.NEWS_DEV === "1" ? "/src/style.css" : "/assets/site.css";
+/* The build retains an uncached alias for server-rendered news pages.
+ * Version its URL to bypass copies cached under the former immutable policy. */
+const CSS_VERSION = process.env.VERCEL_GIT_COMMIT_SHA || "revalidate-1";
+const SITE_CSS = process.env.NEWS_DEV === "1"
+  ? "/src/style.css"
+  : `/assets/site.css?v=${encodeURIComponent(CSS_VERSION)}`;
 
 const FONT = "Be+Vietnam+Pro:wght@400;500;600;700;800";
 
