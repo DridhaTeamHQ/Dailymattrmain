@@ -96,7 +96,7 @@ if (CAPTURE) {
         quality: "desktop",
         screens: {
           home: "/assets/screen-home.jpg?v=5",
-          article: "/assets/screen-article.jpg?v=5",
+          article: "/assets/screen-pix.jpg?v=5",
           qix: "/assets/screen-qix.jpg?v=5",
           trax: "/assets/screen-trax.jpg?v=5",
         },
@@ -113,10 +113,10 @@ if (CAPTURE) {
     meta: { frames: 32, cols: 8, rows: 4, fw: 704, fh: 1034, backBox: { w: 800, h: 980 } },
     urls: {
       seq1: "/assets/dphone-seq1.webp",
-      seq2: "/assets/dphone-seq2.webp",
+      seq2: "/assets/dphone-seq2.webp?v=2",
       a: "/assets/dphone-a.webp",
       b: "/assets/dphone-b.webp",
-      c: "/assets/dphone-c.webp",
+      c: "/assets/dphone-c.webp?v=2",
       q: "/assets/dphone-q.webp",
       t: "/assets/dphone-t.webp",
       back: "/assets/dphone-back.webp",
