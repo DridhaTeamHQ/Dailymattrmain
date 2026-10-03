@@ -337,6 +337,13 @@ html:not(.intro-live) .intro { animation: intro-failsafe 0s linear 15s forwards;
   width: 100%; height: 100%;
   opacity: 0;
 }
+/* Pix card swipe window over the baked screen (geometry set from JS) */
+.seq-swipe { overflow: hidden; }
+.seq-swipe canvas {
+  position: absolute; left: 0; top: 0;
+  width: 200%; height: 100%;
+  will-change: transform;
+}
 /* baked showcase back phone (desktop) — document-positioned so it
    scrolls natively with the section, under the front phone */
 .seq-back {
@@ -796,6 +803,9 @@ html:not(.intro-live) .intro { animation: intro-failsafe 0s linear 15s forwards;
   flex: none;
 }
 .fm-phone img { width: 100%; display: block; }
+/* Pix card: both screens side by side, scrubbed left by the scroll */
+.fm-strip { display: flex; width: 200%; will-change: transform; }
+.fm-strip img { width: 50%; }
 .fm-block .fc-index { color: rgba(255,255,255,.42); }
 .fm-block h3 {
   display: flex; align-items: center; justify-content: center; gap: 10px;

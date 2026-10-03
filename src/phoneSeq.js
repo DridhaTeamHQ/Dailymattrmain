@@ -140,7 +140,9 @@ export function createPhoneSeq({ phoneW, phoneH, meta, sheetUrl, poseAUrl, poseB
  *   prog 1        showcase rest    → still B (tilted, home screen)
  *   prog 1 → 2    swing 2 (D + E)  → sheet 2 frames (article fades in)
  *   prog 2        pinned features  → stills C/Q/T stacked; the screen
- *                 swaps are just opacity on the qix/trax stills (sQ/sT)
+ *                 swaps are just opacity on the qix/trax stills (sQ/sT);
+ *                 the Pix card swipe (sw) slides a strip cropped from
+ *                 stills C and C2 across the screen
  * Plus one static baked still for the showcase back phone, positioned
  * in document space so it scrolls natively with the section.
  * ------------------------------------------------------------------- */
@@ -170,7 +172,18 @@ export function createPhoneSeqDesktop({ phoneW, phoneH, meta, urls }) {
   cnv1.height = cnv2.height = meta.fh;
   const ctx1 = cnv1.getContext("2d");
   const ctx2 = cnv2.getContext("2d");
-  const L = { s1: cnv1, s2: cnv2, a: layer(), b: layer(), c: layer(), q: layer(), t: layer() };
+  const L = { s1: cnv1, s2: cnv2, a: layer(), b: layer(), c: layer() };
+  /* Pix card swipe: a window over the screen (below the status bar) holding
+   * a strip of both Pix screens cropped from stills C and C2, slid by p.sw */
+  const sw = meta.swipe;
+  const swWin = document.createElement("div");
+  swWin.className = "seq-swipe";
+  stage.appendChild(swWin);
+  const swStrip = document.createElement("canvas");
+  swWin.appendChild(swStrip);
+  L.cs = swWin;
+  L.q = layer();
+  L.t = layer();
   state.canvas = stage;
 
   const backCnv = document.createElement("canvas");
@@ -210,8 +223,10 @@ export function createPhoneSeqDesktop({ phoneW, phoneH, meta, urls }) {
         loadBitmap(urls.q),
         loadBitmap(urls.t),
         loadBitmap(urls.back),
-      ]).then(([s2, cB, qB, tB, bkB]) => {
+        loadBitmap(urls.c2),
+      ]).then(([s2, cB, qB, tB, bkB, c2B]) => {
         sheet2 = s2;
+        buildSwipe(cB, c2B); // before paint() closes cB
         paint(L.c, cB);
         paint(L.q, qB);
         paint(L.t, tB);
@@ -224,6 +239,24 @@ export function createPhoneSeqDesktop({ phoneW, phoneH, meta, urls }) {
     .catch(() => {
       if (!state.ready) state.failed = true; // → PNG phone fallback
     });
+
+  function buildSwipe(cB, c2B) {
+    swStrip.width = sw.w * 2;
+    swStrip.height = sw.h;
+    const ctx = swStrip.getContext("2d");
+    ctx.drawImage(cB, sw.x, sw.y, sw.w, sw.h, 0, 0, sw.w, sw.h);
+    ctx.drawImage(c2B, sw.x, sw.y, sw.w, sw.h, sw.w, 0, sw.w, sw.h);
+    c2B.close && c2B.close();
+    // still px → phone-space CSS px (the stage is BOX_W wide)
+    const k = BOX_W / cB.width;
+    Object.assign(swWin.style, {
+      left: sw.x * k + "px",
+      top: sw.y * k + "px",
+      width: sw.w * k + "px",
+      height: sw.h * k + "px",
+      borderRadius: "0 0 " + sw.r * k + "px " + sw.r * k + "px",
+    });
+  }
 
   let lastF1 = -1, lastF2 = -1, lastKey = "";
 
@@ -252,7 +285,7 @@ export function createPhoneSeqDesktop({ phoneW, phoneH, meta, urls }) {
     const key =
       (p.x | 0) + "," + (p.y | 0) + "," + p.scale.toFixed(4) + "," +
       prog.toFixed(4) + "," + p.alpha.toFixed(3) + "," +
-      p.sQ.toFixed(3) + "," + p.sT.toFixed(3);
+      p.sQ.toFixed(3) + "," + p.sT.toFixed(3) + "," + (p.sw || 0).toFixed(4);
     if (key === lastKey) return;
     lastKey = key;
 
@@ -273,7 +306,11 @@ export function createPhoneSeqDesktop({ phoneW, phoneH, meta, urls }) {
       const f = Math.round((prog - 1) * (meta.frames - 1));
       if (f !== lastF2 && sheet2) { lastF2 = f; drawFrame(ctx2, sheet2, f); }
       setOps({ s2: 1 });
-    } else setOps({ c: 1, q: p.sQ, t: p.sT });
+    } else {
+      const s = p.sw || 0;
+      swStrip.style.transform = "translate3d(" + -50 * s + "%,0,0)";
+      setOps({ c: 1, cs: s > 0.001 ? 1 : 0, q: p.sQ, t: p.sT });
+    }
 
     const k = p.scale;
     const cx = p.x + phoneW / 2;

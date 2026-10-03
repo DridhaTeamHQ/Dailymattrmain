@@ -96,7 +96,8 @@ if (CAPTURE) {
         quality: "desktop",
         screens: {
           home: "/assets/screen-home.jpg?v=5",
-          article: "/assets/screen-pix.jpg?v=5",
+          article: "/assets/screen-pix.jpg?v=6",
+          pix2: "/assets/screen-pix-2.jpg?v=1",
           qix: "/assets/screen-qix.jpg?v=5",
           trax: "/assets/screen-trax.jpg?v=5",
         },
@@ -110,16 +111,21 @@ if (CAPTURE) {
   phone3d = createPhoneSeqDesktop({
     phoneW: PHONE_W,
     phoneH: PHONE_H,
-    meta: { frames: 32, cols: 8, rows: 4, fw: 704, fh: 1034, backBox: { w: 800, h: 980 } },
+    meta: {
+      frames: 32, cols: 8, rows: 4, fw: 704, fh: 1034, backBox: { w: 800, h: 980 },
+      // Pix swipe window in still-C pixels: the screen below the status bar
+      swipe: { x: 338, y: 330, w: 920, h: 1847, r: 118 },
+    },
     urls: {
       seq1: "/assets/dphone-seq1.webp",
-      seq2: "/assets/dphone-seq2.webp?v=2",
+      seq2: "/assets/dphone-seq2.webp?v=3",
       a: "/assets/dphone-a.webp",
       b: "/assets/dphone-b.webp",
-      c: "/assets/dphone-c.webp?v=2",
+      c: "/assets/dphone-c.webp?v=3",
+      c2: "/assets/dphone-c2.webp?v=1",
       q: "/assets/dphone-q.webp",
       t: "/assets/dphone-t.webp",
-      back: "/assets/dphone-back.webp",
+      back: "/assets/dphone-back.webp?v=2",
     },
   });
 } else {
@@ -135,18 +141,20 @@ if (CAPTURE) {
 
 /* ---- single pose proxy: every scroll tween writes here, and the
  * ticker mirrors it onto whichever phone representation is live.
- * mix/sQ/sT are the screen opacities (article / qix / trax). ---- */
+ * mix/sQ/sT are the screen opacities (article / qix / trax); sw slides
+ * the Pix screen across to its second card. ---- */
 const P = {
   x: 0, y: 0, scale: 1,
   rotZ: 0, rotY: 0, rotX: 0,
   alpha: 1,
-  mix: 0, sQ: 0, sT: 0,
+  mix: 0, sQ: 0, sT: 0, sw: 0,
   prog: 0, // normalized flight progress — frame selector for the baked sequence
 };
 
 const flyS = {
   home: flyPhone.querySelector('[data-screen="home"]'),
   article: flyPhone.querySelector('[data-screen="article"]'),
+  pix2: flyPhone.querySelector('[data-screen="pix2"]'),
   qix: flyPhone.querySelector('[data-screen="qix"]'),
   trax: flyPhone.querySelector('[data-screen="trax"]'),
 };
@@ -185,6 +193,9 @@ gsap.ticker.add(() => {
     });
     gsap.set(fly3d, { rotationY: P.rotY, rotationX: P.rotX });
     flyS.article.style.opacity = P.mix;
+    flyS.pix2.style.opacity = P.mix;
+    flyS.article.style.transform = "translateX(" + -100 * P.sw + "%)";
+    flyS.pix2.style.transform = "translateX(" + 100 * (1 - P.sw) + "%)";
     flyS.qix.style.opacity = P.sQ;
     flyS.trax.style.opacity = P.sT;
   }
@@ -354,7 +365,7 @@ function build() {
     /* viewport pose at a given scroll position */
     const at = (pose, scroll) => ({ ...pose, y: pose.y - scroll });
 
-    gsap.set(P, { ...at(poseHero, 0), rotY: 0, rotX: 0, alpha: 1, mix: 0, sQ: 0, sT: 0, prog: 0 });
+    gsap.set(P, { ...at(poseHero, 0), rotY: 0, rotX: 0, alpha: 1, mix: 0, sQ: 0, sT: 0, sw: 0, prog: 0 });
 
     /* ---------- master flight timeline (hero -> showcase -> hover) ---------- */
     /* ONE timeline owns the phone's position for the whole journey —
@@ -592,6 +603,9 @@ function build() {
         scenes.to(P, { [screenProp]: 1, duration: 0.45, ease: "none" }, pos + dur * 0.35);
       };
 
+      // mid-Pix: the card swipes right → left to its summary
+      scenes.to(P, { sw: 1, duration: 0.9, ease: "power2.inOut" }, 1.1);
+
       swapScene(3.0, 0, 1, "sQ");
       swapScene(6.3, 1, 2, "sT");
 
@@ -623,6 +637,9 @@ function build() {
           pos + 0.35
         );
       };
+      // the Pix card swipes to its summary before the Qix block arrives
+      const fmStrip = blocks[0].querySelector(".fm-strip");
+      if (fmStrip) mScenes.fromTo(fmStrip, { xPercent: 0 }, { xPercent: -50, duration: 0.9, ease: "power2.inOut" }, 1.1);
       fadeTo(3.1, 0, 1);
       fadeTo(6.4, 1, 2);
     }

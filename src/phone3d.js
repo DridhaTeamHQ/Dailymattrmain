@@ -100,6 +100,8 @@ export function createPhone3D({ phoneW, phoneH, screens, quality }) {
   const texArticle = loadTex(screens.article);
   const texQix = loadTex(screens.qix);
   const texTrax = loadTex(screens.trax);
+  // second Pix card (bake-only): swapped onto the article overlay for stillC2
+  const texPix2 = screens.pix2 ? loadTex(screens.pix2) : null;
   let matArticle, matQix, matTrax;
 
   const gltfLoader = new GLTFLoader();
@@ -626,6 +628,14 @@ export function createPhone3D({ phoneW, phoneH, screens, quality }) {
     const stillB = still(curveB(1), {});
     const upright = { rotY: 0, rotX: 0, rotZ: 0 };
     const stillC = still(upright, { mix: 1 });
+    /* the Pix card the scroll swipes to: same upright pose, second screen.
+     * Runtime crops both screens into a strip and slides it. */
+    let stillC2 = null;
+    if (texPix2 && matArticle) {
+      matArticle.map = texPix2;
+      stillC2 = still(upright, { mix: 1 });
+      matArticle.map = texArticle;
+    }
     const stillQ = still(upright, { mix: 1, sQ: 1 });
     const stillT = still(upright, { mix: 1, sQ: 1, sT: 1 });
 
@@ -642,7 +652,8 @@ export function createPhone3D({ phoneW, phoneH, screens, quality }) {
     lastKey = "";
     return {
       meta: { frames, cols, rows, fw, fh, backBox },
-      sheet1, sheet2, stillA, stillB, stillC, stillQ, stillT, stillBack,
+      sheet1, sheet2, stillA, stillB, stillC, stillC2, stillQ, stillT, stillBack,
+      screenAspect,
     };
   };
 
