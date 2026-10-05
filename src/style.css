@@ -756,6 +756,12 @@ html:not(.intro-live) .intro { animation: intro-failsafe 0s linear 15s forwards;
 .footer-col h4 { font-size: 12px; letter-spacing: 1.5px; color: #97979e; font-weight: 600; margin-bottom: 18px; }
 .footer-col a { display: block; font-size: 14px; font-weight: 500; margin-bottom: 13px; color: var(--ink); }
 .footer-col a:hover { text-decoration: underline; }
+.footer-col:first-child a[href*="play.google"],
+.footer-col:first-child a[href*="apps.apple"] {
+  font-size: 12.5px;
+  letter-spacing: -.15px;
+  white-space: nowrap;
+}
 .footer-support a:last-child { font-size: 13px; overflow-wrap: anywhere; }
 .footer-legal {
   text-align: right;
