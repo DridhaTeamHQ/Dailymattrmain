@@ -744,13 +744,10 @@ html:not(.intro-live) .intro { animation: intro-failsafe 0s linear 15s forwards;
   font-weight: 700;
 }
 .footer-cols {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   flex: 1 1 auto;
-  justify-content: flex-end;
-  /* wrap inside the column block on narrow desktops instead of pushing
-     the whole block below the brand */
-  flex-wrap: wrap;
-  gap: 30px clamp(20px, 2.8vw, 80px);
+  gap: 30px clamp(18px, 2.2vw, 48px);
   min-width: 0;
 }
 .footer-col { min-width: 0; }
@@ -959,7 +956,7 @@ html:not(.intro-live) .intro { animation: intro-failsafe 0s linear 15s forwards;
   /* stacked again below 900px — reset the desktop flex sizing so the
      basis doesn't apply to height in a column container */
   .footer-brand { flex: 0 1 auto; min-width: 0; }
-  .footer-cols { flex: 0 1 auto; justify-content: flex-start; gap: clamp(32px, 10vw, 90px); flex-wrap: wrap; }
+  .footer-cols { display: flex; flex: 0 1 auto; justify-content: flex-start; gap: clamp(32px, 10vw, 90px); flex-wrap: wrap; }
   .footer-legal {
     text-align: left;
     padding: 0 clamp(20px, 6vw, 34px);
