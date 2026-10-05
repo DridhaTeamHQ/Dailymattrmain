@@ -713,6 +713,16 @@ html:not(.intro-live) .intro { animation: intro-failsafe 0s linear 15s forwards;
 }
 /* shrinks faster than the link columns, so the four columns keep a
    single row for as long as they can */
+.app-downloads { margin-top: 18px; color: var(--ink-soft); font-size: 14px; }
+.app-downloads strong { color: var(--blue); font-weight: 700; }
+.footer-socials { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.footer-socials a {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border: 1px solid currentColor;
+  border-radius: 50%; color: var(--ink); transition: color .2s, background-color .2s;
+}
+.footer-socials a:hover { color: var(--blue); background-color: #fff; }
+.footer-socials a:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
 .footer-brand { flex: 0 4 380px; min-width: 230px; }
 .footer-logoline {
   font-size: 24px; font-weight: 700; letter-spacing: -.5px;
