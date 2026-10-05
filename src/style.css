@@ -734,11 +734,13 @@ html:not(.intro-live) .intro { animation: intro-failsafe 0s linear 15s forwards;
 .footer-copy { color: var(--ink-soft); font-size: 15px; line-height: 1.7; max-width: 360px; margin-top: 22px; }
 .footer-parent {
   margin-top: 14px;
-  font-size: 13px;
+  font-size: clamp(11px, .85vw, 13px);
   font-weight: 500;
   color: var(--ink-soft);
   letter-spacing: .2px;
+  white-space: nowrap;
 }
+.footer-parent .legal-brand2 { white-space: nowrap; }
 .footer-parent .legal-brand {
   color: var(--blue);
   font-weight: 700;
