@@ -33,6 +33,15 @@ VITE_SUPABASE_URL=
 VITE_SUPABASE_PUBLISHABLE_KEY=
 ```
 
+## Download link (`/download`)
+`https://dailymattr.com/download` is the one link everyone shares. Vercel
+rewrites it to `api/download.js`, which sends a server-side 302 (iOS ignores
+script redirects): iPhone, iPad and Mac go to the App Store, everything else
+to Google Play. Link-preview bots (WhatsApp, Facebook, Twitter, Telegram,
+Slack, Discord, LinkedIn) get a small Open Graph page with both store buttons.
+Responses are `no-store`. Referral credit comes from the code typed into the
+app, not from the link.
+
 ## SEO
 - Every page carries a canonical URL, Open Graph / Twitter tags and JSON-LD.
 - `public/robots.txt` and `public/sitemap-pages.xml` cover the static pages.

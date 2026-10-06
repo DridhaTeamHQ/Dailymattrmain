@@ -9,6 +9,7 @@
   "rewrites": [
     { "source": "/admin", "destination": "/admin/" },
     { "source": "/admin/dashboard", "destination": "/admin/dashboard/" },
+    { "source": "/download", "destination": "/api/download" },
     { "source": "/news", "destination": "/api/news?p=&bare=1" },
     { "source": "/news/(.*)", "destination": "/api/news?p=$1" }
   ],

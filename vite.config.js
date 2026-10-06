@@ -56,6 +56,11 @@ export default defineConfig(({ mode }) => {
             server.ssrLoadModule("/api/support.js").then(({ default: handler }) => handler(req, res)).catch(next);
             return;
           }
+          // same handler Vercel rewrites /download to
+          if (req.url === "/download" || req.url?.startsWith("/download?")) {
+            server.ssrLoadModule("/api/download.js").then(({ default: handler }) => handler(req, res)).catch(next);
+            return;
+          }
           if (req.url === "/admin" || req.url?.startsWith("/admin?")) {
             res.statusCode = 302;
             res.setHeader("Location", "/admin/");
