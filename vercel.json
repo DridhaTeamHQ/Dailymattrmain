@@ -10,6 +10,7 @@
     { "source": "/index.html", "destination": "/", "permanent": true }
   ],
   "rewrites": [
+    { "source": "/s/:shareId", "destination": "https://api.dailymattr.com/s/:shareId" },
     { "source": "/admin", "destination": "/admin/" },
     { "source": "/admin/dashboard", "destination": "/admin/dashboard/" },
     { "source": "/download", "destination": "/api/download" },
@@ -17,6 +18,13 @@
     { "source": "/news/(.*)", "destination": "/api/news?p=$1" }
   ],
   "headers": [
+    {
+      "source": "/.well-known/apple-app-site-association",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" },
+        { "key": "Cache-Control", "value": "public, max-age=300" }
+      ]
+    },
     {
       "source": "/(.*)",
       "headers": [
