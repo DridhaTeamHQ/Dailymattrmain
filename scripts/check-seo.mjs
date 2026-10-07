@@ -33,6 +33,15 @@ for (const path of paths) {
 }
 const home = read("index.html");
 const publisher = schemas(home).find((n) => n["@type"] === "NewsMediaOrganization");
+const websites = schemas(home).filter((n) => n["@type"] === "WebSite");
+assert.equal(websites.length, 1, "Homepage has one unambiguous WebSite entity");
+assert.equal(websites[0].name, "dailymattr");
+assert.equal(websites[0].alternateName, "Daily Mattr");
+assert.equal(websites[0].url, "https://www.dailymattr.com/");
+assert.match(home, /<title>dailymattr \|/);
+assert.match(home, /property="og:site_name" content="dailymattr"/);
+const hosting = JSON.parse(read("vercel.json"));
+assert.ok(hosting.redirects.some((r) => r.source === "/index.html" && r.destination === "/" && r.permanent === true), "Duplicate homepage redirects permanently to the canonical root");
 assert.equal(publisher.alternateName, "Daily Mattr");
 assert.equal(publisher.sameAs.length, 6);
 assert.match(home, /<noscript><style>\.intro/);

@@ -152,3 +152,39 @@ Remaining account/production steps:
 
 References: https://developers.google.com/search/docs/crawling-indexing/robots/intro
 and https://developers.google.com/search/docs/appearance/structured-data/article
+
+### Brand-query follow-through (7 October 2026)
+
+The live homepage returned 200, allowed indexing, declared the www homepage as
+canonical, and already supplied `WebSite.name = DailyMattr` with
+`alternateName = Daily Mattr`. These checks establish crawl eligibility, not
+Google's indexed state or position for a particular search. Capitalization
+changes alone are not a ranking fix.
+
+The original homepage wording and layout are preserved. The brand is written
+as lowercase `dailymattr` in public-facing text, titles and metadata; the spaced
+alternate name remains in structured data. `/index.html` now has a permanent
+redirect to `/` in `vercel.json`; this takes effect on the next deployment.
+
+Live redirect finding: `https://dailymattr.com/` returned 307 to
+`https://www.dailymattr.com/`. Change that existing redirect to 301 or 308 at the
+service that owns it, preserving paths and query strings. The connected
+`dailymattrmain` Vercel project's domain list contains `www.dailymattr.com` and
+its vercel.app hostname, but does not list the apex domain. Do not reassign the
+apex or change DNS without locating its current redirect configuration.
+
+After deployment, inspect `https://www.dailymattr.com/` in Search Console:
+1. Check the indexed result, last crawl, and Google-selected canonical.
+2. Test the live URL; if it is indexable, request indexing once.
+3. In Performance > Search results, compare exact query filters `dailymattr`
+   and `daily mattr`, including country/device and the landing page. Compare
+   impressions and position; a manual search alone is not a complete diagnosis.
+4. Confirm official app-store and social profiles consistently name DailyMattr
+   and link to `https://www.dailymattr.com/`.
+
+Google controls recrawling and ranking; these changes do not promise a position
+or a deadline. Site-name markup is checked with Schema Markup Validator and
+URL Inspection; Google's Rich Results Test does not support site names.
+
+Guidance: https://developers.google.com/search/docs/appearance/site-names
+and https://developers.google.com/search/docs/crawling-indexing/301-redirects

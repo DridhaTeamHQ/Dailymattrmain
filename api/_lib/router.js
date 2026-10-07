@@ -116,10 +116,10 @@ async function feed({ page: n, cat = null, date = null }) {
   const heading = cat ? `${cat.label} news` : "Latest news";
   const formattedDate = date ? formatDate(`${date}T00:00:00+05:30`) : "";
   const description = date
-    ? `Browse ${cat ? cat.label.toLowerCase() : "latest"} news from ${formattedDate || date} on DailyMattr.`
+    ? `Browse ${cat ? cat.label.toLowerCase() : "latest"} news from ${formattedDate || date} on dailymattr.`
     : cat
     ? cat.description
-    : "The latest news in short from DailyMattr — 100 fact-checked, human-picked stories a day across India, world, business, technology, sports and entertainment.";
+    : "The latest news in short from dailymattr — 100 fact-checked, human-picked stories a day across India, world, business, technology, sports and entertainment.";
   const trail = [
     { name: "Home", path: "/" },
     ...(cat ? [{ name: "News", path: "/news/" }, { name: cat.label, path }] : [{ name: "News", path: "/news/" }]),

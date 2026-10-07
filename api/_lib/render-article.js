@@ -110,7 +110,7 @@ ${crumbs(seo.trail)}
 
           ${source ? html`<p class="article-source">Source: <a href="${source}" target="_blank" rel="noopener nofollow">${host}</a></p>` : ""}
 
-          <div class="article-cta" role="group" aria-label="Get DailyMattr App">
+          <div class="article-cta" role="group" aria-label="Get dailymattr App">
             <div class="acta-left">
               <div class="acta-icon" aria-hidden="true">
                 <img src="/assets/apple-touch-icon.png" width="30" height="30" alt="" loading="lazy" decoding="async" />

@@ -7,7 +7,7 @@
  * all point at a redirect. Override with SITE_ORIGIN if the primary domain
  * ever changes. */
 export const ORIGIN = (process.env.SITE_ORIGIN || "https://www.dailymattr.com").replace(/\/+$/, "");
-export const SITE_NAME = "DailyMattr";
+export const SITE_NAME = "dailymattr";
 export const SOCIAL_URLS = [
   "https://www.instagram.com/dailymattr/",
   "https://youtube.com/@dailymattr",

@@ -614,7 +614,7 @@ html:not(.intro-live) .intro { animation: intro-failsafe 0s linear 15s forwards;
 .support-form { min-height: 560px; padding: 9px; border-radius: 30px; background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.13); box-shadow: 0 32px 90px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,255,255,.05); animation: support-rise .75s .08s cubic-bezier(.22,1,.36,1) both; }
 .support-form-content { min-height: 540px; padding: 28px; border-radius: 22px; border: 1px solid rgba(255,255,255,.06); background: rgba(11,11,14,.38); transition: opacity .25s ease, transform .45s cubic-bezier(.22,1,.36,1), visibility .25s ease; }
 .support-form-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; padding-bottom: 24px; margin-bottom: 22px; border-bottom: 1px solid rgba(255,255,255,.09); }
-.support-form .support-form-kicker { margin: 0 0 7px; color: #7ea9ff; font-size: 11px; font-weight: 700; letter-spacing: 1.15px; text-transform: uppercase; }
+.support-form .support-form-kicker { margin: 0 0 7px; color: #7ea9ff; font-size: 11px; font-weight: 700; letter-spacing: 1.15px; text-transform: none; }
 .support-form .support-form-heading h2 { margin: 0; font-size: 24px; letter-spacing: -.6px; }
 .support-availability { display: inline-flex; align-items: center; gap: 8px; flex: none; padding: 8px 11px; border-radius: 999px; color: rgba(255,255,255,.68); background: rgba(255,255,255,.06); font-size: 11px; font-weight: 600; }
 .support-availability i { width: 7px; height: 7px; border-radius: 50%; background: #64d8a3; box-shadow: 0 0 0 4px rgba(100,216,163,.1); }

@@ -6,6 +6,9 @@
   "functions": {
     "api/*.js": { "maxDuration": 10 }
   },
+  "redirects": [
+    { "source": "/index.html", "destination": "/", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/admin", "destination": "/admin/" },
     { "source": "/admin/dashboard", "destination": "/admin/dashboard/" },
