@@ -1,5 +1,5 @@
 import { esc, jsonLdScript } from "./html.js";
-import { ORIGIN, SITE_NAME, PUBLISHER_LOGO, OG_DEFAULT, PLAY_URL, APP_STORE_URL, LEGAL_NAME, PAGE_SIZE } from "./site.js";
+import { ORIGIN, SITE_NAME, PUBLISHER_LOGO, OG_DEFAULT, PLAY_URL, APP_STORE_URL, LEGAL_NAME, PAGE_SIZE, SOCIAL_URLS } from "./site.js";
 import { cleanHeadline, articlePath } from "./slug.js";
 import { bullets, metaDescription, modifiedAt, truncateAtWord } from "./text.js";
 import { slidesFor, posterFor, artworkFor, ogImageFor } from "./media.js";
@@ -13,10 +13,18 @@ const publisher = {
   "@type": "NewsMediaOrganization",
   "@id": `${ORIGIN}/#organization`,
   name: SITE_NAME,
+  alternateName: "Daily Mattr",
   legalName: LEGAL_NAME,
   url: `${ORIGIN}/`,
   logo: { "@type": "ImageObject", url: PUBLISHER_LOGO.url, width: PUBLISHER_LOGO.width, height: PUBLISHER_LOGO.height },
-  sameAs: [PLAY_URL, APP_STORE_URL],
+  sameAs: [...SOCIAL_URLS, PLAY_URL, APP_STORE_URL],
+  publishingPrinciples: `${ORIGIN}/editorialguidelines/`,
+};
+
+const website = {
+  "@type": "WebSite", "@id": `${ORIGIN}/#website`,
+  name: SITE_NAME, alternateName: "Daily Mattr", url: `${ORIGIN}/`,
+  inLanguage: "en-IN", publisher: { "@id": publisher["@id"] },
 };
 
 export function breadcrumbLd(trail) {
@@ -59,6 +67,7 @@ export function articleHead(post) {
   const ld = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
+    "@id": `${url}#article`,
     headline: truncateAtWord(title, 110),
     description: desc,
     /* the bullets are the article — same text the reader sees */
@@ -103,6 +112,11 @@ export function articleHead(post) {
     meta("twitter:description", desc) +
     meta("twitter:image", poster) +
     (poster ? meta("twitter:image:alt", title) : "") +
+    `  ${jsonLdScript({ "@context": "https://schema.org", "@graph": [website, {
+      "@type": "WebPage", "@id": url, url, name: title, description: desc,
+      inLanguage: "en-IN", isPartOf: { "@id": website["@id"] },
+      mainEntity: { "@id": ld["@id"] }, publisher: { "@id": publisher["@id"] },
+    }] })}\n` +
     `  ${jsonLdScript(ld)}\n` +
     `  ${jsonLdScript(breadcrumbLd(articleTrail(post, title)))}\n`;
 
@@ -117,6 +131,7 @@ export function hubHead({ title, description, path, posts, page = 1, hasNext = f
   const ld = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
+    "@id": canonical,
     name: title,
     description,
     url: canonical,
@@ -149,6 +164,7 @@ export function hubHead({ title, description, path, posts, page = 1, hasNext = f
     meta("twitter:title", title) +
     meta("twitter:description", description) +
     meta("twitter:image", OG_DEFAULT.url) +
+    `  ${jsonLdScript({ "@context": "https://schema.org", ...website })}\n` +
     `  ${jsonLdScript(ld)}\n` +
     `  ${jsonLdScript(breadcrumbLd(trail))}\n`;
   return { head, canonical };

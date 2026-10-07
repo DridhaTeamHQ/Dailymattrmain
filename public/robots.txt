@@ -1,7 +1,10 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /__save
+
+# Admin pages and date-filtered news use noindex; keep them crawlable so
+# search engines can read that directive. Public news and assets stay allowed.
 
 Sitemap: https://www.dailymattr.com/sitemap-pages.xml
 Sitemap: https://www.dailymattr.com/news/sitemap-index.xml
-Sitemap: https://www.dailymattr.com/news/sitemap.xml

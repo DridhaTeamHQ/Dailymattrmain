@@ -107,3 +107,48 @@ node scripts/pull-pix-snapshot.mjs   # refresh the local sample (needs the servi
 
 ## Credits
 3D iPhone model sourced from Sketchfab — verify its license before production use.
+
+## SEO audit follow-through (7 October 2026)
+
+The supplied Daily Mattr_Audit.pdf was compared with the current implementation.
+NewsArticle, BreadcrumbList, canonical URLs, pagination and date-filter noindex
+already existed; they should not be duplicated or removed. The homepage now has
+descriptive search/social metadata, WebPage and NewsMediaOrganization markup,
+the Daily Mattr alternate brand name and official social profiles. News schema
+now explicitly connects articles, their WebPage and the WebSite entity.
+
+Robots.txt lists the static sitemap and news sitemap index only. The 48-hour
+Google News sitemap remains inside the news index alongside monthly archives;
+these serve different purposes. Static sitemap dates reflect page edits, while
+changing news hubs omit unsupported lastmod dates. Admin pages and date filters
+remain crawlable so their existing noindex directives can be read. Do not block
+public news, pagination, images or CSS to try to fix indexing.
+
+Local raster images now have measured width/height attributes. CMS artwork with
+unknown source dimensions still needs dimensions recorded at upload time; do not
+invent aspect ratios. The homepage intro is disabled when JavaScript is off.
+
+Validation: `npm run check:seo` checks static page metadata, structured data,
+image attributes, sitemap references, generated article schema, pagination and
+noindex filters without database credentials. `npm run build` checks the bundle.
+The separate `node scripts/smoke-news.mjs` requires live data or a local snapshot.
+
+Additional crawlability fixes: homepage feature descriptions stay readable at
+all viewport sizes with JavaScript disabled, with an H2 above the feature H3s.
+News feeds and monthly sitemap queries use a unique ID to break publication-time
+ties, preventing unstable ordering across query pages. Run
+`node scripts/check-news-pagination.mjs` for the offline query regression check.
+
+Remaining account/production steps:
+- Deploy, then use Search Console URL Inspection on the homepage to check the
+  selected canonical, crawl result and indexing exclusion reason. The audit's
+  330 indexed pages figure is not independently verified by the local changes.
+- Submit `/sitemap-pages.xml` and `/news/sitemap-index.xml` in Search Console.
+  Validate a deployed article with Google's Rich Results Test and Schema Validator.
+- GA4/GTM and Search Console setup needs property/container IDs and verification
+  access. No placeholder trackers, third-party accounts or passwords were added.
+- Relevant editorial backlinks require outreach and original reporting; no
+  backlink purchases or automatic disavow actions were performed.
+
+References: https://developers.google.com/search/docs/crawling-indexing/robots/intro
+and https://developers.google.com/search/docs/appearance/structured-data/article

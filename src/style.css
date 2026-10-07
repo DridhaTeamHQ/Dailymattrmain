@@ -817,7 +817,7 @@ html:not(.intro-live) .intro { animation: intro-failsafe 0s linear 15s forwards;
   box-shadow: 0 14px 30px rgba(0,0,0,.45);
   flex: none;
 }
-.fm-phone img { width: 100%; display: block; }
+.fm-phone img { width: 100%; height: auto; display: block; }
 /* Pix card: both screens side by side, scrubbed left by the scroll */
 .fm-strip { display: flex; width: 200%; will-change: transform; }
 .fm-strip img { width: 50%; }

@@ -8,6 +8,12 @@
  * ever changes. */
 export const ORIGIN = (process.env.SITE_ORIGIN || "https://www.dailymattr.com").replace(/\/+$/, "");
 export const SITE_NAME = "DailyMattr";
+export const SOCIAL_URLS = [
+  "https://www.instagram.com/dailymattr/",
+  "https://youtube.com/@dailymattr",
+  "https://x.com/dailymattr_news",
+  "https://www.linkedin.com/company/https-www.dailymattr.com-/",
+];
 export const LEGAL_NAME = "Dridha Technologies Private Limited";
 export const SUPPORT_EMAIL = "support@dailymattr.com";
 export const PLAY_URL =

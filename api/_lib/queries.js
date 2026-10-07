@@ -86,7 +86,7 @@ const db = {
   async listLive({ categoryId = null, page = 1, size = PAGE_SIZE, date = null } = {}) {
     const from = (page - 1) * size;
     let q = live(pixDb().from("pix_posts").select(COLS))
-      .order("published_at", { ascending: false });
+      .order("published_at", { ascending: false }).order("id", { ascending: false });
     if (categoryId != null) q = q.eq("category_id", categoryId);
     if (date && isValidDateStr(date)) {
       const { startIso, endIso } = dateRangeForDay(date);
@@ -109,14 +109,15 @@ const db = {
   },
 
   /* every live post in [start, end), oldest first. PostgREST caps a response
-   * at 1,000 rows, so page through with range(). */
+   * at 1,000 rows, so page through with range(). The unique id breaks ties
+   * between simultaneous publishes so page boundaries never shuffle them. */
   async listBetween(startIso, endIso) {
     const out = [];
     const step = 1000;
     for (let from = 0; ; from += step) {
       const { data, error } = await live(pixDb().from("pix_posts").select(SITEMAP_COLS))
         .gte("published_at", startIso).lt("published_at", endIso)
-        .order("published_at", { ascending: true }).range(from, from + step - 1);
+        .order("published_at", { ascending: true }).order("id", { ascending: true }).range(from, from + step - 1);
       if (error) fail(error, "listBetween");
       out.push(...(data || []));
       if (!data || data.length < step) break;
