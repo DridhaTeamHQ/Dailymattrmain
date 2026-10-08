@@ -2,79 +2,160 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
   "outputDirectory": "dist",
-  "regions": ["sin1"],
+  "regions": [
+    "sin1"
+  ],
   "functions": {
-    "api/*.js": { "maxDuration": 10 }
+    "api/*.js": {
+      "maxDuration": 10
+    }
   },
   "redirects": [
-    { "source": "/index.html", "destination": "/", "permanent": true }
+    {
+      "source": "/index.html",
+      "destination": "/",
+      "permanent": true
+    }
   ],
   "rewrites": [
-    { "source": "/s/:shareId", "destination": "https://api.dailymattr.com/s/:shareId" },
-    { "source": "/admin", "destination": "/admin/" },
-    { "source": "/admin/dashboard", "destination": "/admin/dashboard/" },
-    { "source": "/download", "destination": "/api/download" },
-    { "source": "/news", "destination": "/api/news?p=&bare=1" },
-    { "source": "/news/(.*)", "destination": "/api/news?p=$1" }
+    {
+      "source": "/s/:shareId",
+      "destination": "https://api.dailymattr.com/s/:shareId"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin/"
+    },
+    {
+      "source": "/admin/dashboard",
+      "destination": "/admin/dashboard/"
+    },
+    {
+      "source": "/download",
+      "destination": "/api/download"
+    },
+    {
+      "source": "/news",
+      "destination": "/api/news?p=&bare=1"
+    },
+    {
+      "source": "/news/(.*)",
+      "destination": "/api/news?p=$1"
+    }
   ],
   "headers": [
     {
       "source": "/.well-known/apple-app-site-association",
       "headers": [
-        { "key": "Content-Type", "value": "application/json" },
-        { "key": "Cache-Control", "value": "public, max-age=300" }
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300"
+        }
+      ]
+    },
+    {
+      "source": "/.well-known/assetlinks.json",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300"
+        }
       ]
     },
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Content-Security-Policy", "value": "frame-ancestors 'none'; object-src 'none'; base-uri 'self'" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "frame-ancestors 'none'; object-src 'none'; base-uri 'self'"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
       ]
     },
     {
       "source": "/assets/site.css",
       "headers": [
-        { "key": "Cache-Control", "value": "public, no-cache" }
+        {
+          "key": "Cache-Control",
+          "value": "public, no-cache"
+        }
       ]
     },
     {
       "source": "/assets/(.*)-([A-Za-z0-9_-]+)\\.(js|css)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
       ]
     },
     {
       "source": "/assets/(.*)\\.(png|jpg|jpeg|webp|svg|glb|ico)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=3600, stale-while-revalidate=86400" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, stale-while-revalidate=86400"
+        }
       ]
     },
     {
       "source": "/(robots\\.txt|sitemap-pages\\.xml|favicon\\.ico)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        }
       ]
     },
     {
       "source": "/api/(.*)",
       "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex" }
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
       ]
     },
     {
       "source": "/",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
       ]
     },
     {
       "source": "/index.html",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
       ]
     }
   ]
