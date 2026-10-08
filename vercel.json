@@ -19,8 +19,12 @@
   ],
   "rewrites": [
     {
-      "source": "/s/:shareId",
+      "source": "/s/dev/:shareId",
       "destination": "https://api.dailymattr.com/s/:shareId"
+    },
+    {
+      "source": "/s/:shareId",
+      "destination": "https://public.dailymattr.com/s/:shareId"
     },
     {
       "source": "/admin",
