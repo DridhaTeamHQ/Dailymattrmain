@@ -12,6 +12,17 @@
   },
   "redirects": [
     {
+      "source": "/((?!\\.well-known/).*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "dailymattr.com"
+        }
+      ],
+      "destination": "https://www.dailymattr.com/$1",
+      "permanent": false
+    },
+    {
       "source": "/index.html",
       "destination": "/",
       "permanent": true
