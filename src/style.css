@@ -715,6 +715,8 @@ html:not(.intro-live) .intro { animation: intro-failsafe 0s linear 15s forwards;
    single row for as long as they can */
 .app-downloads { margin-top: 18px; color: var(--ink-soft); font-size: 14px; }
 .app-downloads strong { color: var(--blue); font-weight: 700; }
+.app-downloads-sep { margin: 0 6px; }
+.app-rating-star { color: #f5b301; }
 .footer-socials { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
 .footer-socials a {
   display: inline-flex; align-items: center; justify-content: center;
@@ -747,7 +749,8 @@ html:not(.intro-live) .intro { animation: intro-failsafe 0s linear 15s forwards;
 }
 .footer-cols {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* last column sizes to the support email so it never wraps */
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
   flex: 1 1 auto;
   gap: 30px clamp(18px, 2.2vw, 48px);
   min-width: 0;
@@ -762,7 +765,7 @@ html:not(.intro-live) .intro { animation: intro-failsafe 0s linear 15s forwards;
   letter-spacing: -.15px;
   white-space: nowrap;
 }
-.footer-support a:last-child { font-size: 13px; overflow-wrap: anywhere; }
+.footer-support a:last-child { font-size: 13px; white-space: nowrap; }
 .footer-legal {
   text-align: right;
   color: var(--ink-soft);
