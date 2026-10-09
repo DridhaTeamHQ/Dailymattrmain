@@ -18,6 +18,7 @@ for (const path of paths) {
   assert.ok(html.includes(`rel="canonical" href="https://www.dailymattr.com/${path}"`));
   assert.match(html, /name="robots" content="index,follow/);
   assert.match(html, /name="description"\s+content="[^"]+"/);
+  assert.ok(html.includes("gtag/js?id=G-JBLS1RTH1N"), `${path}: Google tag`);
   const title = html.match(/<title>(.*?)<\/title>/)[1];
   assert.ok(!titles.has(title), `Duplicate title: ${title}`);
   titles.add(title);
@@ -69,6 +70,7 @@ const seo = articleHead(post);
 seo.trail = articleTrail(post, seo.title);
 const rendered = page({ title: seo.title, head: seo.head, main: renderArticle({ seo, post, neighbours: {} }) });
 for (const type of ["NewsArticle", "WebPage", "WebSite", "BreadcrumbList"]) assert.ok(types(rendered).includes(type));
+assert.ok(rendered.includes("gtag/js?id=G-JBLS1RTH1N"), "news layout: Google tag");
 const article = schemas(rendered).find((n) => n["@type"] === "NewsArticle");
 const webpage = schemas(rendered).find((n) => n["@type"] === "WebPage");
 assert.equal(article.mainEntityOfPage["@id"], webpage["@id"]);

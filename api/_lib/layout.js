@@ -88,6 +88,16 @@ ${head}
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${FONT}&display=swap" /></noscript>
   <link rel="stylesheet" href="${SITE_CSS}" />
 ${preloadImage?.src ? `  <link rel="preload" as="image" href="${esc(preloadImage.src)}" imagesrcset="${esc(preloadImage.srcset)}" imagesizes="${esc(preloadImage.sizes)}" fetchpriority="high" />\n` : ""}  <style>${NEWS_CSS}</style>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JBLS1RTH1N"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-JBLS1RTH1N');
+  </script>
 </head>
 <body class="news-body">
   <header class="nav">
