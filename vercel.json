@@ -26,6 +26,11 @@
       "source": "/index.html",
       "destination": "/",
       "permanent": true
+    },
+    {
+      "source": "/news-studio",
+      "destination": "https://longmattr.com/general",
+      "permanent": false
     }
   ],
   "rewrites": [
