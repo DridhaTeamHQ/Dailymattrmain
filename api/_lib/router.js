@@ -99,7 +99,9 @@ async function article({ slug, id, trailing }) {
     cache: CACHE.article,
     tags: ["news", `news-post-${post.published_id}`, ...(seo.cat ? [`news-cat-${seo.cat.slug}`] : [])],
     body: page({
-      title: seo.title,
+      /* brand suffix on the <title> tag only — og:title, twitter:title,
+       * JSON-LD and the <h1> keep the bare headline */
+      title: `${seo.title} | ${SITE_NAME}`,
       head: seo.head,
       main: renderArticle({ seo, post, neighbours }),
       preloadImage: seo.heroImages[0] ? { ...slideAttrs(seo.heroImages[0].url), sizes: SLIDE_SIZES } : null,
