@@ -45,11 +45,12 @@ function showError(message) {
   show(errorPanel);
 }
 
-function showSuccess(done) {
+function showSuccess(done, data) {
   const copy = SUCCESS[done];
   document.getElementById("unsub-success-title").textContent = copy.title;
   document.getElementById("unsub-success-text").textContent = copy.text;
-  resubscribeButton.hidden = !copy.resubscribe;
+  // can_resubscribe: false means the address was never a subscriber
+  resubscribeButton.hidden = !copy.resubscribe || data?.can_resubscribe === false;
   resubscribeButton.disabled = false;
   show(successPanel);
 }
@@ -67,7 +68,7 @@ async function run(next) {
       referrerPolicy: "no-referrer",
     });
     const data = await res.json().catch(() => null);
-    if (res.ok && data?.ok) showSuccess(next);
+    if (res.ok && data?.ok) showSuccess(next, data);
     else showError(data?.error);
   } catch {
     showError("We couldn't reach our servers. Check your connection and open the link again.");
