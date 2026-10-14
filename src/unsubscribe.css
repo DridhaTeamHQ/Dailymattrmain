@@ -1,0 +1,62 @@
+/* ============ Daily Mattr — /unsubscribe ============
+   builds on style.css tokens + .brand/.btn; deliberately plain and static
+   (no motion) since readers land here from an email */
+@import "./style.css";
+
+body.unsub-page {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  background: #f6f6f8;
+}
+
+.unsub-header {
+  display: flex; justify-content: center;
+  padding: 28px 16px 0;
+}
+
+.unsub-main {
+  flex: 1;
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: clamp(32px, 10vh, 96px) 16px 48px;
+}
+
+.unsub-card {
+  width: 100%; max-width: 480px;
+  background: var(--paper);
+  border: 1px solid var(--mist);
+  border-radius: 20px;
+  padding: clamp(28px, 6vw, 40px);
+  text-align: center;
+}
+
+.unsub-card h1 {
+  font-size: clamp(22px, 5vw, 28px);
+  font-weight: 700; letter-spacing: -.4px; line-height: 1.2;
+  color: var(--ink);
+}
+
+.unsub-card p {
+  margin-top: 12px;
+  font-size: 15px; line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.unsub-btn {
+  margin-top: 24px;
+  font-size: 15px; padding: 12px 26px;
+  border: 0; cursor: pointer;
+  font-family: inherit;
+}
+.unsub-btn,
+.unsub-btn:hover { transition: none; transform: none; }
+.unsub-btn:disabled { opacity: .6; cursor: default; }
+
+.unsub-card .unsub-email {
+  margin-top: 28px; padding-top: 20px;
+  border-top: 1px solid var(--mist);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.unsub-email strong { color: var(--ink); font-weight: 600; }
+
+[hidden] { display: none !important; }
