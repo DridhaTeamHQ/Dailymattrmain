@@ -23,6 +23,7 @@ export default defineConfig(({ mode }) => {
         main: path.resolve(root, "index.html"),
         newsletter: path.resolve(root, "newsletter/index.html"),
         support: path.resolve(root, "support/index.html"),
+        unsubscribe: path.resolve(root, "unsubscribe/index.html"),
         editorialguidelines: path.resolve(root, "editorialguidelines/index.html"),
         privacypolicy: path.resolve(root, "privacypolicy/index.html"),
         termsandconditions: path.resolve(root, "termsandconditions/index.html"),
@@ -60,6 +61,12 @@ export default defineConfig(({ mode }) => {
           if (req.url === "/download" || req.url?.startsWith("/download?")) {
             server.ssrLoadModule("/api/download.js").then(({ default: handler }) => handler(req, res)).catch(next);
             return;
+          }
+          // same as the Vercel rewrite: serve the page at /unsubscribe with
+          // the query string (email, token, action) left intact
+          if (req.url === "/unsubscribe" || req.url?.startsWith("/unsubscribe?")) {
+            req.url = "/unsubscribe/" + req.url.slice("/unsubscribe".length);
+            return next();
           }
           if (req.url === "/admin" || req.url?.startsWith("/admin?")) {
             res.statusCode = 302;

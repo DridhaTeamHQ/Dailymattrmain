@@ -43,6 +43,10 @@
       "destination": "https://public.dailymattr.com/s/:shareId"
     },
     {
+      "source": "/unsubscribe",
+      "destination": "/unsubscribe/index.html"
+    },
+    {
       "source": "/admin",
       "destination": "/admin/"
     },
