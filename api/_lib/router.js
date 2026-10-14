@@ -4,7 +4,7 @@ import { articlePath, slugify, isValidId, cleanHeadline } from "./slug.js";
 import { articleHead, hubHead, articleTrail, noindexHead } from "./seo.js";
 import { renderArticle, SLIDE_SIZES } from "./render-article.js";
 import { slideAttrs } from "./media.js";
-import { newsSitemap, sitemapIndex, monthSitemap } from "./sitemap.js";
+import { newsSitemap, sitemapIndex, daySitemap, monthSitemap } from "./sitemap.js";
 import { renderHub } from "./render-hub.js";
 import { renderError } from "./render-error.js";
 import { CAROUSEL_JS, STORY_NAV_JS } from "./news-js.js";
@@ -38,10 +38,12 @@ export async function routeNews({ rest = "", bare = false, query = {} }) {
   const body = m.groups.body;
   const trailing = m.groups.slash === "/";
 
-  /* /news/sitemap.xml (Google News, last 48 h), /news/sitemap-index.xml and
-   * the monthly /news/sitemap-YYYY-MM.xml it lists */
+  /* /news/sitemap.xml (Google News, last 48 h), /news/sitemap-index.xml, the
+   * daily /news/sitemap-YYYY-MM-DD.xml it lists and the older monthly files */
   if (rest === "sitemap.xml") return newsSitemap();
   if (rest === "sitemap-index.xml") return sitemapIndex();
+  const day = /^sitemap-(\d{4})-(\d{2})-(\d{2})\.xml$/.exec(rest);
+  if (day) return (await daySitemap(Number(day[1]), Number(day[2]), Number(day[3]))) || fail(404);
   const month = /^sitemap-(\d{4})-(\d{2})\.xml$/.exec(rest);
   if (month) return (await monthSitemap(Number(month[1]), Number(month[2]))) || fail(404);
 

@@ -1,5 +1,5 @@
 import { esc, jsonLdScript } from "./html.js";
-import { ORIGIN, SITE_NAME, PUBLISHER_LOGO, OG_DEFAULT, PLAY_URL, APP_STORE_URL, LEGAL_NAME, PAGE_SIZE, SOCIAL_URLS } from "./site.js";
+import { ORIGIN, SITE_NAME, PUBLISHER_LOGO, OG_DEFAULT, PLAY_URL, APP_STORE_URL, LEGAL_NAME, PAGE_SIZE, SOCIAL_URLS, AUTHOR } from "./site.js";
 import { cleanHeadline, articlePath } from "./slug.js";
 import { bullets, metaDescription, modifiedAt, truncateAtWord } from "./text.js";
 import { slidesFor, posterFor, artworkFor, ogImageFor } from "./media.js";
@@ -82,8 +82,9 @@ export function articleHead(post) {
     image: [...new Set([...heroImages.map((h) => h.url), ...slides.map((s) => s.url)])],
     publisher,
     /* the desk, not the individual writer — user_name is an internal CMS
-     * login and is not shown on the page either */
-    author: { "@type": "Organization", name: SITE_NAME, url: `${ORIGIN}/` },
+     * login and is not shown on the page either. Same name and page as the
+     * visible byline. */
+    author: { "@type": "Organization", name: AUTHOR.name, url: ORIGIN + AUTHOR.path },
     ...(cat ? { articleSection: cat.label } : {}),
     ...(keywords.length ? { keywords } : {}),
     /* we summarise someone else's reporting — say so in the markup */

@@ -3,7 +3,7 @@ import { articlePath, cleanHeadline } from "./slug.js";
 import { formatDate, truncateAtWord, hostnameOf } from "./text.js";
 import { artworkFor, thumbAttrs, slideAttrs } from "./media.js";
 import { categoryById, hubPath } from "./categories.js";
-import { PLAY_URL, APP_STORE_URL } from "./site.js";
+import { PLAY_URL, APP_STORE_URL, AUTHOR } from "./site.js";
 
 /* the hero's sizes attribute; the router's preload repeats it */
 export const SLIDE_SIZES = "(max-width: 860px) 86vw, 420px";
@@ -96,6 +96,7 @@ ${crumbs(seo.trail)}
         <div class="article-text">
           <h1>${title}</h1>
           <p class="news-meta">
+            <span class="news-byline">By <a href="${AUTHOR.path}" rel="author">${AUTHOR.name}</a></span>
             <time datetime="${new Date(post.published_at).toISOString()}">${formatDate(post.published_at)}</time>
             ${cat ? html`<a href="${hubPath(cat)}">${cat.label}</a>` : ""}
           </p>

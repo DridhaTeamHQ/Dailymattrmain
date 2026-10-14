@@ -780,19 +780,6 @@ window.addEventListener("resize", () => {
   }, 220);
 });
 
-/* ---------- nav hides on scroll-down, returns on scroll-up ---------- */
-let navHidden = false;
-lenis.on("scroll", (e) => {
-  const down = e.direction === 1;
-  if (down && e.scroll > 320 && !navHidden) {
-    navHidden = true;
-    gsap.to(".nav", { yPercent: -110, duration: 0.45, ease: "power3.out", overwrite: "auto" });
-  } else if ((!down || e.scroll <= 320) && navHidden) {
-    navHidden = false;
-    gsap.to(".nav", { yPercent: 0, duration: 0.45, ease: "power3.out", overwrite: "auto" });
-  }
-});
-
 /* ---------- in-page anchors ride the smooth scroll ---------- */
 document.querySelectorAll('a[href^="#"]').forEach((a) => {
   a.addEventListener("click", (e) => {

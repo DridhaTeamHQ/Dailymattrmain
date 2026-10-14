@@ -10,7 +10,8 @@ export const CACHE = {
   sitemapIndex:        "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
   sitemapNews:         "public, max-age=0, s-maxage=300, stale-while-revalidate=600",
   sitemapMonthCurrent: "public, max-age=0, s-maxage=1800, stale-while-revalidate=3600",
-  sitemapMonthPast:    "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
+  sitemapMonthPast:    "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",   // also past days
+  sitemapDayCurrent:   "public, max-age=0, s-maxage=600, stale-while-revalidate=1800",
   error:    "no-store",
 };
 
