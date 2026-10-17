@@ -807,6 +807,7 @@ html:not(.intro-live) .intro { animation: intro-failsafe 0s linear 15s forwards;
   font-size: 24px; font-weight: 700; letter-spacing: -.5px;
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
 }
+.footer-logo-link { display: inline-flex; }
 .footer-logo { height: 34px; width: auto; }
 .brand-mini { font-family: var(--font-serif); }
 .brand-mini b { font-weight: 900; }
