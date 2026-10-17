@@ -10,7 +10,7 @@ import { listRecentForNews, listBetween } from "./queries.js";
  *   /news/sitemap.xml             Google News sitemap — stories from the last 48 h
  *   /news/sitemap-index.xml       the news sitemap, then one sitemap per month and
  *                                 one per day, each newest first
- *   /news/sitemap-YYYY-MM.xml     every live story published that month (UTC)
+ *   /news/sitemap-YYYY-MM.xml     every live story published that month (UTC), no images
  *   /news/sitemap-YYYY-MM-DD.xml  every live story published that day (UTC)
  * Only the current month and today change, so past files cache for long and
  * crawlers re-fetch one small daily file instead of the whole month.
@@ -51,18 +51,20 @@ function monthsSoFar(now = new Date()) {
   return out;
 }
 
-/* a monthly or daily archive file: every story with lastmod and artwork */
-function archive(posts, cache) {
+/* a monthly or daily archive file: every story with lastmod, plus artwork when
+ * images is set (monthly files leave it out — they are for article indexing) */
+function archive(posts, cache, { images = true } = {}) {
   const urls = posts.map((p) => {
-    const img = artworkFor(p);
+    const img = images && artworkFor(p);
     return `  <url>
     <loc>${esc(ORIGIN + articlePath(p))}</loc>
     <lastmod>${modifiedAt(p)}</lastmod>${img ? `
     <image:image><image:loc>${esc(img)}</image:loc></image:image>` : ""}
   </url>\n`;
   }).join("");
+  const ns = images ? ` xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"` : "";
   return xml(
-    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${urls}</urlset>\n`,
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"${ns}>\n${urls}</urlset>\n`,
     cache,
   );
 }
@@ -119,5 +121,5 @@ export async function monthSitemap(y, m) {
   const end = new Date(Date.UTC(y, m, 1)).toISOString();
   const posts = (await listBetween(start, end)).filter(listable);
   const current = k === monthKey(now.getUTCFullYear(), now.getUTCMonth() + 1);
-  return archive(posts, current ? CACHE.sitemapMonthCurrent : CACHE.sitemapMonthPast);
+  return archive(posts, current ? CACHE.sitemapMonthCurrent : CACHE.sitemapMonthPast, { images: false });
 }

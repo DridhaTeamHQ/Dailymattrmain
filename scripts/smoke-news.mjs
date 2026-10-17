@@ -292,6 +292,7 @@ console.log("\nsitemaps");
   check("impossible date -> 404", (await routeNews({ rest: "sitemap-2026-02-30.xml" })).status === 404);
   const mth = await routeNews({ rest: "sitemap-2026-08.xml" });
   check("monthly sitemap served", mth.status === 200 && wellFormed(mth.body));
+  check("monthly sitemap has article URLs but no image tags", /<loc>https:\/\/www\.dailymattr\.com\/news\//.test(String(mth.body)) && !/image:/.test(String(mth.body)));
   check("month out of range -> 404", (await routeNews({ rest: "sitemap-1999-01.xml" })).status === 404);
 }
 
