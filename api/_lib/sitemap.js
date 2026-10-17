@@ -8,13 +8,12 @@ import { listRecentForNews, listBetween } from "./queries.js";
 
 /* XML sitemaps for the news section, served by the same router:
  *   /news/sitemap.xml             Google News sitemap — stories from the last 48 h
- *   /news/sitemap-index.xml       the news sitemap plus one sitemap per day, newest first
+ *   /news/sitemap-index.xml       the news sitemap, then one sitemap per month and
+ *                                 one per day, each newest first
+ *   /news/sitemap-YYYY-MM.xml     every live story published that month (UTC)
  *   /news/sitemap-YYYY-MM-DD.xml  every live story published that day (UTC)
- *   /news/sitemap-YYYY-MM.xml     every live story published that month (UTC); no
- *                                 longer listed in the index, still served so URLs
- *                                 search engines already know keep working
- * Only today's daily file changes, so past days cache for long and crawlers
- * re-fetch one small file instead of the whole month.
+ * Only the current month and today change, so past files cache for long and
+ * crawlers re-fetch one small daily file instead of the whole month.
  * Every value is from the CMS and is escaped; every URL is on ORIGIN. */
 
 /* the first month with live stories — nothing before it to list */
@@ -39,6 +38,15 @@ function daysSoFar(now = new Date()) {
   for (let t = startOfDay(now); t >= FIRST_DAY; t -= DAY_MS) {
     const d = new Date(t);
     out.push({ y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate() });
+  }
+  return out;
+}
+
+/* every month from FIRST_MONTH to this month (UTC), newest first */
+function monthsSoFar(now = new Date()) {
+  const out = [];
+  for (let k = monthKey(now.getUTCFullYear(), now.getUTCMonth() + 1); k >= monthKey(FIRST_MONTH.y, FIRST_MONTH.m); k--) {
+    out.push({ y: Math.floor(k / 12), m: (k % 12) + 1 });
   }
   return out;
 }
@@ -81,6 +89,7 @@ export async function newsSitemap() {
 export async function sitemapIndex() {
   const locs = [
     `${ORIGIN}/news/sitemap.xml`,
+    ...monthsSoFar().map(({ y, m }) => `${ORIGIN}/news/sitemap-${y}-${pad(m)}.xml`),
     ...daysSoFar().map(({ y, m, d }) => `${ORIGIN}/news/sitemap-${y}-${pad(m)}-${pad(d)}.xml`),
   ];
   return xml(

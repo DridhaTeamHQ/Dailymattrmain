@@ -118,11 +118,10 @@ the Daily Mattr alternate brand name and official social profiles. News schema
 now explicitly connects articles, their WebPage and the WebSite entity.
 
 Robots.txt lists the static sitemap and news sitemap index only. The 48-hour
-Google News sitemap remains inside the news index alongside daily archives
-(`/news/sitemap-YYYY-MM-DD.xml`, newest first); these serve different purposes.
-Only today's daily file changes, so past days are cached for a day at the CDN.
-The older monthly files (`/news/sitemap-YYYY-MM.xml`) are no longer listed but
-are still served so URLs search engines already know keep working. Static sitemap dates reflect page edits, while
+Google News sitemap remains inside the news index alongside monthly archives
+(`/news/sitemap-YYYY-MM.xml`) and daily archives (`/news/sitemap-YYYY-MM-DD.xml`),
+each newest first; these serve different purposes. Only the current month and
+today change, so past files are cached for a day at the CDN. Static sitemap dates reflect page edits, while
 changing news hubs omit unsupported lastmod dates. Admin pages and date filters
 remain crawlable so their existing noindex directives can be read. Do not block
 public news, pagination, images or CSS to try to fix indexing.
