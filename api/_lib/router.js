@@ -3,12 +3,12 @@ import { page } from "./layout.js";
 import { articlePath, slugify, isValidId, cleanHeadline } from "./slug.js";
 import { articleHead, hubHead, articleTrail, noindexHead } from "./seo.js";
 import { renderArticle, SLIDE_SIZES } from "./render-article.js";
-import { slideAttrs } from "./media.js";
+import { slideAttrs, thumbAttrs, artworkFor } from "./media.js";
 import { newsSitemap, sitemapIndex, daySitemap, monthSitemap } from "./sitemap.js";
 import { renderHub } from "./render-hub.js";
 import { renderError } from "./render-error.js";
 import { CAROUSEL_JS, STORY_NAV_JS } from "./news-js.js";
-import { categoryBySlug, hubPath, CATEGORIES } from "./categories.js";
+import { categoryBySlug, categoryById, hubPath, CATEGORIES } from "./categories.js";
 import { getPostByPublishedId, getNeighbours, listLive } from "./queries.js";
 import { SITE_NAME, PAGE_SIZE } from "./site.js";
 import { isValidDateStr, formatDate } from "./text.js";
@@ -46,6 +46,9 @@ export async function routeNews({ rest = "", bare = false, query = {} }) {
   if (day) return (await daySitemap(Number(day[1]), Number(day[2]), Number(day[3]))) || fail(404);
   const month = /^sitemap-(\d{4})-(\d{2})\.xml$/.exec(rest);
   if (month) return (await monthSitemap(Number(month[1]), Number(month[2]))) || fail(404);
+
+  /* /news/latest.json — the newest stories, for the homepage section */
+  if (rest === "latest.json") return latestJson();
 
   /* /news/ and /news/page/N/ — page 0 doesn't exist, and a zero-padded
    * number redirects to the one canonical form like every other variant */
@@ -108,6 +111,38 @@ async function article({ slug, id, trailing }) {
       main: renderArticle({ seo, post, neighbours }),
       preloadImage: seo.heroImages[0] ? { ...slideAttrs(seo.heroImages[0].url), sizes: SLIDE_SIZES } : null,
       script: (seo.heroImages.length > 1 ? CAROUSEL_JS : "") + STORY_NAV_JS,
+    }),
+  };
+}
+
+const LATEST_COUNT = 10;
+
+/* The homepage is static HTML, so its "Latest news" row loads this. A failed
+ * query returns an empty list and the homepage simply hides the row. */
+async function latestJson() {
+  let posts = [];
+  try {
+    ({ posts } = await listLive({ page: 1, size: LATEST_COUNT }));
+  } catch (err) {
+    console.error("[latest]", err);
+  }
+  return {
+    status: 200,
+    type: "application/json; charset=utf-8",
+    cache: CACHE.feed,
+    tags: ["news", "news-hub"],
+    body: JSON.stringify({
+      stories: posts.map((p) => {
+        const art = artworkFor(p);
+        return {
+          title: cleanHeadline(p.headline),
+          path: articlePath(p),
+          section: categoryById(p.category_id)?.label || "",
+          publishedAt: new Date(p.published_at).toISOString(),
+          /* our own Pix artwork, host-checked by artworkFor() */
+          image: art ? thumbAttrs(art) : null,
+        };
+      }),
     }),
   };
 }

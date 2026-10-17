@@ -14,7 +14,7 @@
 const BOX_W = 640; // capture box in phone-space CSS px (see capture())
 const BOX_H = 940;
 
-export function createPhoneSeq({ phoneW, phoneH, meta, sheetUrl, poseAUrl, poseBUrl }) {
+export function createPhoneSeq({ phoneW, phoneH, meta, sheetUrl, poseAUrl, poseBUrl, backUrl }) {
   const state = {
     ready: false,
     failed: false,
@@ -22,10 +22,17 @@ export function createPhoneSeq({ phoneW, phoneH, meta, sheetUrl, poseAUrl, poseB
     canvas: null,
     apply,
     resize() {},
-    setBackPhone() {},
+    setBackPhone,
     demote() {},
     dispose,
   };
+
+  /* the showcase back phone: the same baked still the desktop player uses,
+   * document-positioned so it scrolls natively with the section */
+  const backCnv = document.createElement("canvas");
+  backCnv.className = "seq-back";
+  let backCfg = null;
+  let backReady = false;
 
   /* stage: [cnv (motion frames)] + [cnvA, cnvB (hi-res rest poses)],
    * each painted once at init; runtime only toggles opacity between
@@ -64,10 +71,45 @@ export function createPhoneSeq({ phoneW, phoneH, meta, sheetUrl, poseAUrl, poseB
       }
       document.body.appendChild(stage);
       state.ready = true;
+      /* loaded after the hero phone so it never delays first paint; a
+       * failure only costs the back phone, never the front one */
+      if (backUrl) {
+        loadBitmap(backUrl)
+          .then((bmp) => {
+            backCnv.width = bmp.width;
+            backCnv.height = bmp.height;
+            backCnv.getContext("2d").drawImage(bmp, 0, 0);
+            bmp.close && bmp.close();
+            backReady = true;
+            placeBack();
+          })
+          .catch(() => {});
+      }
     })
     .catch(() => {
       state.failed = true; // main.js falls back to the PNG phone
     });
+
+  /* doc-space center + width of the back phone's anchor, from main.js */
+  function setBackPhone(cfg) {
+    backCfg = cfg || null;
+    placeBack();
+  }
+
+  function placeBack() {
+    if (!backCfg || !backReady || !meta.backBox) {
+      backCnv.remove();
+      return;
+    }
+    if (!backCnv.parentNode) document.body.appendChild(backCnv);
+    const k = backCfg.w / phoneW;
+    const w = meta.backBox.w * k;
+    const h = meta.backBox.h * k;
+    backCnv.style.width = w + "px";
+    backCnv.style.height = h + "px";
+    backCnv.style.left = backCfg.cx - w / 2 + "px";
+    backCnv.style.top = backCfg.cy - h / 2 + "px";
+  }
 
   let lastFrame = -1;
   let lastMode = "";
@@ -128,6 +170,7 @@ export function createPhoneSeq({ phoneW, phoneH, meta, sheetUrl, poseAUrl, poseB
 
   function dispose() {
     stage.remove();
+    backCnv.remove();
   }
 
   return state;

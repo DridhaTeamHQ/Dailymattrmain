@@ -132,7 +132,10 @@ export default defineConfig(({ mode }) => {
             }
             res.statusCode = out.status;
             // the router says what it returned (the sitemaps are XML)
-            res.setHeader("Content-Type", out.type === "xml" ? "application/xml; charset=utf-8" : "text/html; charset=utf-8");
+            res.setHeader("Content-Type",
+              out.type === "xml" ? "application/xml; charset=utf-8"
+              : out.type === "html" || !out.type ? "text/html; charset=utf-8"
+              : out.type);
             res.setHeader("Cache-Control", "no-store");
             res.end(String(out.body));
           } catch (err) {

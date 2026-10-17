@@ -286,6 +286,23 @@
       </div>
     </section>
 
+    <!-- ================= LATEST NEWS ================= -->
+    <!-- filled from /news/latest.json by src/latest-news.js; stays hidden if
+         that request fails, so the page never shows an empty strip -->
+    <section class="home-trend" id="latest" hidden>
+      <div class="trend" aria-labelledby="latest-title" data-trend>
+        <div class="trend-head">
+          <h2 id="latest-title">Latest news</h2>
+          <div class="trend-arrows" hidden>
+            <button type="button" data-trend-step="-1" aria-label="Scroll latest news left">‹</button>
+            <button type="button" data-trend-step="1" aria-label="Scroll latest news right">›</button>
+          </div>
+        </div>
+        <ol class="trend-row"></ol>
+        <p class="home-trend-more"><a href="/news/">See all of today's news →</a></p>
+      </div>
+    </section>
+
     <!-- ================= FAQ ================= -->
     <section class="faq" id="faq">
       <div class="faq-grid">
@@ -423,6 +440,7 @@
   </div>
 
   <script type="module" src="/src/main.js"></script>
+  <script type="module" src="/src/latest-news.js"></script>
 </body>
 
 </html>

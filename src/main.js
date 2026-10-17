@@ -68,7 +68,7 @@ let lastDotIdx = -1;
  * hi-res rest stills, so playback is pure compositor work — no three.js
  * is ever downloaded at runtime. Desktop gets the full journey player
  * (both swings + the pinned-features screen stills + the showcase back
- * phone); phones get the shorter flight sheet. Live three.js only loads
+ * phone); phones get the shorter flight sheet plus the same back phone. Live three.js only loads
  * for the offline bake (?capture=1). If a sequence fails to load, the
  * PNG mockup phone takes over. */
 const IS_DESKTOP =
@@ -132,10 +132,12 @@ if (CAPTURE) {
   phone3d = createPhoneSeq({
     phoneW: PHONE_W,
     phoneH: PHONE_H,
-    meta: { frames: 40, cols: 8, rows: 5, fw: 461, fh: 677 },
+    // backBox: the back still's frame in phone-space px, as on desktop
+    meta: { frames: 40, cols: 8, rows: 5, fw: 461, fh: 677, backBox: { w: 800, h: 980 } },
     sheetUrl: "/assets/phone-seq.webp",
     poseAUrl: "/assets/phone-pose-a.webp",
     poseBUrl: "/assets/phone-pose-b.webp",
+    backUrl: "/assets/dphone-back.webp?v=2",
   });
 }
 

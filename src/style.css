@@ -344,7 +344,7 @@ html:not(.intro-live) .intro { animation: intro-failsafe 0s linear 15s forwards;
   width: 200%; height: 100%;
   will-change: transform;
 }
-/* baked showcase back phone (desktop) — document-positioned so it
+/* baked showcase back phone (desktop and mobile) — document-positioned so it
    scrolls natively with the section, under the front phone */
 .seq-back {
   position: absolute; z-index: 39;
@@ -550,6 +550,83 @@ html:not(.intro-live) .intro { animation: intro-failsafe 0s linear 15s forwards;
 }
 .scene-progress .dot.on { color: #fff; }
 .scene-progress .dot.on i { width: 34px; background: var(--blue); }
+
+/* ============ LATEST NEWS ROW ============ */
+/* the homepage "Latest news" row (src/latest-news.js) */
+.trend { margin: 6px 0 34px; }
+.trend-head { display: flex; align-items: center; gap: 18px; margin-bottom: 18px; }
+.trend-head h2 { font-size: clamp(20px, 2.4vw, 26px); font-weight: 700; letter-spacing: -0.02em; color: var(--ink); white-space: nowrap; }
+.trend-head::after { content: ""; order: 1; flex: 1; height: 1px; background: var(--mist); }
+.trend-arrows { order: 2; display: flex; gap: 8px; }
+.trend-arrows[hidden] { display: none; }
+.trend-arrows button {
+  width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--mist); background: #fff;
+  color: var(--ink); font-size: 20px; line-height: 1; cursor: pointer; transition: border-color .2s ease, opacity .2s ease;
+}
+.trend-arrows button:hover:not(:disabled) { border-color: var(--ink); }
+.trend-arrows button:disabled { opacity: .35; cursor: default; }
+.trend-row {
+  display: grid; grid-auto-flow: column; grid-auto-columns: max(250px, calc((100% - 48px) / 4));
+  gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; list-style: none;
+  padding: 6px 2px 22px; margin: -6px -2px -16px; scrollbar-width: none;
+}
+.trend-row::-webkit-scrollbar { display: none; }
+.trend-row > li { scroll-snap-align: start; }
+/* story card: picture on top, never covered; headline on white below */
+.lnews-card {
+  display: flex; flex-direction: column; height: 100%;
+  background: #fff; border: 1px solid #ececf0; border-radius: 20px; overflow: hidden;
+  color: var(--ink); text-decoration: none;
+  box-shadow: 0 1px 2px rgba(10,10,11,.04);
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.lnews-card:hover { transform: translateY(-4px); border-color: #e2e2e8; box-shadow: 0 18px 36px -12px rgba(10,10,11,.18); }
+.lnews-card:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.lnews-media {
+  position: relative; display: block; aspect-ratio: 4 / 3; overflow: hidden;
+  background: radial-gradient(120% 120% at 100% 0%, rgba(57,121,255,.32) 0%, transparent 60%), linear-gradient(160deg, #1c1c21, var(--coal));
+}
+.lnews-media img {
+  width: 100%; height: 100%; object-fit: cover; object-position: center 25%; display: block;
+  transition: transform .5s ease;
+}
+.lnews-card:hover .lnews-media img { transform: scale(1.05); }
+.lnews-chip {
+  position: absolute; left: 12px; top: 12px;
+  padding: 5px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink); background: rgba(255,255,255,.92);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(10,10,11,.12);
+}
+.lnews-body { display: flex; flex-direction: column; gap: 14px; flex: 1; padding: 16px 18px 18px; }
+.lnews-title {
+  font-size: 16.5px; font-weight: 600; line-height: 1.38; letter-spacing: -0.01em; color: var(--ink);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.lnews-card:hover .lnews-title { color: var(--blue); }
+.lnews-meta {
+  margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  font-size: 12.5px; font-weight: 600; color: var(--ink-soft);
+}
+.lnews-go { color: var(--blue); white-space: nowrap; }
+.lnews-card:hover .lnews-go { text-decoration: underline; }
+@media (max-width: 640px) {
+  .trend-row { grid-auto-columns: 78%; }
+  .lnews-title { font-size: 16px; }
+}
+
+/* homepage: a white sheet between the features and the FAQ */
+.home-trend {
+  background: var(--paper); position: relative; z-index: 5;
+  border-radius: 32px 32px 0 0; margin-top: -32px;
+  padding: 90px 8vw 40px;
+}
+.home-trend .trend { max-width: 1280px; margin: 0 auto; }
+.home-trend + .faq { padding-top: 70px; }
+.home-trend-more { margin-top: 18px; font-size: 14px; font-weight: 600; }
+.home-trend-more a { color: var(--blue); }
+.home-trend-more a:hover { text-decoration: underline; }
 
 /* ============ FAQ ============ */
 /* rises over the dark features section as a rounded white sheet */
