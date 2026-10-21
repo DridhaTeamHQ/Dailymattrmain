@@ -676,7 +676,9 @@ function build() {
         ease: "none",
       });
       gsap.to(".hero-inner", {
-        borderRadius: 0,
+        // top corners only: the bottom edge is already square (style.css)
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
         scrollTrigger: {
           trigger: "#showcase",
           start: "top bottom",

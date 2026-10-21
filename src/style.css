@@ -187,13 +187,14 @@ html:not(.intro-live) .intro { animation: intro-failsafe 0s linear 15s forwards;
 
 /* ============ Hero ============ */
 .hero {
-  padding: calc(var(--nav-h) + 11px) 16px 14px;
+  padding: calc(var(--nav-h) + 11px) 0 0;
   background: var(--paper); /* scroll-tweened to coal so the panel goes full-bleed */
 }
 .hero-inner {
   position: relative;
   background: radial-gradient(120% 90% at 50% 0%, #1c1c1f 0%, var(--coal) 55%);
-  border-radius: var(--radius-panel); /* scroll-tweened to 0 */
+  /* bottom edge meets the dark showcase, so only the top is rounded */
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0; /* scroll-tweened to 0 */
   overflow: hidden;
   text-align: center;
   padding: 88px 24px 0;
