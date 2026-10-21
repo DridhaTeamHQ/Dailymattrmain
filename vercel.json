@@ -31,6 +31,11 @@
       "source": "/news-studio",
       "destination": "https://longmattr.com/general",
       "permanent": false
+    },
+    {
+      "source": "/tamada-media",
+      "destination": "https://play.google.com/store/apps/details?id=com.dailymattr&utm_source=linkedin&utm_medium=social&utm_campaign=tamada_media",
+      "permanent": false
     }
   ],
   "rewrites": [
