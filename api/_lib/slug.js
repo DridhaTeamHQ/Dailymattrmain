@@ -9,6 +9,9 @@ export function cleanHeadline(h) {
   return String(h || "").replace(MARKERS, "").replace(/\s+/g, " ").trim();
 }
 
+/* has at least one letter or digit once the markers are gone */
+export const hasHeadline = (p) => /[\p{L}\p{N}]/u.test(cleanHeadline(p.headline));
+
 export function slugify(h) {
   let s = cleanHeadline(h)
     .replace(/₹/g, " rs ")

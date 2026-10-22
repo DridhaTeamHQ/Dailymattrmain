@@ -2,6 +2,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { isValidDateStr, dateRangeForDay } from "./text.js";
+import { hasHeadline } from "./slug.js";
 
 /* Local development fallback. pix_posts has no anon read policy, so without
  * PIX_SUPABASE_SERVICE_ROLE_KEY there is no way to reach the real database —
@@ -17,7 +18,7 @@ export const hasSnapshot = () => existsSync(FILE);
 function all() {
   if (!cache) {
     cache = JSON.parse(readFileSync(FILE, "utf8"))
-      .filter((p) => p.approved && !p.rejected && p.published_at)
+      .filter((p) => p.approved && !p.rejected && p.published_at && hasHeadline(p))
       .sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
   }
   return cache;

@@ -2,6 +2,7 @@ import { pixDb, hasServiceKey } from "./supabase.js";
 import { snapshot, hasSnapshot } from "./snapshot.js";
 import { PAGE_SIZE } from "./site.js";
 import { isValidDateStr, dateRangeForDay } from "./text.js";
+import { hasHeadline } from "./slug.js";
 
 /* Only the columns a page needs. The carousel and keywords are pulled out of
  * published_response with JSON-path aliases so the (large) blob itself never
@@ -22,16 +23,21 @@ const SITEMAP_COLS =
   "headline,published_id,published_at,updated_at,main_image_url,web_pages," +
   "media_pages:published_response->response->data->media_pages";
 
-/* a post is public once QA approved it, nobody rejected it afterwards and
- * its publish time has passed */
+/* a post is public once QA approved it, nobody rejected it afterwards, its
+ * publish time has passed and it has a headline. Headline-less posts (the
+ * "Daily Wrap" cards) are app-only and never get a web page. */
 const live = (q) =>
   q.eq("approved", true).eq("rejected", false)
-    .not("published_at", "is", null).lte("published_at", new Date().toISOString());
+    .not("published_at", "is", null).lte("published_at", new Date().toISOString())
+    .filter("headline", "match", "[[:alnum:]]");
 
-const isLive = (p) => p.approved && !p.rejected && p.published_at && new Date(p.published_at) <= new Date();
+const wasPublished = (p) => p.published_at && new Date(p.published_at) <= new Date();
 
-/* rejected after its publish time had passed, i.e. it was public once */
-const wasTakenDown = (p) => p.rejected && p.published_at && new Date(p.published_at) <= new Date();
+const isLive = (p) => p.approved && !p.rejected && wasPublished(p) && hasHeadline(p);
+
+/* was public once: rejected after its publish time had passed, or a
+ * headline-less post that used to get a page */
+const wasTakenDown = (p) => wasPublished(p) && (p.rejected || (p.approved && !hasHeadline(p)));
 
 const fail = (error, what) => { throw new Error(`${what}: ${error.message}`); };
 
