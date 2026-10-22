@@ -13,6 +13,7 @@ export const SOCIAL_URLS = [
   "https://youtube.com/@dailymattr",
   "https://x.com/dailymattr_news",
   "https://www.linkedin.com/company/dailymattr/",
+  "https://www.facebook.com/profile.php?id=61595620943543",
 ];
 /* the byline on every story, and NewsArticle.author */
 export const AUTHOR = { name: "dailymattr Editorial Team", path: "/author/dailymattr-editorial-team/" };
