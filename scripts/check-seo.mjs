@@ -9,7 +9,7 @@ const read = (name) => readFileSync(new URL(`../${name}`, import.meta.url), "utf
 const schemas = (html) => [...html.matchAll(/<script\s+type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
   .flatMap((m) => { const data = JSON.parse(m[1]); return data["@graph"] || [data]; });
 const types = (html) => schemas(html).map((n) => n["@type"]);
-const paths = ["", "newsletter/", "support/", "editorialguidelines/", "privacypolicy/", "termsandconditions/", "author/dailymattr-editorial-team/"];
+const paths = ["", "newsletter/", "support/", "editorialguidelines/", "privacypolicy/", "termsandconditions/", "author/dailymattr-editorial-team/", "about/"];
 const titles = new Set();
 for (const path of paths) {
   const html = read(`${path}index.html`);
@@ -22,8 +22,8 @@ for (const path of paths) {
   const title = html.match(/<title>(.*?)<\/title>/)[1];
   assert.ok(!titles.has(title), `Duplicate title: ${title}`);
   titles.add(title);
-  /* ProfilePage is a WebPage subtype, used for the author page */
-  assert.ok(types(html).some((t) => t === "WebPage" || t === "ProfilePage"), `${path}: WebPage schema`);
+  /* ProfilePage and AboutPage are WebPage subtypes, used for the author and about pages */
+  assert.ok(types(html).some((t) => t === "WebPage" || t === "ProfilePage" || t === "AboutPage"), `${path}: WebPage schema`);
   if (path) assert.ok(types(html).includes("BreadcrumbList"));
   for (const img of html.matchAll(/<img\b[^>]*>/g)) {
     assert.match(img[0], /\balt="[^"]*"/);
@@ -82,4 +82,4 @@ assert.match(rendered, /name="robots" content="index,follow/);
 const args = { title: "Latest news", description: "Recent stories", path: "/news/", posts: [post], trail: [{name:"Home",path:"/"},{name:"News",path:"/news/"}] };
 assert.equal(hubHead({ ...args, page: 2 }).canonical, "https://www.dailymattr.com/news/page/2/");
 assert.match(hubHead({ ...args, date: "2026-10-07" }).head, /noindex,follow/);
-console.log("SEO checks passed: seven static pages, admin exclusions, sitemaps, article schema relationships, pagination and date filters.");
+console.log("SEO checks passed: eight static pages, admin exclusions, sitemaps, article schema relationships, pagination and date filters.");
