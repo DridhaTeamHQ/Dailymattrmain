@@ -27,6 +27,7 @@ export default defineConfig(({ mode }) => {
         editorialguidelines: path.resolve(root, "editorialguidelines/index.html"),
         privacypolicy: path.resolve(root, "privacypolicy/index.html"),
         termsandconditions: path.resolve(root, "termsandconditions/index.html"),
+        about: path.resolve(root, "about/index.html"),
         // byline target on every news article (AUTHOR.path in api/_lib/site.js)
         author: path.resolve(root, "author/dailymattr-editorial-team/index.html"),
         admin: path.resolve(root, "admin/index.html"),

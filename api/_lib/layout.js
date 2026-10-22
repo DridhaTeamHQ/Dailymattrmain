@@ -36,6 +36,7 @@ const footerHtml = () => html`
         <div class="footer-col">
           <h4>PRODUCT</h4>
           <a href="/">Home</a>
+          <a href="/about/">About Us</a>
           <a href="/#showcase">What we are</a>
           <a href="/#features">Features</a>
           <a href="/newsletter/">Newsletter</a>
