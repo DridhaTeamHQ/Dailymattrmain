@@ -4,7 +4,7 @@ import LmNav from '../components/lm/LmNav'
 import LmReader from '../components/lm/LmReader'
 import LmFooter from '../components/lm/LmFooter'
 import { dedupeStories } from '../components/lm/LmNewsStudio'
-import { fetchApproved, fetchArticlesByIds, fetchTrendingTopics } from '../lib/content'
+import { fetchApprovedPage, fetchArticlesByIds, fetchTrendingTopics } from '../lib/content'
 import { parseSlugId, storyPath } from '../lib/routes'
 import { applyHead, storySeo, FEED_SEO } from '../lib/seo'
 import NotFoundPage from './NotFoundPage'
@@ -12,15 +12,15 @@ import NotFoundPage from './NotFoundPage'
 const newestFirst = (a, b) => new Date(b.publishedAt) - new Date(a.publishedAt)
 
 // The stories a reader steps through around this one: the topic's timeline
-// when the story was opened from it (?topic=<id>), otherwise the News Studio
-// feed in front-page order.
+// when the story was opened from it (?topic=<id>), otherwise the newest page
+// of the News Studio feed in front-page order.
 async function loadSequence(topicId) {
   if (topicId) {
     const topic = (await fetchTrendingTopics()).find((t) => String(t.id) === topicId)
     if (topic) return (await fetchArticlesByIds(topic.memberIds)).sort(newestFirst)
   }
-  const all = await fetchApproved()
-  return dedupeStories(all.filter((a) => a.slug === 'general').sort(newestFirst))
+  const { items } = await fetchApprovedPage({ slug: 'general', limit: 60 })
+  return dedupeStories(items.sort(newestFirst))
 }
 
 // /<headline-slug>-<id> — one page per story, same URL shape as /news.
@@ -41,7 +41,7 @@ export default function StoryPage() {
     let alive = true
     loadSequence(topicId)
       .then(async (list) => {
-        // Older stories (outside the live feed window) still get a page.
+        // Older stories (outside that page) still get a page.
         if (!list.some((x) => String(x.id) === id)) {
           const [own] = await fetchArticlesByIds([id]).catch(() => [])
           if (own) list = [own, ...list]

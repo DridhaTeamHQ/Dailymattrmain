@@ -3,8 +3,9 @@ import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { storyPath } from '../../lib/routes'
 import { FactChip } from './LmFactBadge'
-import { breakingScore, isBreaking, topicLabel } from '../../lib/content'
+import { breakingScore, isBreaking, topicLabel, FEED_PAGE_SIZE } from '../../lib/content'
 import {
+  FeedTail,
   dayKey,
   headerLabel,
   Excerpt,
@@ -403,10 +404,20 @@ function StudioCard({ item, onOpen }) {
   )
 }
 
-export default function LmNewsStudio({ items: rawItems = [], loading = false, emptyLabel = 'No stories here yet — check back soon.' }) {
+export default function LmNewsStudio({
+  items: rawItems = [],
+  loading = false,
+  emptyLabel = 'No stories here yet — check back soon.',
+  hasMore = false,
+  loadingMore = false,
+  onLoadMore,
+}) {
   // Collapse near-identical headlines (same story from different outlets) —
   // everything below, including the reader, works on the deduped feed.
   const items = useMemo(() => dedupeStories(rawItems), [rawItems])
+  // The ticker and top band pick from the newest page only, so they stay put
+  // while older pages stream in below.
+  const head = useMemo(() => items.slice(0, FEED_PAGE_SIZE), [items])
 
   // Every story opens on its own page (/story/:id).
   const navigate = useNavigate()
@@ -414,15 +425,15 @@ export default function LmNewsStudio({ items: rawItems = [], loading = false, em
 
   // Breaking banner — identical selection to the old General feed.
   const breaking = useMemo(() => {
-    const hot = items.filter(isBreaking).sort((a, b) => breakingScore(b) - breakingScore(a)).slice(0, 6)
+    const hot = head.filter(isBreaking).sort((a, b) => breakingScore(b) - breakingScore(a)).slice(0, 6)
     if (hot.length > 0) return hot
-    return [...items.slice(0, 10)].sort((a, b) => breakingScore(b) - breakingScore(a)).slice(0, 6)
-  }, [items])
+    return [...head.slice(0, 10)].sort((a, b) => breakingScore(b) - breakingScore(a)).slice(0, 6)
+  }, [head])
 
   // Hero band: hottest stories first; the lead must carry an image when any
   // story has one, the left pair prefers images, the rail is text-only.
   const { lead, side, rail, rest } = useMemo(() => {
-    const ranked = [...items].sort((a, b) => breakingScore(b) - breakingScore(a))
+    const ranked = [...head].sort((a, b) => breakingScore(b) - breakingScore(a))
     const lead = ranked.find((it) => it.image) || ranked[0] || null
     const used = new Set(lead ? [lead.id] : [])
     const withImg = ranked.filter((it) => !used.has(it.id) && it.image)
@@ -436,7 +447,7 @@ export default function LmNewsStudio({ items: rawItems = [], loading = false, em
     rail.forEach((it) => used.add(it.id))
     const rest = items.filter((it) => !used.has(it.id))
     return { lead, side, rail, rest }
-  }, [items])
+  }, [head, items])
 
   // Date groups for everything below the band. Within each day, SECTION FRONTS
   // are derived automatically from the stories actually present: any topic with
@@ -480,14 +491,10 @@ export default function LmNewsStudio({ items: rawItems = [], loading = false, em
       })
   }, [rest])
 
-  const [visible, setVisible] = useState(2)
-  const shown = groups.slice(0, visible)
-  const hasMore = groups.length > visible
-
   if (loading && items.length === 0) {
     return <StudioSkeleton />
   }
-  if (!loading && items.length === 0) {
+  if (items.length === 0) {
     return <div className="px-[32px] py-[80px] text-center font-roboto text-[18px] text-lm-500" style={rb}>{emptyLabel}</div>
   }
 
@@ -528,7 +535,7 @@ export default function LmNewsStudio({ items: rawItems = [], loading = false, em
       {/* ---- The rest of the feed: per-day SECTION FRONTS (auto-derived from
            the day's topics — a section exists only while its story wave does)
            followed by the day's masonry ---- */}
-      {shown.map((g) => (
+      {groups.map((g) => (
         <motion.section
           key={g.key}
           initial={{ opacity: 0, y: 32 }}
@@ -574,21 +581,7 @@ export default function LmNewsStudio({ items: rawItems = [], loading = false, em
         </motion.section>
       ))}
 
-      {hasMore && (
-        <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={() => setVisible((v) => v + 2)}
-            className="group inline-flex items-center gap-[10px] rounded-full border border-lm-300 bg-white py-[8px] pl-[20px] pr-[8px] font-roboto text-[14px] font-semibold text-lm-800 transition-all duration-200 hover:border-lm-800 hover:shadow-[0px_8px_24px_rgba(0,0,0,0.08)]"
-            style={rb}
-          >
-            Load more stories
-            <span className="flex size-[30px] items-center justify-center rounded-full bg-lm-800 text-white transition-transform duration-300 group-hover:translate-y-[2px]">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M6 2v8M2.5 6.5 6 10l3.5-3.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </span>
-          </button>
-        </div>
-      )}
+      <FeedTail hasMore={hasMore} loadingMore={loadingMore} onLoadMore={onLoadMore} count={rawItems.length} />
       </div>
     </>
   )

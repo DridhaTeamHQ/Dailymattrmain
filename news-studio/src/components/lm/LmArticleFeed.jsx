@@ -6,6 +6,7 @@ import { storyPath } from '../../lib/routes'
 import LmBreakingCarousel from './LmBreakingCarousel'
 import { FactChip } from './LmFactBadge'
 import { breakingScore, isBreaking, topicLabel, istDayKey } from '../../lib/content'
+import { useInfiniteSentinel } from '../../lib/usePagedFeed'
 
 // Date-grouped article feed — Figma node 1:5453. Each date group: bold header
 // with hairline divider, then a two-column grid — left 895px (2 featured +
@@ -483,9 +484,41 @@ export function ArticleFeedSkeleton() {
   )
 }
 
+// End of a paged feed: an invisible sentinel that pulls the next page in
+// before the reader reaches it (infinite scroll), a quiet loader while it
+// arrives, and a sign-off once everything is loaded.
+export function FeedTail({ hasMore = false, loadingMore = false, onLoadMore, count = 0 }) {
+  const ref = useInfiniteSentinel(onLoadMore, hasMore && !loadingMore, count)
+  if (!hasMore && !loadingMore) {
+    return (
+      <p className="py-[8px] text-center font-roboto text-[13px] text-lm-400" style={rb}>
+        You're all caught up.
+      </p>
+    )
+  }
+  return (
+    <div ref={ref} className="flex justify-center py-[8px]" role="status" aria-live="polite">
+      {loadingMore && (
+        <span className="inline-flex items-center gap-[10px] font-roboto text-[13px] text-lm-500" style={rb}>
+          <span className="size-[16px] animate-spin rounded-full border-2 border-lm-200 border-t-lm-800" aria-hidden="true" />
+          Loading more stories…
+        </span>
+      )}
+    </div>
+  )
+}
+
 // fullStories: General mode — cards carry the complete brief (no Read more)
 // plus the alternate-reading lens pills.
-export default function LmArticleFeed({ items = [], loading = false, emptyLabel = 'No stories here yet — check back soon.', fullStories = false }) {
+export default function LmArticleFeed({
+  items = [],
+  loading = false,
+  emptyLabel = 'No stories here yet — check back soon.',
+  fullStories = false,
+  hasMore = false,
+  loadingMore = false,
+  onLoadMore,
+}) {
   const groups = useMemo(() => {
     const byDay = new Map()
     for (const it of items) {
@@ -498,10 +531,6 @@ export default function LmArticleFeed({ items = [], loading = false, emptyLabel 
       .sort((a, b) => new Date(b[1][0].publishedAt) - new Date(a[1][0].publishedAt))
       .map(([k, arr]) => ({ key: k, items: arr, ...headerLabel(arr[0].publishedAt) }))
   }, [items])
-
-  const [visible, setVisible] = useState(2)
-  const shown = groups.slice(0, visible)
-  const hasMore = groups.length > visible
 
   // Every story opens on its own page (/story/:id).
   const navigate = useNavigate()
@@ -520,10 +549,16 @@ export default function LmArticleFeed({ items = [], loading = false, emptyLabel 
       .slice(0, 6)
   }, [items, fullStories])
 
-  if (loading && items.length === 0) {
-    return <ArticleFeedSkeleton />
+  if (items.length === 0 && (loading || loadingMore || hasMore)) {
+    // A filter can hide a whole page — keep pulling until something matches.
+    return (
+      <>
+        <ArticleFeedSkeleton />
+        {!loading && <FeedTail hasMore={hasMore} loadingMore={loadingMore} onLoadMore={onLoadMore} count={items.length} />}
+      </>
+    )
   }
-  if (!loading && items.length === 0) {
+  if (items.length === 0) {
     return <div className="px-[32px] py-[80px] text-center font-roboto text-[18px] text-lm-500" style={rb}>{emptyLabel}</div>
   }
 
@@ -534,7 +569,7 @@ export default function LmArticleFeed({ items = [], loading = false, emptyLabel 
           <LmBreakingCarousel items={breaking} onOpen={openItem} />
         </div>
       )}
-      {shown.map((g, gi) => (
+      {groups.map((g, gi) => (
         <motion.section
           key={g.key}
           initial={{ opacity: 0, y: 32 }}
@@ -567,21 +602,7 @@ export default function LmArticleFeed({ items = [], loading = false, emptyLabel 
         </motion.section>
       ))}
 
-      {hasMore && (
-        <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={() => setVisible((v) => v + 2)}
-            className="group inline-flex items-center gap-[10px] rounded-full border border-lm-300 bg-white py-[8px] pl-[20px] pr-[8px] font-roboto text-[14px] font-semibold text-lm-800 transition-all duration-200 hover:border-lm-800 hover:shadow-[0px_8px_24px_rgba(0,0,0,0.08)]"
-            style={rb}
-          >
-            Load more stories
-            <span className="flex size-[30px] items-center justify-center rounded-full bg-lm-800 text-white transition-transform duration-300 group-hover:translate-y-[2px]">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M6 2v8M2.5 6.5 6 10l3.5-3.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </span>
-          </button>
-        </div>
-      )}
+      <FeedTail hasMore={hasMore} loadingMore={loadingMore} onLoadMore={onLoadMore} count={items.length} />
     </div>
   )
 }
