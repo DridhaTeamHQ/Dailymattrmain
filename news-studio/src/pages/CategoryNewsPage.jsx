@@ -9,8 +9,8 @@ import LmTopicRail, { TopicRailSkeleton } from '../components/lm/LmTopicRail'
 import LmFaq from '../components/lm/LmFaq'
 import LmFooter from '../components/lm/LmFooter'
 import { lmCategoryBySlug } from '../components/lm/lmCategories'
-import { fetchApproved, fetchFeaturesByCategory, fetchTrendingTopics, freshTopics } from '../lib/content'
-import { useLiveData } from '../lib/useLiveData'
+import { fetchApprovedPage, fetchFeaturesByCategory, fetchTrendingTopics, freshTopics } from '../lib/content'
+import { usePagedFeed } from '../lib/usePagedFeed'
 import { useScrolledPast } from '../lib/useScrolledPast'
 import NotFoundPage from './NotFoundPage'
 
@@ -22,50 +22,6 @@ const AGENT_SLUGS = new Set(['real-estate', 'automobile', 'health-wellness', 'te
 export default function CategoryNewsPage() {
   const { category: slug = 'general' } = useParams()
   const cat = lmCategoryBySlug(slug)
-
-  const fetcher = useMemo(() => {
-    return async () => {
-      const [articles, features] = await Promise.all([
-        fetchApproved(),
-        AGENT_SLUGS.has(slug) ? fetchFeaturesByCategory(slug).catch(() => []) : Promise.resolve([]),
-      ])
-      const feed = cat?.feed || {}
-      const matches = (a) => {
-        if (feed.general && a.slug === 'general') return true
-        if (feed.category && a.slug === slug) return true
-        if (feed.topics && a.slug === 'general' && feed.topics.includes(a.topic)) return true
-        return false
-      }
-      const list = [...features, ...articles.filter(matches)]
-      // Newest first; within the same day, long stories lead.
-      const weight = (x) => (x.kind === 'feature' || x.kind === 'case_study' ? 1 : 0)
-      list.sort((a, b) => {
-        const dayA = new Date(a.publishedAt).toDateString()
-        const dayB = new Date(b.publishedAt).toDateString()
-        if (dayA === dayB) return weight(b) - weight(a) || (new Date(b.publishedAt) - new Date(a.publishedAt))
-        return new Date(b.publishedAt) - new Date(a.publishedAt)
-      })
-      return list
-    }
-  }, [slug, cat])
-
-  const { data: items, loading } = useLiveData(fetcher, [slug], { intervalMs: 30000 })
-
-  // Trending topics — General feed only. Fetched on mount and whenever the slug
-  // changes; fetchTrendingTopics swallows its own errors (returns []), so this
-  // never breaks the page. Each topic card links to its own timeline page.
-  const [topics, setTopics] = useState([])
-  useEffect(() => {
-    if (slug !== 'general') { setTopics([]); return }
-    let alive = true
-    fetchTrendingTopics().then((t) => { if (alive) setTopics(t) })
-    return () => { alive = false }
-  }, [slug])
-
-  // A topic is trending only while it has a story on the feed's freshest day.
-  // Compared against the UNFILTERED feed, so picking a section pill (Sports…)
-  // never changes which topics qualify.
-  const visibleTopics = useMemo(() => freshTopics(topics, items || []), [topics, items])
 
   // Filter pills. News Studio filters by SECTION (the scraper's feed topic —
   // National / International / Politics / …); category pages keep the
@@ -84,18 +40,76 @@ export default function CategoryNewsPage() {
   const [filter, setFilter] = useState('all')
   const [query, setQuery] = useState('')
   useEffect(() => { setFilter('all'); setQuery('') }, [slug])
+  // The search runs in the database, so wait for a typing pause.
+  const [search, setSearch] = useState('')
+  useEffect(() => {
+    const t = setTimeout(() => setSearch(query.trim()), 300)
+    return () => clearTimeout(t)
+  }, [query])
+
+  // News Studio sections filter in the database; category-page pills (long /
+  // short / fact) filter what's loaded.
+  const topic = slug === 'general' && filter !== 'all' ? filter : null
+  const fetchPage = (offset) => fetchApprovedPage({ slug, topic, query: search, offset })
+  const { data: articles, loading, loadingMore, hasMore, loadMore } =
+    usePagedFeed(fetchPage, [slug, topic, search], { intervalMs: 30000 })
+
+  // Long-form features (the five agent topics) — about one a day, so they load
+  // whole, once per category.
+  const [features, setFeatures] = useState([])
+  useEffect(() => {
+    setFeatures([])
+    if (!AGENT_SLUGS.has(slug)) return
+    let alive = true
+    fetchFeaturesByCategory(slug).catch(() => []).then((f) => { if (alive) setFeatures(f) })
+    return () => { alive = false }
+  }, [slug])
+
+  const items = useMemo(() => {
+    if (!articles) return null
+    const q = search.toLowerCase()
+    // Only features within the loaded window, so an old long read never sits
+    // between today's briefs and the next page.
+    const oldest = articles.length ? new Date(articles[articles.length - 1].publishedAt) : null
+    const feats = features.filter((f) =>
+      (!hasMore || !oldest || new Date(f.publishedAt) >= oldest) &&
+      (!q || `${f.headline} ${f.summary || ''} ${f.source || ''}`.toLowerCase().includes(q)))
+    const list = [...feats, ...articles]
+    // Newest first; within the same day, long stories lead.
+    const weight = (x) => (x.kind === 'feature' || x.kind === 'case_study' ? 1 : 0)
+    list.sort((a, b) => {
+      const dayA = new Date(a.publishedAt).toDateString()
+      const dayB = new Date(b.publishedAt).toDateString()
+      if (dayA === dayB) return weight(b) - weight(a) || (new Date(b.publishedAt) - new Date(a.publishedAt))
+      return new Date(b.publishedAt) - new Date(a.publishedAt)
+    })
+    return list
+  }, [articles, features, hasMore, search])
+
+  // Trending topics — General feed only. Fetched on mount and whenever the slug
+  // changes; fetchTrendingTopics swallows its own errors (returns []), so this
+  // never breaks the page. Each topic card links to its own timeline page.
+  const [topics, setTopics] = useState([])
+  useEffect(() => {
+    if (slug !== 'general') { setTopics([]); return }
+    let alive = true
+    fetchTrendingTopics().then((t) => { if (alive) setTopics(t) })
+    return () => { alive = false }
+  }, [slug])
+
+  // A topic is trending only while it has a story on the feed's freshest day.
+  // Compared against the UNFILTERED feed (remembered from the last load with no
+  // section or search), so picking a section pill never changes which qualify.
+  const [headItems, setHeadItems] = useState(null)
+  useEffect(() => { setHeadItems(null) }, [slug])
+  useEffect(() => {
+    if (articles && !topic && !search) setHeadItems(articles)
+  }, [articles, topic, search])
+  const visibleTopics = useMemo(() => freshTopics(topics, headItems || []), [topics, headItems])
+
   const filtered = useMemo(() => {
-    let list = items || []
-    // Live search from the toolbar — matches headline, brief, and outlet name;
-    // composes with the section/kind pills below.
-    const q = query.trim().toLowerCase()
-    if (q) {
-      list = list.filter((a) =>
-        `${a.headline} ${a.summary || ''} ${a.source || ''}`.toLowerCase().includes(q),
-      )
-    }
-    if (filter === 'all') return list
-    if (slug === 'general') return list.filter((a) => a.topic === filter)
+    const list = items || []
+    if (filter === 'all' || slug === 'general') return list
     if (filter === 'long') return list.filter((a) => a.kind === 'feature' || a.kind === 'case_study')
     if (filter === 'short') return list.filter((a) => a.kind === 'article')
     if (filter === 'fact') {
@@ -105,7 +119,8 @@ export default function CategoryNewsPage() {
         .sort((a, b) => b.factScore - a.factScore)
     }
     return list
-  }, [items, filter, slug, query])
+  }, [items, filter, slug])
+  const paging = { hasMore, loadingMore, onLoadMore: loadMore }
 
   // Once the reader scrolls in, the DailyMattr nav retracts and the section
   // toolbar takes the top slot — one bar of chrome instead of two.
@@ -157,6 +172,7 @@ export default function CategoryNewsPage() {
         <LmNewsStudio
           items={filtered}
           loading={loading}
+          {...paging}
           emptyLabel={
             query.trim()
               ? `No stories match “${query.trim()}”.`
@@ -169,6 +185,7 @@ export default function CategoryNewsPage() {
         <LmArticleFeed
           items={filtered}
           loading={loading}
+          {...paging}
           emptyLabel={
             filter === 'long'
               ? 'No long reads here yet — switch to Briefs or check back soon.'

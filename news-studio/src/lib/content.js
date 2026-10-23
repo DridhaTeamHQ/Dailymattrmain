@@ -109,32 +109,57 @@ const PUBLIC_STATUSES = ['summarized', 'approved', 'sent']
 
 const missingColumn = (error) => error && /column|does not exist/i.test(error.message || '')
 
-// Every completed item, newest first. Fall back to the base table during a
-// staggered deploy; its RLS will continue exposing only the previously public
-// rows until the safe feed view migration lands.
-export async function fetchApproved() {
-  const query = (relation, cols) => supabase
-    .from(relation)
-    .select(cols)
-    .in('status', PUBLIC_STATUSES)
-    .order('scraped_at', { ascending: false })
-  let { data, error } = await query(PUBLIC_ARTICLES_RELATION, SELECT)
-  if (error && /relation|schema cache|could not find/i.test(error.message || '')) {
-    ({ data, error } = await query('articles', SELECT))
-  }
-  if (missingColumn(error)) ({ data, error } = await query(PUBLIC_ARTICLES_RELATION, SELECT_BASE))
-  if (error) throw error
-  return (data || []).map(normalize)
-}
+// How many stories one feed request pulls. The feed holds thousands of rows;
+// pulling them all on every load/poll was megabytes per request, so the pages
+// fetch one slice at a time and infinite-scroll the rest in.
+export const FEED_PAGE_SIZE = 30
 
-// Approved items mapped to a single website category slug.
-export async function fetchApprovedByCategory(slug) {
-  const all = await fetchApproved()
-  return all.filter((a) => a.slug === slug)
+// PostgREST filter values: quote anything with spaces/&, and strip the
+// characters that would break out of an or=(…) list.
+const pgQuote = (v) => `"${String(v).replace(/["\\]/g, '')}"`
+const searchTerm = (q) => String(q || '').replace(/[,()*%\\"]/g, ' ').trim()
+
+// One page of completed items, newest first, filtered in the database:
+//   slug   'general' (no topic category) or one of the five topic slugs
+//   topic  a General section ('India', 'World', …) or null for all
+//   query  free-text search over headline, brief and outlet
+// Falls back to the base table during a staggered deploy (its RLS keeps
+// exposing only the previously public rows until the feed view lands), and to
+// the base column list if the fact-check migration hasn't been applied yet.
+export async function fetchApprovedPage({ slug = 'general', topic = null, query = '', offset = 0, limit = FEED_PAGE_SIZE } = {}) {
+  const category = Object.keys(TOPIC_SLUG).find((c) => TOPIC_SLUG[c] === slug)
+  const q = searchTerm(query)
+  const build = (relation, cols) => {
+    let req = supabase
+      .from(relation)
+      .select(cols)
+      .in('status', PUBLIC_STATUSES)
+    if (category) req = req.eq('category', category)
+    // General = everything outside the five topic categories (slugFor's rule).
+    else req = req.or(`category.is.null,category.not.in.(${Object.keys(TOPIC_SLUG).map(pgQuote).join(',')})`)
+    if (topic) req = req.eq('topic', topic)
+    if (q) {
+      req = req.or(['title', 'edited_title', 'summary', 'edited_summary', 'source']
+        .map((c) => `${c}.ilike.${pgQuote(`*${q}*`)}`).join(','))
+    }
+    // id breaks timestamp ties so offsets stay stable across pages.
+    return req
+      .order('scraped_at', { ascending: false })
+      .order('id', { ascending: false })
+      .range(offset, offset + limit - 1)
+  }
+  let { data, error } = await build(PUBLIC_ARTICLES_RELATION, SELECT)
+  if (error && /relation|schema cache|could not find/i.test(error.message || '')) {
+    ({ data, error } = await build('articles', SELECT))
+  }
+  if (missingColumn(error)) ({ data, error } = await build(PUBLIC_ARTICLES_RELATION, SELECT_BASE))
+  if (error) throw error
+  const rows = data || []
+  return { items: rows.map(normalize), hasMore: rows.length === limit }
 }
 
 // Specific completed articles by id — used by the trending-topic timeline,
-// whose members can be older than the fetchApproved window. Same light SELECT
+// whose members can be older than the loaded feed pages. Same light SELECT
 // (with the missingColumn fallback) and the same normalize() as the main feed.
 export async function fetchArticlesByIds(ids) {
   if (!ids || !ids.length) return []
