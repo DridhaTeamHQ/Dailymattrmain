@@ -1,9 +1,35 @@
 import { defineConfig, loadEnv } from "vite";
+import react from "@vitejs/plugin-react";
+import postcss from "postcss";
+import tailwindcss from "tailwindcss";
+import autoprefixer from "autoprefixer";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
+const newsStudio = path.join(root, "news-studio");
+
+// Tailwind + autoprefixer for the News Studio app only, so the rest of the
+// site's hand-written CSS goes through the build untouched.
+function newsStudioPostcss() {
+  const processor = postcss([
+    tailwindcss({ config: path.join(newsStudio, "tailwind.config.js") }),
+    autoprefixer(),
+  ]);
+  return {
+    postcssPlugin: "news-studio-only",
+    async Once(css, { result }) {
+      const file = css.source?.input.file;
+      if (!file || !path.resolve(file).startsWith(newsStudio + path.sep)) return;
+      const out = await processor.process(css, { ...result.opts, from: file });
+      result.root = out.root;
+      // tailwind's dependency messages keep HMR watching the content files
+      result.messages.push(...out.messages);
+    },
+  };
+}
+newsStudioPostcss.postcss = true;
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, root, "");
@@ -30,10 +56,14 @@ export default defineConfig(({ mode }) => {
         about: path.resolve(root, "about/index.html"),
         // byline target on every news article (AUTHOR.path in api/_lib/site.js)
         author: path.resolve(root, "author/dailymattr-editorial-team/index.html"),
-        admin: path.resolve(root, "admin/index.html"),
-        adminDashboard: path.resolve(root, "admin/dashboard/index.html"),
+        // News Studio React app, served at /news-studio/* (SPA fallback in
+        // vercel.json and the news-studio-dev plugin below)
+        newsStudio: path.join(newsStudio, "index.html"),
       },
     },
+  },
+  css: {
+    postcss: { plugins: [newsStudioPostcss()] },
   },
   server: {
     // the dev server may be launched via the 8.3 short path (DAILYM~1),
@@ -43,17 +73,45 @@ export default defineConfig(({ mode }) => {
     fs: { allow: [root, fs.realpathSync.native(root)] },
   },
   plugins: [
+    react({ include: /news-studio[\\/].*\.jsx?$/ }),
     {
-      name: "admin-route",
+      // dev mount of api/news-studio.js: every /news-studio page that isn't a
+      // real file gets the app shell with that page's SEO head (studio.js),
+      // and React Router takes it from there
+      name: "news-studio-dev",
+      apply: "serve",
+      configureServer(server) {
+        server.middlewares.use(async (req, res, next) => {
+          const url = new URL(req.url, "http://localhost");
+          const pathname = url.pathname;
+          if (pathname !== "/news-studio" && !pathname.startsWith("/news-studio/")) return next();
+          if (path.extname(pathname) || !(req.headers.accept || "").includes("text/html")) return next();
+          try {
+            const source = fs.readFileSync(path.join(newsStudio, "index.html"), "utf8");
+            const shell = await server.transformIndexHtml(req.url, source);
+            const { routeStudio } = await server.ssrLoadModule("/api/_lib/studio.js");
+            const out = await routeStudio({
+              rest: pathname === "/news-studio" ? "" : pathname.slice("/news-studio/".length),
+              search: url.search,
+              shell,
+            });
+            res.statusCode = out.status;
+            if (out.status === 301) res.setHeader("Location", out.location);
+            else res.setHeader("Content-Type", "text/html; charset=utf-8");
+            res.setHeader("Cache-Control", "no-store");
+            res.end(out.body || "");
+          } catch (err) {
+            server.ssrFixStacktrace?.(err);
+            next(err);
+          }
+        });
+      },
+    },
+    {
+      name: "api-routes",
       apply: "serve",
       configureServer(server) {
         server.middlewares.use((req, res, next) => {
-          if (req.url?.startsWith("/api/admin")) {
-            const url = new URL(req.url, "http://localhost");
-            req.query = Object.fromEntries(url.searchParams);
-            server.ssrLoadModule("/api/admin.js").then(({ default: handler }) => handler(req, res)).catch(next);
-            return;
-          }
           if (req.url?.startsWith("/api/support")) {
             const url = new URL(req.url, "http://localhost");
             req.query = Object.fromEntries(url.searchParams);
@@ -70,12 +128,6 @@ export default defineConfig(({ mode }) => {
           if (req.url === "/unsubscribe" || req.url?.startsWith("/unsubscribe?")) {
             req.url = "/unsubscribe/" + req.url.slice("/unsubscribe".length);
             return next();
-          }
-          if (req.url === "/admin" || req.url?.startsWith("/admin?")) {
-            res.statusCode = 302;
-            res.setHeader("Location", "/admin/");
-            res.end();
-            return;
           }
           next();
         });

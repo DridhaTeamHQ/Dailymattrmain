@@ -7,7 +7,8 @@
   ],
   "functions": {
     "api/*.js": {
-      "maxDuration": 10
+      "maxDuration": 10,
+      "includeFiles": "dist/news-studio/index.html"
     }
   },
   "redirects": [
@@ -26,11 +27,6 @@
       "source": "/index.html",
       "destination": "/",
       "permanent": true
-    },
-    {
-      "source": "/news-studio",
-      "destination": "https://longmattr.com/general",
-      "permanent": false
     },
     {
       "source": "/tamada-media",
@@ -52,14 +48,6 @@
       "destination": "/unsubscribe/index.html"
     },
     {
-      "source": "/admin",
-      "destination": "/admin/"
-    },
-    {
-      "source": "/admin/dashboard",
-      "destination": "/admin/dashboard/"
-    },
-    {
       "source": "/download",
       "destination": "/api/download"
     },
@@ -70,6 +58,14 @@
     {
       "source": "/news/(.*)",
       "destination": "/api/news?p=$1"
+    },
+    {
+      "source": "/news-studio",
+      "destination": "/api/news-studio?p="
+    },
+    {
+      "source": "/news-studio/(.*)",
+      "destination": "/api/news-studio?p=$1"
     }
   ],
   "headers": [

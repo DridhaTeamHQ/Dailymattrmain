@@ -9,7 +9,7 @@ import { safeUrl } from "./html.js";
 const meta = (name, content) => (content ? `  <meta name="${name}" content="${esc(content)}" />\n` : "");
 const prop = (property, content) => (content ? `  <meta property="${property}" content="${esc(content)}" />\n` : "");
 
-const publisher = {
+export const publisher = {
   "@type": "NewsMediaOrganization",
   "@id": `${ORIGIN}/#organization`,
   name: SITE_NAME,
@@ -21,7 +21,7 @@ const publisher = {
   publishingPrinciples: `${ORIGIN}/editorialguidelines/`,
 };
 
-const website = {
+export const website = {
   "@type": "WebSite", "@id": `${ORIGIN}/#website`,
   name: SITE_NAME, alternateName: "Daily Mattr", url: `${ORIGIN}/`,
   inLanguage: "en-IN", publisher: { "@id": publisher["@id"] },

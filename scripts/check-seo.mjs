@@ -45,11 +45,8 @@ assert.match(home, /property="og:site_name" content="dailymattr"/);
 const hosting = JSON.parse(read("vercel.json"));
 assert.ok(hosting.redirects.some((r) => r.source === "/index.html" && r.destination === "/" && r.permanent === true), "Duplicate homepage redirects permanently to the canonical root");
 assert.equal(publisher.alternateName, "Daily Mattr");
-assert.equal(publisher.sameAs.length, 6);
+assert.equal(publisher.sameAs.length, 7); // 5 socials (incl. Facebook) + 2 app stores
 assert.match(home, /<noscript><style>\.intro/);
-for (const path of ["admin/index.html", "admin/dashboard/index.html"]) {
-  assert.match(read(path), /name="robots" content="noindex/);
-}
 const robots = read("public/robots.txt");
 const sitemapRefs = [...robots.matchAll(/^Sitemap: (.+)$/gm)].map((m) => m[1].trim());
 assert.equal(sitemapRefs.length, 2);
@@ -82,4 +79,4 @@ assert.match(rendered, /name="robots" content="index,follow/);
 const args = { title: "Latest news", description: "Recent stories", path: "/news/", posts: [post], trail: [{name:"Home",path:"/"},{name:"News",path:"/news/"}] };
 assert.equal(hubHead({ ...args, page: 2 }).canonical, "https://www.dailymattr.com/news/page/2/");
 assert.match(hubHead({ ...args, date: "2026-10-07" }).head, /noindex,follow/);
-console.log("SEO checks passed: eight static pages, admin exclusions, sitemaps, article schema relationships, pagination and date filters.");
+console.log("SEO checks passed: eight static pages, sitemaps, article schema relationships, pagination and date filters.");
