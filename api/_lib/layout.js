@@ -23,7 +23,7 @@ const footerHtml = () => html`
   <footer class="footer" id="footer">
     <div class="footer-top">
       <div class="footer-brand">
-        <p class="footer-logoline"><a class="footer-logo-link" href="/"><img class="footer-logo" src="/assets/logo.svg" width="156" height="32" alt="dailymattr" /></a><span>your deeper read.</span></p>
+        <p class="footer-logoline"><a class="footer-logo-link" href="/"><img class="footer-logo" src="/assets/publisher-logo.png" width="156" height="32" alt="dailymattr" /></a><span>your deeper read.</span></p>
         <p class="footer-copy">dailymattr brings you the story behind the headline - with context, clarity, and perspective that help you understand what really matters.</p>
         <p class="footer-parent"><span style="color: #3979ff;">dailymattr</span> is a part of <span class="legal-brand2">DRIDHA TECHNOLOGIES PRIVATE LIMITED</span></p>
                 <nav class="footer-socials" aria-label="Social media">
@@ -64,7 +64,7 @@ const footerHtml = () => html`
       </div>
     </div>
     <p class="footer-legal">© 2026 <span class="legal-brand">${LEGAL_NAME.toUpperCase()}</span>. All rights reserved.</p>
-    <div class="footer-wordmark" aria-hidden="true"><img src="/assets/logo.svg" width="156" height="32" alt="" /></div>
+    <div class="footer-wordmark" aria-hidden="true"><img src="/assets/publisher-logo.png" width="156" height="32" alt="" /></div>
   </footer>`;
 
 /* `head` is pre-escaped markup from seo.js; `main` likewise from a renderer.
@@ -103,7 +103,7 @@ ${preloadImage?.src ? `  <link rel="preload" as="image" href="${esc(preloadImage
 </head>
 <body class="news-body">
   <header class="nav">
-    <a class="brand" href="/"><img src="/assets/logo.svg" width="156" height="32" alt="${SITE_NAME}" /><span class="brand-tagline">Stories that mattr</span></a>
+    <a class="brand" href="/"><img src="/assets/publisher-logo.png" width="156" height="32" alt="${SITE_NAME}" /><span class="brand-tagline">Stories that mattr</span></a>
 ${navHtml(activeNav)}
     <div class="nav-cta">
       <a class="btn btn-dark shine" href="https://www.dailymattr.com/download" target="_blank" rel="noopener noreferrer">Download App</a>

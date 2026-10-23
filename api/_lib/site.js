@@ -26,7 +26,7 @@ export const APP_STORE_URL =
 
 /* rectangular raster logo for NewsArticle.publisher — Google rejects SVG
  * and square marks here. The file is supplied by the design team. */
-export const PUBLISHER_LOGO = { url: `${ORIGIN}/assets/publisher-logo.png`, width: 600, height: 120 };
+export const PUBLISHER_LOGO = { url: `${ORIGIN}/assets/publisher-logo.png`, width: 1560, height: 320 };
 export const OG_DEFAULT = { url: `${ORIGIN}/assets/og-default.jpg`, width: 1200, height: 630 };
 
 /* same order as index.html's <nav class="nav-links"> */
