@@ -122,7 +122,7 @@ Google News sitemap remains inside the news index alongside monthly archives
 (`/news/sitemap-YYYY-MM.xml`) and daily archives (`/news/sitemap-YYYY-MM-DD.xml`),
 each newest first; these serve different purposes. Only the current month and
 today change, so past files are cached for a day at the CDN. Static sitemap dates reflect page edits, while
-changing news hubs omit unsupported lastmod dates. Admin pages and date filters
+changing news hubs omit unsupported lastmod dates. Date filters
 remain crawlable so their existing noindex directives can be read. Do not block
 public news, pagination, images or CSS to try to fix indexing.
 
