@@ -85,7 +85,8 @@ export default defineConfig(({ mode }) => {
           const url = new URL(req.url, "http://localhost");
           const pathname = url.pathname;
           if (pathname !== "/news-studio" && !pathname.startsWith("/news-studio/")) return next();
-          if (path.extname(pathname) || !(req.headers.accept || "").includes("text/html")) return next();
+          const isXml = path.extname(pathname) === ".xml";
+          if (!isXml && (path.extname(pathname) || !(req.headers.accept || "").includes("text/html"))) return next();
           try {
             const source = fs.readFileSync(path.join(newsStudio, "index.html"), "utf8");
             const shell = await server.transformIndexHtml(req.url, source);
@@ -97,7 +98,10 @@ export default defineConfig(({ mode }) => {
             });
             res.statusCode = out.status;
             if (out.status === 301) res.setHeader("Location", out.location);
-            else res.setHeader("Content-Type", "text/html; charset=utf-8");
+            else res.setHeader("Content-Type",
+              out.type === "xml" ? "application/xml; charset=utf-8"
+              : out.type === "text" ? "text/plain; charset=utf-8"
+              : "text/html; charset=utf-8");
             res.setHeader("Cache-Control", "no-store");
             res.end(out.body || "");
           } catch (err) {

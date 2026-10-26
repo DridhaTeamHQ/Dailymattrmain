@@ -49,8 +49,9 @@ assert.equal(publisher.sameAs.length, 7); // 5 socials (incl. Facebook) + 2 app 
 assert.match(home, /<noscript><style>\.intro/);
 const robots = read("public/robots.txt");
 const sitemapRefs = [...robots.matchAll(/^Sitemap: (.+)$/gm)].map((m) => m[1].trim());
-assert.equal(sitemapRefs.length, 2);
-assert.equal(new Set(sitemapRefs).size, 2);
+assert.equal(sitemapRefs.length, 3);
+assert.equal(new Set(sitemapRefs).size, 3);
+assert.ok(sitemapRefs.includes("https://www.dailymattr.com/news-studio/sitemap-index.xml"));
 assert.ok(!sitemapRefs.some((s) => s.endsWith("/news/sitemap.xml")));
 const index = await sitemapIndex();
 assert.equal((index.body.match(/<loc>[^<]+\/news\/sitemap.xml<\/loc>/g) || []).length, 1);

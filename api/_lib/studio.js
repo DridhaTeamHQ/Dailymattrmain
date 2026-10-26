@@ -14,6 +14,7 @@ import { CACHE } from "./http.js";
 import { BASE, parseSlugId, storyPath, topicPath } from "../../news-studio/src/lib/routes.js";
 import { FEED_SEO, storySeo, topicSeo } from "../../news-studio/src/lib/seo.js";
 import { decodeEntities, stripArtifacts } from "../../news-studio/src/lib/text.js";
+import { cleanHeadline } from "./slug.js";
 
 /* the News Studio Supabase project — public values, the same ones the app
  * bundles (news-studio/src/lib/supabaseClient.js); RLS guards the data */
@@ -35,14 +36,27 @@ async function rest(path) {
 const COLS = "id,title,edited_title,summary,edited_summary,source,url,topic,category,status,reviewed_at,scraped_at,created_at";
 const STATUSES = "status=in.(summarized,approved,sent)";
 
-async function fetchStory(id) {
-  const q = (rel, cols) => rest(`${rel}?id=eq.${id}&${STATUSES}&select=${cols}&limit=1`);
+async function fetchStories(filter, what) {
+  const q = (rel, cols) => rest(`${rel}?${filter}&${STATUSES}&select=${cols}`);
   let r = await q("public_articles_feed", `${COLS},image_url`);
   if (!r.ok && r.status === 404) r = await q("articles", `${COLS},image_url`);
   if (!r.ok && r.status === 400) r = await q("public_articles_feed", COLS);
-  if (!r.ok) throw new Error(`story lookup failed (${r.status})`);
-  const row = r.rows[0];
-  if (!row) return null;
+  if (!r.ok) throw new Error(`${what} failed (${r.status})`);
+  return r.rows.map(toItem);
+}
+
+async function fetchStory(id) {
+  return (await fetchStories(`id=eq.${id}&limit=1`, "story lookup"))[0] || null;
+}
+
+/* the newest stories, for the feed's crawlable list */
+const fetchLatest = (limit) => fetchStories(`order=created_at.desc&limit=${limit}`, "latest stories");
+
+/* every story added in [start, end), for the daily sitemaps */
+const fetchBetween = (start, end) =>
+  fetchStories(`created_at=gte.${start}&created_at=lt.${end}&order=created_at.desc&limit=5000`, "sitemap stories");
+
+function toItem(row) {
   const summary = stripArtifacts(decodeEntities(row.edited_summary || row.summary || ""));
   return {
     id: row.id,
@@ -59,26 +73,52 @@ async function fetchStory(id) {
 }
 
 /* the app only shows topics with 3+ approved members (content.js) */
-async function fetchTopic(id) {
-  const r = await rest(`topics?id=eq.${id}&select=id,title,description,approved_at,topic_articles(articles(image_url,reviewed_at,scraped_at))&limit=1`);
-  if (!r.ok) throw new Error(`topic lookup failed (${r.status})`);
-  const t = r.rows[0];
-  if (!t || (t.topic_articles || []).length < 3) return null;
-  const arts = (t.topic_articles || []).map((m) => m.articles).filter(Boolean);
+const TOPIC_COLS = "id,title,description,approved_at,topic_articles(position,added_at,articles(id,title,edited_title,status,image_url,reviewed_at,scraped_at,created_at))";
+const PUBLIC = new Set(["summarized", "approved", "sent"]);
+
+function toTopic(t) {
+  if ((t.topic_articles || []).length < 3) return null;
+  /* timeline order, as the app shows it: position, then when it was added */
+  const members = [...t.topic_articles].sort((a, b) =>
+    a.position != null && b.position != null ? a.position - b.position
+      : a.position != null ? -1 : b.position != null ? 1
+      : new Date(a.added_at || 0) - new Date(b.added_at || 0));
+  const arts = members.map((m) => m.articles).filter(Boolean);
+  const stories = arts.filter((a) => PUBLIC.has(a.status)).map((a) => ({
+    id: a.id,
+    headline: decodeEntities(a.edited_title || a.title || ""),
+    publishedAt: a.reviewed_at || a.scraped_at || a.created_at,
+  })).filter((s) => s.headline);
+  const times = stories.map((s) => new Date(s.publishedAt).getTime()).filter((n) => n > 0);
   return {
     id: t.id,
     title: decodeEntities(t.title || ""),
     description: decodeEntities(t.description || ""),
     approvedAt: t.approved_at,
+    modifiedAt: times.length ? new Date(Math.max(...times)).toISOString() : t.approved_at,
     image: arts.map((a) => a.image_url).find(Boolean) || null,
+    stories,
   };
+}
+
+async function fetchTopic(id) {
+  const r = await rest(`topics?id=eq.${id}&select=${TOPIC_COLS}&limit=1`);
+  if (!r.ok) throw new Error(`topic lookup failed (${r.status})`);
+  return r.rows[0] ? toTopic(r.rows[0]) : null;
+}
+
+/* every approved topic with a timeline, newest first (RLS hides the rest) */
+async function fetchTopics() {
+  const r = await rest(`topics?select=${TOPIC_COLS}&order=approved_at.desc`);
+  if (!r.ok) throw new Error(`topics lookup failed (${r.status})`);
+  return r.rows.map(toTopic).filter(Boolean);
 }
 
 /* ---------- head tags ---------- */
 
 const meta = (name, content) => (content ? `    <meta name="${name}" content="${esc(content)}" />\n` : "");
 const prop = (property, content) => (content ? `    <meta property="${property}" content="${esc(content)}" />\n` : "");
-const iso = (d) => { const t = new Date(d); return Number.isNaN(t.getTime()) ? undefined : t.toISOString(); };
+const iso = (d) => { if (!d) return undefined; const t = new Date(d); return Number.isNaN(t.getTime()) ? undefined : t.toISOString(); };
 /* scraped lead images come from the outlets' own CDNs; only https ones are
  * used, anything else falls back to the site card */
 const imageOf = (u) => { const s = safeUrl(u); return s.startsWith("https://") ? s : ""; };
@@ -115,7 +155,7 @@ const webPage = (url, title, description, extra = {}) => ld({
 });
 
 function storyHead(item) {
-  const { title, description, path } = storySeo(item);
+  const { title, pageTitle, description, path } = storySeo(item);
   const url = ORIGIN + path;
   const image = imageOf(item.image);
   const source = safeUrl(item.sourceUrl);
@@ -154,29 +194,134 @@ function storyHead(item) {
     (item.summary ? `<p>${esc(item.summary)}</p>` : "") +
     (source ? `<p><a href="${esc(source)}" rel="noopener">Read the source${item.source ? ` (${esc(item.source)})` : ""}</a></p>` : "") +
     `<p><a href="${BASE}/">More from News Studio</a></p></article></main>`;
-  return { title, head, body };
+  return { title: pageTitle, head, body };
 }
 
 function topicHead(topic) {
-  const { title, description, path } = topicSeo(topic);
+  const { title, pageTitle, description, path } = topicSeo(topic);
   const url = ORIGIN + path;
   const image = imageOf(topic.image);
+  const stories = topic.stories.map((s) => ({ ...s, path: BASE + storyPath(s) }));
   const head =
     baseTags({ title, description, url, type: "website", image }) +
-    webPage(url, title, description) +
+    webPage(url, title, description, {
+      "@type": "CollectionPage",
+      ...(iso(topic.modifiedAt) ? { dateModified: iso(topic.modifiedAt) } : {}),
+      mainEntity: itemList(stories),
+    }) +
     ld(breadcrumbLd([homeCrumb, studioCrumb, { name: title, path }]));
-  const body = `<main><h1>${esc(title)}</h1><p>${esc(description)}</p><p><a href="${BASE}/">More from News Studio</a></p></main>`;
+  const body =
+    `<main><h1>${esc(title)}</h1><p>${esc(description)}</p>` +
+    storyLinks(stories, "Timeline") +
+    `<p><a href="${BASE}/">More from News Studio</a></p></main>`;
+  return { title: pageTitle, head, body };
+}
+
+/* the feed lists the newest stories and the trending topics as plain links,
+ * so crawlers reach every page from /news-studio/ without running the app */
+function feedHead({ stories = [], topics = [] } = {}) {
+  const { title, description, path } = FEED_SEO;
+  const url = ORIGIN + path;
+  const linked = stories.map((s) => ({ ...s, path: BASE + storyPath(s) }));
+  const head =
+    baseTags({ title, description, url, type: "website" }) +
+    webPage(url, title, description, { "@type": "CollectionPage", ...(linked.length ? { mainEntity: itemList(linked) } : {}) }) +
+    ld(breadcrumbLd([homeCrumb, studioCrumb]));
+  const body =
+    `<main><h1>News Studio</h1><p>${esc(description)}</p>` +
+    (topics.length
+      ? `<section><h2>Trending topics</h2><ul>${topics.map((t) =>
+          `<li><a href="${BASE}${topicPath(t)}">${esc(cleanHeadline(t.title))}</a></li>`).join("")}</ul></section>`
+      : "") +
+    storyLinks(linked, "Latest stories") +
+    `</main>`;
   return { title, head, body };
 }
 
-function feedHead() {
-  const { title, description, path } = FEED_SEO;
-  const url = ORIGIN + path;
-  const head =
-    baseTags({ title, description, url, type: "website" }) +
-    webPage(url, title, description) +
-    ld(breadcrumbLd([homeCrumb, studioCrumb]));
-  return { title, head, body: `<main><h1>News Studio</h1><p>${esc(description)}</p></main>` };
+const itemList = (stories) => ({
+  "@type": "ItemList",
+  itemListElement: stories.map((s, i) => ({ "@type": "ListItem", position: i + 1, url: ORIGIN + s.path, name: cleanHeadline(s.headline) })),
+});
+
+const storyLinks = (stories, heading) => (stories.length
+  ? `<section><h2>${esc(heading)}</h2><ol>${stories.map((s) =>
+      `<li><a href="${esc(s.path)}">${esc(cleanHeadline(s.headline))}</a>` +
+      (iso(s.publishedAt) ? ` <time datetime="${iso(s.publishedAt)}">${esc(new Date(s.publishedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" }))}</time>` : "") +
+      `</li>`).join("")}</ol></section>`
+  : "");
+
+/* the feed's crawlable content; the page still renders if the lookup fails */
+async function feedContent() {
+  const [stories, topics] = await Promise.all([
+    fetchLatest(FEED_LINKS).catch(() => []),
+    fetchTopics().catch(() => []),
+  ]);
+  /* same as the app's rail: topics still getting coverage, freshest first */
+  const fresh = topics.sort((a, b) => new Date(b.modifiedAt || 0) - new Date(a.modifiedAt || 0)).slice(0, 12);
+  return { stories, topics: fresh };
+}
+const FEED_LINKS = 50;
+
+/* ---------- sitemaps ----------
+ *   /news-studio/sitemap.xml             Google News sitemap — stories from the last 48 h
+ *   /news-studio/sitemap-index.xml       that, the topics, then one file per day, newest first
+ *   /news-studio/sitemap-topics.xml      every trending-topic timeline
+ *   /news-studio/sitemap-YYYY-MM-DD.xml  every story added that day (UTC)
+ * Same shape as the /news sitemaps (sitemap.js). */
+
+/* the first day with News Studio stories — nothing before it to list */
+const FIRST_DAY = Date.UTC(2026, 5, 23);
+const DAY_MS = 86400e3;
+const pad = (n) => String(n).padStart(2, "0");
+const xml = (body, cache) => ({ status: 200, type: "xml", cache, tags: ["news-studio-sitemap"], body: `<?xml version="1.0" encoding="UTF-8"?>\n${body}` });
+const urlset = (urls, ns = "") => xml(`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"${ns}>\n${urls.join("")}</urlset>\n`, null);
+const startOfDay = (d = new Date()) => Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+const dayKey = (t) => { const d = new Date(t); return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`; };
+const loc = (path, lastmod, extra = "") =>
+  `  <url>\n    <loc>${esc(ORIGIN + path)}</loc>${iso(lastmod) ? `\n    <lastmod>${iso(lastmod)}</lastmod>` : ""}${extra}\n  </url>\n`;
+const listable = (s) => s.id && s.headline;
+
+async function newsSitemap() {
+  const since = new Date(Date.now() - 48 * 3600e3).toISOString();
+  const stories = (await fetchStories(`created_at=gte.${since}&order=created_at.desc&limit=1000`, "news sitemap")).filter(listable);
+  const out = urlset(stories.map((s) => loc(BASE + storyPath(s), null, `
+    <news:news>
+      <news:publication>
+        <news:name>${esc(SITE_NAME)}</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>${iso(s.publishedAt)}</news:publication_date>
+      <news:title>${esc(cleanHeadline(s.headline))}</news:title>
+    </news:news>`)), ` xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"`);
+  return { ...out, cache: CACHE.sitemapNews };
+}
+
+function sitemapIndex() {
+  const locs = [`${BASE}/sitemap.xml`, `${BASE}/sitemap-topics.xml`];
+  for (let t = startOfDay(); t >= FIRST_DAY; t -= DAY_MS) locs.push(`${BASE}/sitemap-${dayKey(t)}.xml`);
+  return xml(
+    `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${locs.map((l) => `  <sitemap><loc>${esc(ORIGIN + l)}</loc></sitemap>\n`).join("")}</sitemapindex>\n`,
+    CACHE.sitemapIndex,
+  );
+}
+
+async function topicsSitemap() {
+  const topics = await fetchTopics();
+  return { ...urlset(topics.map((t) => loc(BASE + topicPath(t), t.modifiedAt))), cache: CACHE.sitemapDayCurrent };
+}
+
+/* null when the date is not a real calendar day or is outside [FIRST_DAY, today] */
+async function daySitemap(y, m, d) {
+  const t = Date.UTC(y, m - 1, d);
+  if (dayKey(t) !== `${y}-${pad(m)}-${pad(d)}`) return null;
+  const today = startOfDay();
+  if (t < FIRST_DAY || t > today) return null;
+  const stories = (await fetchBetween(new Date(t).toISOString(), new Date(t + DAY_MS).toISOString())).filter(listable);
+  const out = urlset(stories.map((s) => {
+    const img = imageOf(s.image);
+    return loc(BASE + storyPath(s), s.modifiedAt, img ? `\n    <image:image><image:loc>${esc(img)}</image:loc></image:image>` : "");
+  }), ` xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"`);
+  return { ...out, cache: t === today ? CACHE.sitemapDayCurrent : CACHE.sitemapMonthPast };
 }
 
 const notFoundHead = () => ({
@@ -207,7 +352,18 @@ export async function routeStudio({ rest, search = "", shell }) {
   const segs = rest.replace(/\/+$/, "").split("/").filter(Boolean);
   const keep = search && search !== "?" ? search : "";
 
-  if (segs.length === 0) return { status: 200, cache: CACHE.feed, body: inject(shell, feedHead()) };
+  if (segs.length === 0) return { status: 200, cache: CACHE.feed, body: inject(shell, feedHead(await feedContent())) };
+
+  if (segs.length === 1 && !trailing) {
+    if (segs[0] === "sitemap.xml") return newsSitemap();
+    if (segs[0] === "sitemap-index.xml") return sitemapIndex();
+    if (segs[0] === "sitemap-topics.xml") return topicsSitemap();
+    const day = /^sitemap-(\d{4})-(\d{2})-(\d{2})\.xml$/.exec(segs[0]);
+    if (day) {
+      return (await daySitemap(Number(day[1]), Number(day[2]), Number(day[3]))) ||
+        { status: 404, type: "text", cache: CACHE.gone, body: "Not found\n" };
+    }
+  }
 
   if (segs.length === 1 && PRIVATE.has(segs[0])) {
     return { status: 200, cache: CACHE.feed, body: inject(shell, privateHead()) };

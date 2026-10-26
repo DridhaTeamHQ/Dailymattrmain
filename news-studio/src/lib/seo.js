@@ -8,6 +8,10 @@ import { BASE, storyPath, topicPath } from './routes.js'
 
 export const ORIGIN = 'https://www.dailymattr.com'
 
+// brand suffix on the <title> tag only, as on /news (api/_lib/router.js) —
+// og:title, twitter:title, JSON-LD and the H1 keep the bare headline
+const withBrand = (title) => `${title} | dailymattr`
+
 export const FEED_SEO = {
   title: 'dailymattr | News Studio',
   description:
@@ -26,8 +30,10 @@ export function truncateAtWord(s, max) {
 }
 
 export function storySeo(item) {
+  const title = cleanHeadline(item.headline)
   return {
-    title: cleanHeadline(item.headline),
+    title,
+    pageTitle: withBrand(title),
     description: truncateAtWord(cleanHeadline(item.summary || item.body), 155),
     path: BASE + storyPath(item),
   }
@@ -37,6 +43,7 @@ export function topicSeo(topic) {
   const title = cleanHeadline(topic.title)
   return {
     title,
+    pageTitle: withBrand(title),
     description: truncateAtWord(
       cleanHeadline(topic.description) || `${title}: every report on this story, in order, from the outlets covering it.`,
       155,
@@ -47,8 +54,8 @@ export function topicSeo(topic) {
 
 // Browser side: keep the head in step on in-app navigation. The first load
 // already arrives with these tags rendered by the server.
-export function applyHead({ title, description, path }) {
-  document.title = title
+export function applyHead({ title, pageTitle = title, description, path }) {
+  document.title = pageTitle
   const url = ORIGIN + path
   const set = (selector, attr, value) => {
     const el = document.head.querySelector(selector)

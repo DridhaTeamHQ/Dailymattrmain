@@ -8,3 +8,4 @@ Disallow: /__save
 
 Sitemap: https://www.dailymattr.com/sitemap-pages.xml
 Sitemap: https://www.dailymattr.com/news/sitemap-index.xml
+Sitemap: https://www.dailymattr.com/news-studio/sitemap-index.xml
