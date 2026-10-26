@@ -80,8 +80,8 @@ export function page({ title, head, main, activeNav = "/news/", preloadImage = n
   <title>${esc(title)}</title>
 ${head}
   <link rel="icon" href="/favicon.ico" sizes="32x32" />
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=2" />
-  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png?v=2" />
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg?v=3" />
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png?v=3" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://coggfnbqqyiqfsxvtaym.supabase.co" />
