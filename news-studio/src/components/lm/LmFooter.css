@@ -1,0 +1,105 @@
+/* Copy of the marketing footer rules in src/style.css, with its design
+   tokens scoped to the footer so they don't leak into News Studio. */
+.footer {
+  --ink: #141417;
+  --ink-soft: #6b6b73;
+  --mist: #e5e4e8;
+  --blue: #3979ff;
+  background: var(--mist);
+  color: var(--ink);
+  font-family: "Be Vietnam Pro", system-ui, sans-serif;
+  padding: 90px 0 1vw;
+  overflow: hidden;
+}
+.footer a { color: inherit; text-decoration: none; }
+.footer-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: clamp(32px, 4vw, 80px);
+  flex-wrap: nowrap;
+  padding: 0 6.5vw;
+}
+.footer-socials { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.footer-socials a {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border: 1px solid currentColor;
+  border-radius: 50%; color: var(--ink); transition: color .2s, background-color .2s;
+}
+.footer-socials a:hover { color: var(--blue); background-color: #fff; }
+.footer-socials a:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+.footer-brand { flex: 0 4 380px; min-width: 230px; }
+.footer-logoline {
+  font-size: 24px; font-weight: 700; letter-spacing: -.5px;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.footer-logo-link { display: inline-flex; }
+.footer-logo { height: 34px; width: auto; }
+.footer-copy { color: var(--ink-soft); font-size: 15px; line-height: 1.7; max-width: 360px; margin-top: 22px; }
+.footer-parent {
+  margin-top: 14px;
+  font-size: clamp(11px, .85vw, 13px);
+  font-weight: 500;
+  color: var(--ink-soft);
+  letter-spacing: .2px;
+  white-space: nowrap;
+}
+.footer .legal-brand2 { color: #0e58f7; font-weight: 700; font-size: 10px; white-space: nowrap; }
+.footer-cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  flex: 1 1 auto;
+  gap: 30px clamp(18px, 2.2vw, 48px);
+  min-width: 0;
+}
+.footer-col { min-width: 0; }
+.footer-col h4 { font-size: 12px; letter-spacing: 1.5px; color: #97979e; font-weight: 600; margin-bottom: 18px; }
+.footer-col a { display: block; font-size: 14px; font-weight: 500; margin-bottom: 13px; color: var(--ink); }
+.footer-col a:hover { text-decoration: underline; }
+.footer-col:first-child a[href*="play.google"],
+.footer-col:first-child a[href*="apps.apple"] {
+  font-size: 12.5px;
+  letter-spacing: -.15px;
+  white-space: nowrap;
+}
+.footer-support a:last-child { font-size: 13px; white-space: nowrap; }
+.footer-legal {
+  text-align: right;
+  color: var(--ink-soft);
+  font-size: 17px;
+  font-weight: 500;
+  margin-top: 40px;
+  padding: 0 6.5vw;
+}
+.footer-legal .legal-brand {
+  color: var(--blue);
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: -.3px;
+}
+.footer-wordmark {
+  margin-top: 70px;
+  margin-bottom: -1vw;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.footer-wordmark img {
+  width: min(92vw, 1400px);
+  height: auto;
+}
+
+@media (max-width: 900px) {
+  .footer { padding: clamp(60px, 9vh, 90px) 0 clamp(10px, 1vw, 20px); }
+  .footer-top {
+    flex-direction: column;
+    gap: 40px;
+    padding: 0 clamp(20px, 6vw, 34px);
+  }
+  .footer-brand { flex: 0 1 auto; min-width: 0; }
+  .footer-cols { display: flex; flex: 0 1 auto; justify-content: flex-start; gap: clamp(32px, 10vw, 90px); flex-wrap: wrap; }
+  .footer-legal {
+    text-align: left;
+    padding: 0 clamp(20px, 6vw, 34px);
+  }
+}
