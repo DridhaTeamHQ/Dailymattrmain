@@ -38,8 +38,8 @@ const footerHtml = () => html`
           <h4>PRODUCT</h4>
           <a href="/">Home</a>
           <a href="/about/">About Us</a>
-          <a href="/#showcase">What we are</a>
-          <a href="/#features">Features</a>
+          <a href="/#showcase">What we do</a>
+          <a href="/#features">Our features</a>
           <a href="/newsletter/">Newsletter</a>
           <a href="/support/">Support</a>
           <a href="${PLAY_URL}" target="_blank" rel="noopener noreferrer">Android App (Google Play)</a>

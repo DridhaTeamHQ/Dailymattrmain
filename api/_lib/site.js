@@ -32,8 +32,8 @@ export const OG_DEFAULT = { url: `${ORIGIN}/assets/og-default.jpg`, width: 1200,
 /* same order as index.html's <nav class="nav-links"> */
 export const NAV = [
   { href: "/", label: "Home" },
-  { href: "/#showcase", label: "What we are" },
-  { href: "/#features", label: "Features" },
+  { href: "/#showcase", label: "What we do" },
+  { href: "/#features", label: "Our features" },
   { href: "/news/", label: "News" },
   { href: "/newsletter/", label: "Newsletter" },
   { href: "/support/", label: "Support" },

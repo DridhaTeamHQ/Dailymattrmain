@@ -18,8 +18,8 @@ function Glow() {
 // Main-site pages, so plain <a> (not router Links, which would add /news-studio).
 const LINKS = [
   { label: 'Home', href: '/' },
-  { label: 'What we are', href: '/#showcase' },
-  { label: 'Features', href: '/#features' },
+  { label: 'What we do', href: '/#showcase' },
+  { label: 'Our features', href: '/#features' },
   { label: 'News', href: '/news/' },
   { label: 'Newsletter', href: '/newsletter/' },
   { label: 'Support', href: '/support/' },
