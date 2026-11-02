@@ -2,11 +2,14 @@
  * Vercel's CDN honours s-maxage / stale-while-revalidate and strips them
  * before the browser sees the response, so browsers only ever get max-age=0. */
 
+/* article and feed stay short: a post rejected in the CMS must drop off the
+ * site within a few minutes, and stale-while-revalidate serves the old copy
+ * to the first visitor after s-maxage, so the worst case is the sum of both. */
 export const CACHE = {
-  article:  "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
+  article:  "public, max-age=0, s-maxage=120, stale-while-revalidate=120",
   redirect: "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
   gone:     "public, max-age=0, s-maxage=300, stale-while-revalidate=600",   // 404 and 410
-  feed:     "public, max-age=0, s-maxage=120, stale-while-revalidate=600",
+  feed:     "public, max-age=0, s-maxage=60, stale-while-revalidate=60",
   sitemapIndex:        "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
   sitemapNews:         "public, max-age=0, s-maxage=300, stale-while-revalidate=600",
   sitemapMonthCurrent: "public, max-age=0, s-maxage=1800, stale-while-revalidate=3600",
