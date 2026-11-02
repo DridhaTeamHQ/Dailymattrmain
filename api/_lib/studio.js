@@ -52,10 +52,6 @@ async function fetchStory(id) {
 /* the newest stories, for the feed's crawlable list */
 const fetchLatest = (limit) => fetchStories(`order=created_at.desc&limit=${limit}`, "latest stories");
 
-/* every story added in [start, end), for the daily sitemaps */
-const fetchBetween = (start, end) =>
-  fetchStories(`created_at=gte.${start}&created_at=lt.${end}&order=created_at.desc&limit=5000`, "sitemap stories");
-
 function toItem(row) {
   const summary = stripArtifacts(decodeEntities(row.edited_summary || row.summary || ""));
   return {
@@ -262,68 +258,6 @@ async function feedContent() {
 }
 const FEED_LINKS = 50;
 
-/* ---------- sitemaps ----------
- *   /news-studio/sitemap.xml             Google News sitemap — stories from the last 48 h
- *   /news-studio/sitemap-index.xml       that, the topics, then one file per day, newest first
- *   /news-studio/sitemap-topics.xml      every trending-topic timeline
- *   /news-studio/sitemap-YYYY-MM-DD.xml  every story added that day (UTC)
- * Same shape as the /news sitemaps (sitemap.js). */
-
-/* the first day with News Studio stories — nothing before it to list */
-const FIRST_DAY = Date.UTC(2026, 5, 23);
-const DAY_MS = 86400e3;
-const pad = (n) => String(n).padStart(2, "0");
-const xml = (body, cache) => ({ status: 200, type: "xml", cache, tags: ["news-studio-sitemap"], body: `<?xml version="1.0" encoding="UTF-8"?>\n${body}` });
-const urlset = (urls, ns = "") => xml(`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"${ns}>\n${urls.join("")}</urlset>\n`, null);
-const startOfDay = (d = new Date()) => Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-const dayKey = (t) => { const d = new Date(t); return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`; };
-const loc = (path, lastmod, extra = "") =>
-  `  <url>\n    <loc>${esc(ORIGIN + path)}</loc>${iso(lastmod) ? `\n    <lastmod>${iso(lastmod)}</lastmod>` : ""}${extra}\n  </url>\n`;
-const listable = (s) => s.id && s.headline;
-
-async function newsSitemap() {
-  const since = new Date(Date.now() - 48 * 3600e3).toISOString();
-  const stories = (await fetchStories(`created_at=gte.${since}&order=created_at.desc&limit=1000`, "news sitemap")).filter(listable);
-  const out = urlset(stories.map((s) => loc(BASE + storyPath(s), null, `
-    <news:news>
-      <news:publication>
-        <news:name>${esc(SITE_NAME)}</news:name>
-        <news:language>en</news:language>
-      </news:publication>
-      <news:publication_date>${iso(s.publishedAt)}</news:publication_date>
-      <news:title>${esc(cleanHeadline(s.headline))}</news:title>
-    </news:news>`)), ` xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"`);
-  return { ...out, cache: CACHE.sitemapNews };
-}
-
-function sitemapIndex() {
-  const locs = [`${BASE}/sitemap.xml`, `${BASE}/sitemap-topics.xml`];
-  for (let t = startOfDay(); t >= FIRST_DAY; t -= DAY_MS) locs.push(`${BASE}/sitemap-${dayKey(t)}.xml`);
-  return xml(
-    `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${locs.map((l) => `  <sitemap><loc>${esc(ORIGIN + l)}</loc></sitemap>\n`).join("")}</sitemapindex>\n`,
-    CACHE.sitemapIndex,
-  );
-}
-
-async function topicsSitemap() {
-  const topics = await fetchTopics();
-  return { ...urlset(topics.map((t) => loc(BASE + topicPath(t), t.modifiedAt))), cache: CACHE.sitemapDayCurrent };
-}
-
-/* null when the date is not a real calendar day or is outside [FIRST_DAY, today] */
-async function daySitemap(y, m, d) {
-  const t = Date.UTC(y, m - 1, d);
-  if (dayKey(t) !== `${y}-${pad(m)}-${pad(d)}`) return null;
-  const today = startOfDay();
-  if (t < FIRST_DAY || t > today) return null;
-  const stories = (await fetchBetween(new Date(t).toISOString(), new Date(t + DAY_MS).toISOString())).filter(listable);
-  const out = urlset(stories.map((s) => {
-    const img = imageOf(s.image);
-    return loc(BASE + storyPath(s), s.modifiedAt, img ? `\n    <image:image><image:loc>${esc(img)}</image:loc></image:image>` : "");
-  }), ` xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"`);
-  return { ...out, cache: t === today ? CACHE.sitemapDayCurrent : CACHE.sitemapMonthPast };
-}
-
 const notFoundHead = () => ({
   title: "Story not found | dailymattr News Studio",
   head: meta("description", "This link doesn't match any story on dailymattr News Studio.") + meta("robots", "noindex,follow"),
@@ -355,14 +289,9 @@ export async function routeStudio({ rest, search = "", shell }) {
   if (segs.length === 0) return { status: 200, cache: CACHE.feed, body: inject(shell, feedHead(await feedContent())) };
 
   if (segs.length === 1 && !trailing) {
-    if (segs[0] === "sitemap.xml") return newsSitemap();
-    if (segs[0] === "sitemap-index.xml") return sitemapIndex();
-    if (segs[0] === "sitemap-topics.xml") return topicsSitemap();
-    const day = /^sitemap-(\d{4})-(\d{2})-(\d{2})\.xml$/.exec(segs[0]);
-    if (day) {
-      return (await daySitemap(Number(day[1]), Number(day[2]), Number(day[3]))) ||
-        { status: 404, type: "text", cache: CACHE.gone, body: "Not found\n" };
-    }
+    /* no News Studio sitemaps: its stories duplicate /news, which the /news
+     * sitemaps already list */
+    if (/^sitemap.*\.xml$/.test(segs[0])) return { status: 404, type: "text", cache: CACHE.gone, body: "Not found\n" };
   }
 
   if (segs.length === 1 && PRIVATE.has(segs[0])) {

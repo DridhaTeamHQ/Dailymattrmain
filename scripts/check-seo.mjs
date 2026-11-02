@@ -49,12 +49,11 @@ assert.equal(publisher.sameAs.length, 7); // 5 socials (incl. Facebook) + 2 app 
 assert.match(home, /<noscript><style>\.intro/);
 const robots = read("public/robots.txt");
 const sitemapRefs = [...robots.matchAll(/^Sitemap: (.+)$/gm)].map((m) => m[1].trim());
-assert.equal(sitemapRefs.length, 3);
-assert.equal(new Set(sitemapRefs).size, 3);
-assert.ok(sitemapRefs.includes("https://www.dailymattr.com/news-studio/sitemap-index.xml"));
-assert.ok(!sitemapRefs.some((s) => s.endsWith("/news/sitemap.xml")));
+assert.deepEqual(sitemapRefs, ["https://www.dailymattr.com/sitemap-pages.xml", "https://www.dailymattr.com/news/sitemap-index.xml"]);
 const index = await sitemapIndex();
-assert.equal((index.body.match(/<loc>[^<]+\/news\/sitemap.xml<\/loc>/g) || []).length, 1);
+const indexed = [...index.body.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+assert.ok(indexed.length >= 1 && indexed.every((l) => /\/news\/sitemap-\d{4}-\d{2}\.xml$/.test(l)), "news index lists monthly files only");
+assert.deepEqual(indexed, [...indexed].sort().reverse(), "news index is newest month first");
 const sitemap = read("public/sitemap-pages.xml");
 for (const path of paths) assert.ok(sitemap.includes(`<loc>https://www.dailymattr.com/${path}</loc>`));
 assert.ok(!sitemap.includes("/admin"));

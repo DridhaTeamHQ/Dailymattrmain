@@ -280,19 +280,15 @@ console.log("\nsitemaps");
   check("news sitemap uses ORIGIN", !/<loc>(?!https:\/\/www\.dailymattr\.com\/news\/)/.test(String(n.body)));
   const i = await routeNews({ rest: "sitemap-index.xml" });
   check("sitemap index well-formed", i.status === 200 && wellFormed(i.body));
-  const days = [...String(i.body).matchAll(/sitemap-(\d{4}-\d{2}-\d{2})\.xml/g)].map((x) => x[1]);
-  check("sitemap index lists daily files, newest first", days.length >= 1 && days.join() === [...days].sort().reverse().join());
+  check("sitemap index lists no daily files or news sitemap", !/sitemap-\d{4}-\d{2}-\d{2}\.xml|\/news\/sitemap\.xml/.test(String(i.body)));
   const months = [...String(i.body).matchAll(/sitemap-(\d{4}-\d{2})\.xml/g)].map((x) => x[1]);
   check("sitemap index lists monthly files, newest first", months.length >= 1 && months.join() === [...months].sort().reverse().join());
-  const today = days[0] && (await routeNews({ rest: `sitemap-${days[0]}.xml` }));
-  check("daily sitemap well-formed", today && today.status === 200 && wellFormed(today.body));
-  const past = days[1] && (await routeNews({ rest: `sitemap-${days[1]}.xml` }));
-  check("past day cached longer than today", past && past.cache !== today.cache);
-  check("day out of range -> 404", (await routeNews({ rest: "sitemap-1999-01-01.xml" })).status === 404);
-  check("impossible date -> 404", (await routeNews({ rest: "sitemap-2026-02-30.xml" })).status === 404);
+  check("daily sitemaps removed -> 404", (await routeNews({ rest: "sitemap-2026-09-01.xml" })).status === 404);
   const mth = await routeNews({ rest: "sitemap-2026-08.xml" });
   check("monthly sitemap served", mth.status === 200 && wellFormed(mth.body));
   check("monthly sitemap has article URLs but no image tags", /<loc>https:\/\/www\.dailymattr\.com\/news\//.test(String(mth.body)) && !/image:/.test(String(mth.body)));
+  const mods = [...String(mth.body).matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map((x) => x[1]);
+  check("monthly sitemap is newest first", mods.join() === [...mods].sort().reverse().join());
   check("month out of range -> 404", (await routeNews({ rest: "sitemap-1999-01.xml" })).status === 404);
 }
 
