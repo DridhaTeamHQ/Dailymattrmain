@@ -21,7 +21,7 @@
         }
       ],
       "destination": "https://www.dailymattr.com/$1",
-      "permanent": false
+      "permanent": true
     },
     {
       "source": "/index.html",
