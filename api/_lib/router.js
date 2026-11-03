@@ -39,7 +39,7 @@ export async function routeNews({ rest = "", bare = false, query = {} }) {
   const trailing = m.groups.slash === "/";
 
   /* /news/sitemap-index.xml, the monthly /news/sitemap-YYYY-MM.xml it lists,
-   * and the unlisted Google News /news/sitemap.xml (last 48 h) */
+   * and the Google News /news/sitemap.xml (last 48 h, listed in robots.txt) */
   if (rest === "sitemap.xml") return newsSitemap();
   if (rest === "sitemap-index.xml") return sitemapIndex();
   const month = /^sitemap-(\d{4})-(\d{2})\.xml$/.exec(rest);

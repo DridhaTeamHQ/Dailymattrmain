@@ -117,13 +117,15 @@ descriptive search/social metadata, WebPage and NewsMediaOrganization markup,
 the Daily Mattr alternate brand name and official social profiles. News schema
 now explicitly connects articles, their WebPage and the WebSite entity.
 
-Robots.txt lists the static sitemap and news sitemap index only. Per the
+Robots.txt lists the static sitemap, the news sitemap index and the 48-hour
+Google News sitemap. Per the
 November 2026 sitemap review, every article URL appears in exactly one indexed
 sitemap: the news index lists monthly archives only (`/news/sitemap-YYYY-MM.xml`,
 roughly 4,500 URLs each), newest month first, and each file lists its stories
 newest lastmod first. Daily archives and the News Studio sitemaps were removed
 as duplicates and now 404. The 48-hour Google News sitemap (`/news/sitemap.xml`)
-is still served but is not in the index. Only the current month changes, so
+is not in the index; robots.txt lists it so Google finds new stories within
+minutes (a News sitemap may repeat URLs from regular sitemaps). Only the current month changes, so
 past months are cached for a day at the CDN. Static sitemap dates reflect page edits, while
 changing news hubs omit unsupported lastmod dates. Date filters
 remain crawlable so their existing noindex directives can be read. Do not block

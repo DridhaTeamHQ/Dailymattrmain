@@ -12,6 +12,7 @@ import { listRecentForNews, listBetween } from "./queries.js";
  *   /news/sitemap.xml          Google News sitemap — stories from the last 48 h.
  *                              Not in the index: every URL in it is already in a
  *                              monthly file, and the index lists each URL once.
+ *                              robots.txt lists it so new stories are found fast.
  * Only the current month changes, so past months cache for long.
  * Every value is from the CMS and is escaped; every URL is on ORIGIN. */
 

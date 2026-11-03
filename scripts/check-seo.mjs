@@ -49,7 +49,7 @@ assert.equal(publisher.sameAs.length, 7); // 5 socials (incl. Facebook) + 2 app 
 assert.match(home, /<noscript><style>\.intro/);
 const robots = read("public/robots.txt");
 const sitemapRefs = [...robots.matchAll(/^Sitemap: (.+)$/gm)].map((m) => m[1].trim());
-assert.deepEqual(sitemapRefs, ["https://www.dailymattr.com/sitemap-pages.xml", "https://www.dailymattr.com/news/sitemap-index.xml"]);
+assert.deepEqual(sitemapRefs, ["https://www.dailymattr.com/sitemap-pages.xml", "https://www.dailymattr.com/news/sitemap-index.xml", "https://www.dailymattr.com/news/sitemap.xml"]);
 const index = await sitemapIndex();
 const indexed = [...index.body.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
 assert.ok(indexed.length >= 1 && indexed.every((l) => /\/news\/sitemap-\d{4}-\d{2}\.xml$/.test(l)), "news index lists monthly files only");
