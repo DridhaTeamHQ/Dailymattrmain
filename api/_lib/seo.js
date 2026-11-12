@@ -13,7 +13,7 @@ export const publisher = {
   "@type": "NewsMediaOrganization",
   "@id": `${ORIGIN}/#organization`,
   name: SITE_NAME,
-  alternateName: "Daily Mattr",
+  alternateName: ["Daily Mattr", "Daily Matter", "Dailymatter"],
   legalName: LEGAL_NAME,
   url: `${ORIGIN}/`,
   logo: { "@type": "ImageObject", url: PUBLISHER_LOGO.url, width: PUBLISHER_LOGO.width, height: PUBLISHER_LOGO.height },
@@ -23,7 +23,7 @@ export const publisher = {
 
 export const website = {
   "@type": "WebSite", "@id": `${ORIGIN}/#website`,
-  name: SITE_NAME, alternateName: "Daily Mattr", url: `${ORIGIN}/`,
+  name: SITE_NAME, alternateName: ["Daily Mattr", "Daily Matter", "Dailymatter"], url: `${ORIGIN}/`,
   inLanguage: "en-IN", publisher: { "@id": publisher["@id"] },
 };
 

@@ -38,13 +38,13 @@ const publisher = schemas(home).find((n) => n["@type"] === "NewsMediaOrganizatio
 const websites = schemas(home).filter((n) => n["@type"] === "WebSite");
 assert.equal(websites.length, 1, "Homepage has one unambiguous WebSite entity");
 assert.equal(websites[0].name, "dailymattr");
-assert.equal(websites[0].alternateName, "Daily Mattr");
+assert.deepEqual(websites[0].alternateName, ["Daily Mattr", "Daily Matter", "Dailymatter"]);
 assert.equal(websites[0].url, "https://www.dailymattr.com/");
 assert.match(home, /<title>dailymattr \|/);
 assert.match(home, /property="og:site_name" content="dailymattr"/);
 const hosting = JSON.parse(read("vercel.json"));
 assert.ok(hosting.redirects.some((r) => r.source === "/index.html" && r.destination === "/" && r.permanent === true), "Duplicate homepage redirects permanently to the canonical root");
-assert.equal(publisher.alternateName, "Daily Mattr");
+assert.deepEqual(publisher.alternateName, ["Daily Mattr", "Daily Matter", "Dailymatter"]);
 assert.equal(publisher.sameAs.length, 7); // 5 socials (incl. Facebook) + 2 app stores
 assert.match(home, /<noscript><style>\.intro/);
 const robots = read("public/robots.txt");
