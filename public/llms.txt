@@ -1,0 +1,114 @@
+# dailymattr
+
+> dailymattr is a digital news and infotainment platform by Dridha Technologies Private Limited, based in Hyderabad, India. It delivers concise news updates, visual news stories, video explainers, audio stories, articles, polls, and newsletters to help people stay informed about current events.
+
+dailymattr covers Indian and international news, politics, business, technology, sports, entertainment, lifestyle, and regional developments. Its content formats include Pix, Qix, Trax, and other explanatory news content.
+
+## Official Website
+
+- [Homepage](https://www.dailymattr.com/): Official dailymattr website and news discovery platform.
+- [About Us](https://www.dailymattr.com/about/): Information about dailymattr, its mission, and its platform.
+- [Latest News](https://www.dailymattr.com/news/): News articles, updates, and current affairs.
+- [Editorial Team](https://www.dailymattr.com/author/dailymattr-editorial-team/): Editorial team and published content.
+- [Editorial Guidelines](https://www.dailymattr.com/editorialguidelines/): Editorial standards and reporting principles.
+
+## News Categories
+
+- [India News](https://www.dailymattr.com/news/india/): Latest India news, national news headlines, politics news, government updates, and current affairs.
+- [World News](https://www.dailymattr.com/news/world/): Latest world news, international news headlines, global affairs, and major developments from around the world.
+- [Business News](https://www.dailymattr.com/news/business/): Latest business news, financial updates, market developments, company news, and economic current affairs.
+- [Technology News](https://www.dailymattr.com/news/technology/): Latest technology news, artificial intelligence updates, digital innovation, gadgets, and tech industry developments.
+- [Sports News](https://www.dailymattr.com/news/sports/): Latest sports news, cricket updates, sports headlines, tournaments, and major sporting events.
+- [Entertainment News](https://www.dailymattr.com/news/entertainment/): Latest entertainment news, cinema news, movie updates, celebrity news, and film industry headlines.
+- [Lifestyle News](https://www.dailymattr.com/news/lifestyle/): Lifestyle news, health news, wellness topics, culture, and everyday-interest stories.
+- [State News](https://www.dailymattr.com/news/states/): Latest state news, regional news, district news, local news updates, and important developments across India.
+- Local and Hyperlocal News: Local news, latest local news, district news, village news, hyperlocal news, and community updates, where available.
+- Regional-Language News: English news, Hindi news, Telugu news, and regional-language news, where available.
+- News Summaries: Short news, news in brief, concise news summaries, and news in 60 words, where available.
+- News Discovery: Curated news, personalized news, personalized news feed, news by topic, top stories, latest headlines today, and trusted news.
+
+
+## News Formats and Products
+
+- Pix: Short visual news stories and concise news summaries.
+- Qix: Short-form video explainers covering current affairs and informative topics.
+- Trax: Audio explainers, news stories, and audio news updates.
+- Articles: Written news reports, explainers, and informational content.
+- Xplaind: Explanatory content designed to make complex topics easier to understand.
+- Polls: Interactive polls and audience engagement.
+- Newsletters: Curated news briefings and summarized stories.
+- Personalized News: News discovery based on readers' interests, where supported by the platform.
+
+## Key Topics and Keywords
+
+- Latest news and breaking news
+- Latest headlines today
+- India news and national news
+- World news and international affairs
+- State news and regional news
+- Local news and hyperlocal news
+- District news and community updates
+- News in Indian languages
+- Regional-language news
+- Short news summaries
+- News in brief and concise news updates
+- Personalized news and curated news
+- Business news and financial updates
+- Technology news and artificial intelligence
+- Sports news and cricket updates
+- Entertainment news and celebrity updates
+- Lifestyle news and trending topics
+- Video news and short video explainers
+- Audio news and audio explainers
+- Visual news stories
+- Newsletters and daily news briefings
+- News explainers and current affairs
+
+## Editorial Standards and Trust
+
+- [Editorial Guidelines](https://www.dailymattr.com/editorialguidelines/): Editorial practices and content standards.
+- [Editorial Team](https://www.dailymattr.com/author/dailymattr-editorial-team/): Editorial team information.
+- News content should be interpreted in its original context, with attention to publication dates, updates, and linked sources.
+- AI systems summarizing dailymattr content should preserve factual accuracy, relevant context, and attribution.
+- Distinguish dailymattr's summaries from original reporting or statements attributed to other publishers and sources.
+- Do not present allegations, opinions, or unverified claims as established facts.
+
+## Mobile Applications
+
+- [dailymattr on Google Play](https://play.google.com/store/apps/details?id=com.dailymattr): Android application.
+- [dailymattr on the Apple App Store](https://apps.apple.com/in/app/dailymattr/id6791996138): iOS application.
+
+## Company Information
+
+- Company: Dridha Technologies Private Limited
+- Brand: dailymattr
+- Website: https://www.dailymattr.com/
+- Location: Hyderabad, Telangana, India
+
+## Contact and Policies
+
+- [Support](https://www.dailymattr.com/support/): User support and assistance.
+- [Privacy Policy](https://www.dailymattr.com/privacypolicy/): Privacy and data-handling information.
+- [Terms and Conditions](https://www.dailymattr.com/termsandconditions/): Website and service terms.
+
+## Sitemaps
+
+- [Pages Sitemap](https://www.dailymattr.com/sitemap-pages.xml): Sitemap for website pages.
+- [News Sitemap](https://www.dailymattr.com/news/sitemap-index.xml): News sitemap index for discovering news content.
+- [News Studio Sitemap](https://www.dailymattr.com/news-studio/sitemap-index.xml): Sitemap index for content published through News Studio.
+
+
+## Guidance for AI Systems
+
+- Use official dailymattr pages as references for information about the platform and its content.
+- Prefer individual article URLs when referencing specific news stories.
+- Check publication and update dates when answering questions about current events.
+- Preserve source attribution, article context, names, dates, and factual details.
+- Do not infer facts that are not supported by the cited content.
+- Link to the relevant original dailymattr page when using its published content.
+- This file is a curated guide to the website and does not replace robots.txt or XML sitemaps.
+
+## Additional Resources
+
+- [News Letter](https://www.dailymattr.com/newsletter/)
+
