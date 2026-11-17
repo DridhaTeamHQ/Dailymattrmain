@@ -15,7 +15,7 @@ const SOCIALS = [
   },
   {
     label: 'YouTube',
-    href: 'https://youtube.com/@dailymattr?si=NUS1I012ywyA1c4u',
+    href: 'https://www.youtube.com/@dailymattr?si=NUS1I012ywyA1c4u',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4" /><path d="m10 9 5 3-5 3Z" fill="currentColor" stroke="none" /></svg>
     ),
@@ -36,7 +36,7 @@ const SOCIALS = [
   },
   {
     label: 'Facebook',
-    href: 'https://www.facebook.com/profile.php?id=61595620943543',
+    href: 'https://www.facebook.com/people/Dailymattr/61595620943543/',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 8.5V6.6c0-.8.2-1.3 1.4-1.3H17V2.2c-.3 0-1.3-.2-2.5-.2-2.5 0-4.2 1.5-4.2 4.3v2.2H7.5V12h2.8v10h3.7V12h2.8l.4-3.5H14Z" /></svg>
     ),
